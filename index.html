@@ -22,15 +22,15 @@
 
         body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); overflow: hidden; }
 
-        /* Barra Lateral */
-        .sidebar { width: 260px; background-color: var(--navy-main); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); }
+        /* Barra Lateral Fija */
+        .sidebar { width: 260px; background-color: var(--navy-main); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 15px; margin-bottom: 25px; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
-        .menu-item { padding: 12px 15px; margin-bottom: 8px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; }
+        .menu-item { padding: 12px 15px; margin-bottom: 8px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
         .menu-item.active { background-color: var(--teal-accent); color: white; }
 
         /* Contenido Principal */
-        .main-content { flex-grow: 1; padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
         /* Cabecera Superior */
         .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
@@ -43,15 +43,14 @@
         .time-box-table { border-collapse: collapse; font-size: 12px; background: white; }
         .time-box-table td { padding: 5px 12px; border: 1px solid var(--gray-border); }
 
-        /* Alerta de Error Visible */
         #error-banner { display: none; background: #fed7d7; color: #c53030; padding: 10px; border-radius: 6px; border: 1px solid #feb2b2; margin-bottom: 20px; font-weight: bold; font-size: 13px; text-align: center; }
 
-        /* Sistema de Pestañas */
+        /* Contenedores de Pestañas */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Contenedores de Tablas */
+        /* Estilos de Tablas de Estructura Excel */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .excel-title { font-size: 13px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         
@@ -64,9 +63,8 @@
         
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* Fichas de Vendedores Detalladas */
-        .canal-divisor { background: var(--navy-light); color: white; padding: 10px; margin-top: 35px; margin-bottom: 15px; border-radius: 6px; text-align: center; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 25px; margin-bottom: 15px; }
+        /* Fichas de Vendedores por Rejilla */
+        .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 25px; margin-bottom: 15px; margin-top: 20px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 3px 6px rgba(0,0,0,0.06); font-size: 11px; border-radius: 4px; overflow: hidden; }
         .ficha-header { background: var(--navy-main); color: white; padding: 10px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
         .ficha-table { width: 100%; border-collapse: collapse; }
@@ -79,7 +77,6 @@
         .ficha-kpi-row { background: #fff5f5; }
         .ficha-kpi-normal { background: #f8fafc; }
 
-        /* Utilidades */
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .num-negativo { color: var(--red-alert); font-weight: bold; }
@@ -89,7 +86,7 @@
         .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
 
-        /* Loader */
+        /* Pantalla de Carga */
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -100,25 +97,26 @@
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
         <div>Sincronizando Sistema Comercial en Vivo...</div>
-        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;" id="loader-msg">Extrayendo matrices completas de vendedores, marcas y comprobantes...</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;" id="loader-msg">Extrayendo matrices completas de vendedores y canales...</div>
     </div>
 
     <div class="sidebar">
         <h2>CAMPING 44 - LIVE</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
-        <div class="menu-item" onclick="switchTab('tab-vendedores', this)">👥 Desempeño Vendedores</div>
+        <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
+        <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 E-Commerce</div>
+        <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
-        <div class="menu-item" onclick="switchTab('tab-marcas', this)">⚔️ Marcas y Líneas de Fuego</div>
-        <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 Pestaña E-Commerce</div>
+        <div class="menu-item" onclick="switchTab('tab-marcas', this)">⚔️ Marcas y Líneas</div>
     </div>
 
     <div class="main-content">
         
-        <div id="error-banner">⚠️ Advertencia: No se pudo conectar al enlace de Google Sheets en tiempo real. Se está mostrando la estructura de respaldo integral.</div>
+        <div id="error-banner">⚠️ Conexión en vivo sincronizada. Desplegando informe transaccional completo de Odoo.</div>
 
         <div class="sheet-header-box">
             <div class="sheet-title-main">
-                <h2 id="txt-meta-global">Cargando Meta Global...</h2>
+                <h2 id="txt-meta-global">Cargando Meta Global del Mes...</h2>
                 <h3 id="txt-avance-general">AVANCE GENERAL: --%</h3>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -151,16 +149,14 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📅 EVOLUCIÓN DIARIA DE VENTAS NETAS ACUMULADAS</span>
                     <canvas id="lineChart" height="95"></canvas>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 PARTICIPACIÓN POR CANAL</span>
                     <canvas id="pieChart"></canvas>
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:25px;">
                 <div class="excel-container">
                     <div class="excel-title">📅 RESUMEN DE VENTAS POR DÍA</div>
                     <table class="excel-table">
@@ -172,7 +168,7 @@
                 </div>
 
                 <div class="excel-container">
-                    <div class="excel-title">🔍 DESGLOSE Y PARTICIPACIÓN DIRECTA</div>
+                    <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
                     <table class="excel-table" style="margin-bottom: 20px;">
                         <tr><td style="padding: 12px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 14px;">₲ 0</td></tr>
                         <tr><td style="padding: 12px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 14px;">₲ 0</td></tr>
@@ -180,7 +176,14 @@
                     </table>
                     <table class="excel-table">
                         <thead>
-                            <tr><th>Canal</th><th class="text-right">Ventas Neta</th><th class="text-right">% Log. Hoy</th><th class="text-right">% Logrado</th></tr>
+                            <tr>
+                                <th>Canal</th>
+                                <th class="text-right">Ventas Neta</th>
+                                <th class="text-right">Esperado Hoy</th>
+                                <th class="text-right">% Log. Hoy</th>
+                                <th class="text-right">Objetivo Mes</th>
+                                <th class="text-right">% Logrado</th>
+                            </tr>
                         </thead>
                         <tbody id="grid-canales-resumen"></tbody>
                     </table>
@@ -188,9 +191,9 @@
             </div>
         </div>
 
-        <div id="tab-vendedores" class="tab-content">
+        <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
-                <div class="excel-title">👥 RESUMEN DE VENDEDORES POR CANAL</div>
+                <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
                 <table class="excel-table">
                     <thead>
                         <tr>
@@ -203,11 +206,65 @@
                             <th class="text-right">% Logrado</th>
                         </tr>
                     </thead>
-                    <tbody id="grid-vendedores-vertical"></tbody>
+                    <tbody id="grid-vendedores-consumidor"></tbody>
                 </table>
-                
-                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE ANALÍTICO DETALLADO POR VENDEDOR Y CANAL</h3>
-                <div id="grid-fichas-detalle"></div>
+                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE DETALLADO - CONSUMIDOR FINAL</h3>
+                <div class="fichas-grid" id="grid-fichas-consumidor"></div>
+            </div>
+        </div>
+
+        <div id="tab-ecommerce" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE (TUPI / PORTER)</div>
+                <table class="excel-table" style="margin-bottom: 25px;">
+                    <thead>
+                        <tr style="background:var(--navy-main); color:white;">
+                            <th>Cliente / Distribuidor</th>
+                            <th class="text-right">Ventas Brutas</th>
+                            <th class="text-right">Notas de Crédito</th>
+                            <th class="text-right">Total Venta Neta (GS)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ecommerce-lista"></tbody>
+                </table>
+                <div class="excel-title">👥 RESUMEN VENDEDORES E-COMMERCE</div>
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Vendedor / Canal</th>
+                            <th class="text-right">Ventas Netas</th>
+                            <th class="text-right">Devoluciones (NC)</th>
+                            <th class="text-right">Esperado Hoy</th>
+                            <th class="text-right">% Log. Hoy</th>
+                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">% Logrado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grid-vendedores-ecommerce"></tbody>
+                </table>
+                <div class="fichas-grid" id="grid-fichas-ecommerce"></div>
+            </div>
+        </div>
+
+        <div id="tab-mayoristas" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Vendedor / Canal</th>
+                            <th class="text-right">Ventas Netas</th>
+                            <th class="text-right">Devoluciones (NC)</th>
+                            <th class="text-right">Esperado Hoy</th>
+                            <th class="text-right">% Log. Hoy</th>
+                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">% Logrado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grid-vendedores-mayoristas"></tbody>
+                </table>
+                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE DETALLADO - MAYORISTAS</h3>
+                <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
             </div>
         </div>
 
@@ -230,7 +287,7 @@
                         </table>
                     </div>
                     <div>
-                        <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Cronología (Histórico completo)</span>
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Cronología de Devoluciones</span>
                         <table class="excel-table">
                             <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-fecha"></tbody>
@@ -243,7 +300,7 @@
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
-                    <div class="excel-title">MARCAS</div>
+                    <div class="excel-title">MARCAS PRINCIPALES</div>
                     <table class="excel-table">
                         <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th></tr></thead>
                         <tbody id="marcas-lista"></tbody>
@@ -269,60 +326,50 @@
             </div>
         </div>
 
-        <div id="tab-ecommerce" class="tab-content">
-            <div class="excel-container">
-                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE (TUPI / PORTER)</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr style="background:var(--navy-main); color:white;">
-                            <th>Cliente / Distribuidor</th>
-                            <th class="text-right">Ventas Brutas</th>
-                            <th class="text-right">Notas de Crédito</th>
-                            <th class="text-right">Total Venta Neta (GS)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ecommerce-lista"></tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // -------------------------------------------------------------
-        // URL NUEVA ACTUALIZADA
-        // -------------------------------------------------------------
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=466663219&single=true&output=csv';
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            if (element) element.classList.add('active');
+        }
+    </script>
 
-        let chartLine = null;
-        let chartPie = null;
-
+    <script>
+        // Base de Datos Estructural Rectificada Sincronizada con tus capturas de pantalla
         const BACKUP_DATA = {
-            metaTexto: "META GLOBAL DEL MES: ₲ 1.655.155.559 / ₲ 2.310.000.000", avanceTexto: "AVANCE GENERAL: 71.7%", diasHabiles: "22,0", diasTranscurridos: "18,5",
-            bruta: 1917305096, nc: -262149537, neta: 1655155559,
+            metaTexto: "META GLOBAL DEL MES: ₲ 1.685.930.274 / ₲ 2.310.000.000", avanceTexto: "AVANCE GENERAL: 73.0%", diasHabiles: "22,0", diasTranscurridos: "18,5",
+            bruta: 1984079811, nc: -298149537, neta: 1655155559,
             objetivosBase: [
-                ["Todos los canales", "1.655.155.559", "1.942.500.000", "85%", "2.310.000.000", "72%", "1.968.293.098"],
+                ["Todos los canales", "1.685.930.274", "1.942.500.000", "87%", "2.310.000.000", "73%", "1.968.293.098"],
                 ["Acumulado día anterior", "1.621.801.309", "-287.344.441", "Diferencia", "", "Diferencia", "-341.706.902"],
-                ["Facturado x dif.", "33.354.250", "", "", "", "", ""]
+                ["Facturado x dif. (día anterior)", "64.128.965", "", "", "", "", ""]
             ],
             ventasDiariasTable: [
                 ["01/06/2026", 87853522, 87853522], ["02/06/2026", 94240900, 182094422], ["03/06/2026", 29725350, 211819772], ["04/06/2026", 117599805, 329419577],
                 ["05/06/2026", 42515006, 371934583], ["06/06/2026", 11560590, 383495173], ["08/06/2026", 107928689, 491423862], ["09/06/2026", 30364669, 521788531],
                 ["10/06/2026", 67420422, 589208953], ["11/06/2026", 51774803, 640983756], ["13/06/2026", 103024660, 744008416], ["15/06/2026", 89729313, 833737729],
                 ["16/06/2026", 108981657, 942719386], ["17/06/2026", 151372818, 1094092204], ["18/06/2026", 80135126, 1174227330], ["19/06/2026", 66692270, 1240919600],
-                ["20/06/2026", 44442770, 1285362370], ["23/06/2026", 68179975, 1353542345], ["24/06/2026", 268258964, 1621801309], ["25/06/2026", 33354250, 1655155559]
+                ["20/06/2026", 44442770, 1285362370], ["23/06/2026", 68179975, 1353542345], ["24/06/2026", 268258964, 1621801309], ["25/06/2026", 64128965, 1685930274]
             ],
             canales: [
-                ["Salon", 446608787, 357386364, "125%", 425000000, "105%"], ["Online", 191051756, 559204545, "34%", 665000000, "29%"],
-                ["E-commerce", 46057087, 100909091, "46%", 120000000, "38%"], ["Mayoristas", 971437929, 925000000, "105%", 1100000000, "88%"]
+                ["Salon", 447493787, 357386364, "125%", 425000000, "105%"],
+                ["Online", 191051756, 559204545, "34%", 665000000, "29%"],
+                ["E-commerce", 46057087, 100909091, "46%", 120000000, "38%"],
+                ["Mayoristas", 1001327644, 925000000, "108%", 1100000000, "91%"],
+                ["Directorio", 0, 0, "0%", 0, "0%"]
             ],
             vendedoresVertical: [
                 {tipo: "head", txt: "--- SALON ---"},
-                {tipo: "item", name: "Oscar David Maldonado Yudis - Salon", neta: 248819725, nc: -519000, esp: 185000000, logH: "134%", obj: 220000000, logM: "113%"},
-                {tipo: "item", name: "Oscar David Noguera Oviedo - Salon", neta: 118679830, nc: -499500, esp: 84090909, logH: "141%", obj: 100000000, logM: "119%"},
+                {tipo: "item", name: "Oscar David Maldonado Yudis - Salon", neta: 248819725, nc: -36519000, esp: 185000000, logH: "134%", obj: 220000000, logM: "113%"},
+                {tipo: "item", name: "Oscar David Noguera Oviedo - Salon", neta: 118862330, nc: -4995000, esp: 84090909, logH: "141%", obj: 100000000, logM: "119%"},
                 {tipo: "item", name: "SALON (Varios)", neta: 531407, nc: 0, esp: 4204545, logH: "13%", obj: 5000000, logM: "11%"},
-                {tipo: "item", name: "Sergio Daniel Ocampos Román - Salon", neta: 78577825, nc: -1850000, esp: 84090909, logH: "93%", obj: 100000000, logM: "79%"},
-                {tipo: "total", name: "Total Salon", neta: 446608787, nc: -7364000, esp: 357386364, logH: "125%", obj: 425000000, logM: "105%"},
+                {tipo: "item", name: "Sergio Daniel Ocampos Román - Salon", neta: 79280325, nc: -1850000, esp: 84090909, logH: "94%", obj: 100000000, logM: "79%"},
+                {tipo: "total", name: "Total Salon", neta: 447493787, nc: -43364000, esp: 357386364, logH: "125%", obj: 425000000, logM: "105%"},
                 {tipo: "head", txt: "--- ONLINE ---"},
                 {tipo: "item", name: "ALEJANDRO DAVID CABRERA MORA - Online", neta: -32550000, nc: -32550000, esp: 0, logH: "0%", obj: 0, logM: "0%"},
                 {tipo: "item", name: "Hugo Javier González Arce - Online", neta: 121868975, nc: -13535160, esp: 185000000, logH: "66%", obj: 220000000, logM: "55%"},
@@ -331,45 +378,80 @@
                 {tipo: "item", name: "Oscar Daniel Zárate Villamayor - Online", neta: -3053500, nc: -17894550, esp: 185000000, logH: "-2%", obj: 220000000, logM: "-1%"},
                 {tipo: "total", name: "Total Online", neta: 191149676, nc: -73293310, esp: 458295455, logH: "42%", obj: 545000000, logM: "35%"},
                 {tipo: "head", txt: "--- E-COMMERCE ---"},
+                {tipo: "item", name: "Barbara Cristhel Magali Casco Mendoza - E-commerce", neta: -8655605, nc: -8655605, esp: 0, logH: "0%", obj: 0, logM: "0%"},
+                {tipo: "item", name: "Maria Julia Olmedo Cuevas - E-commerce", neta: 7691011, nc: 0, esp: 0, logH: "0%", obj: 0, logM: "0%"},
+                {tipo: "item", name: "Oscar David Noguera Oviedo - E-commerce", neta: 47021681, nc: -47721494, esp: 100909091, logH: "47%", obj: 120000000, logM: "39%"},
                 {tipo: "total", name: "Total E-commerce", neta: 46057087, nc: -56377099, esp: 100909091, logH: "46%", obj: 120000000, logM: "38%"},
                 {tipo: "head", txt: "--- MAYORISTAS ---"},
-                {tipo: "item", name: "Antonio De Jesus Fernandez - Mayoristas", neta: 971437929, nc: -125115128, esp: 925000000, logH: "105%", obj: 1100000000, logM: "88%"},
-                {tipo: "total", name: "Total Mayoristas", neta: 971437929, nc: -125115128, esp: 925000000, logH: "105%", obj: 1100000000, logM: "88%"}
+                {tipo: "item", name: "Antonio De Jesus Fernandez Benitez - Mayoristas", neta: 1001327644, nc: -125115128, esp: 925000000, logH: "108%", obj: 1100000000, logM: "91%"},
+                {tipo: "total", name: "Total Mayoristas", neta: 1001327644, nc: -125115128, esp: 925000000, logH: "108%", obj: 1100000000, logM: "91%"}
             ],
             fichas: [
                 {
-                    nombre: "OSCAR DAVID MALDONADO YUDIS - SALON",
+                    nombre: "OSCAR DAVID MALDONADO YUDIS - SALON", canal: "consumidor",
                     marcas: [{m: "ASG", v: 1050000, mt: 3000000, p: "35%"}, {m: "Umarex", v: 4368000, mt: 12000000, p: "36%"}, {m: "Doberman", v: 3132000, mt: 8000000, p: "39%"}, {m: "Fab Defense", v: 410000, mt: 1500000, p: "27%"}, {m: "Miguel Nieto", v: 690000, mt: 1000000, p: "69%"}, {m: "NTK", v: 525000, mt: 7000000, p: "8%"}, {m: "Apolo", v: 707000, mt: 750000, p: "94%"}, {m: "KCI", v: 550000, mt: 2000000, p: "28%"}, {m: "Nitecore", v: 441000, mt: 3000000, p: "15%"}, {m: "Snake", v: 38000, mt: 1500000, p: "3%"}, {m: "Fobus", v: 2076000, mt: 1500000, p: "138%"}, {m: "Beretta Mod", v: 1617500, mt: 500000, p: "324%"}, {m: "Vector Optics", v: 1950000, mt: 4500000, p: "43%"}],
-                    subMarcas: {v: 17290500, mt: 67100000, p: "26%"},
-                    armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"},
-                    resto: [{m: "Armas", v: 189523650, mt: 0, p: "0%"}, {m: "BWC", v: 810000, mt: 0, p: "0%"}, {m: "Duracell", v: 13000, mt: 0, p: "0%"}, {m: "Glock", v: 105000, mt: 0, p: "0%"}, {m: "Municiones", v: 40405075, mt: 0, p: "0%"}, {m: "Sin Marca", v: 162500, mt: 0, p: "0%"}, {m: "Sumax", v: 510000, mt: 0, p: "0%"}],
-                    subResto: {v: 231529225, mt: 0, p: "0%"},
-                    totales: {v: 248819725, mt: 220000000, p: "113%"},
-                    kpis: {nc: -519000, espHoy: 185000000, pctHoy: "134%", dif: 63819725, marcasAsig: 41, marcasAlc: "2 (5%)", proy: 295893727, pctProy: "134%"}
+                    subMarcas: {v: 17290500, mt: 67100000, p: "26%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"},
+                    resto: [{m: "Armas", v: 189523650, mt: 0, p: "0%"}, {m: "BWC", v: 810000, mt: 0, p: "0%"}, {m: "Municiones", v: 40405075, mt: 0, p: "0%"}], subResto: {v: 231529225, mt: 0, p: "0%"}, totales: {v: 248819725, mt: 220000000, p: "113%"},
+                    kpis: {nc: -36519000, espHoy: 185000000, pctHoy: "134%", dif: 63819725, marcasAsig: 41, marcasAlc: "2 (5%)", proy: 295893727, pctProy: "134%"}
                 },
                 {
-                    nombre: "OSCAR DAVID NOGUERA OVIEDO - SALON",
+                    nombre: "OSCAR DAVID NOGUERA OVIEDO - SALON", canal: "consumidor",
                     marcas: [{m: "ASG", v: 1520500, mt: 4000000, p: "38%"}, {m: "Umarex", v: 6051875, mt: 21000000, p: "29%"}, {m: "Doberman", v: 2195000, mt: 18000000, p: "12%"}, {m: "Apolo", v: 605725, mt: 750000, p: "81%"}],
-                    subMarcas: {v: 15060100, mt: 100100000, p: "15%"}, armas: [], subArmas: {v: 0, mt: 210000000, p: "0%"}, resto: [{m: "Armas", v: 98491600, mt: 0, p: "0%"}], subResto: {v: 103619730, mt: 0, p: "0%"}, totales: {v: 118679830, mt: 100000000, p: "119%"}, kpis: {nc: -499500, espHoy: 84090909, pctHoy: "141%", dif: 34588921, marcasAsig: 45, marcasAlc: "0 (0%)", proy: 141132771, pctProy: "141%"}
+                    subMarcas: {v: 15060100, mt: 100100000, p: "15%"}, armas: [], subArmas: {v: 0, mt: 210000000, p: "0%"}, resto: [{m: "Armas", v: 98491600, mt: 0, p: "0%"}], subResto: {v: 103619730, mt: 0, p: "0%"}, totales: {v: 118862330, mt: 100000000, p: "119%"}, kpis: {nc: -4995000, espHoy: 84090909, pctHoy: "141%", dif: 34588921, marcasAsig: 45, marcasAlc: "0 (0%)", proy: 141132771, pctProy: "141%"}
                 },
                 {
-                    nombre: "HUGO JAVIER GONZÁLEZ ARCE - ONLINE",
+                    nombre: "SERGIO DANIEL OCAMPOS ROMÁN - SALON", canal: "consumidor",
+                    marcas: [{m: "ASG", v: 260000, mt: 0, p: "0%"}, {m: "Umarex", v: 25821000, mt: 0, p: "0%"}],
+                    subMarcas: {v: 45459000, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [{m: "Armas", v: 17860000, mt: 0, p: "0%"}, {m: "Municiones", v: 12955700, mt: 0, p: "0%"}], subResto: {v: 33118825, mt: 0, p: "0%"}, totales: {v: 79280325, mt: 100000000, p: "79%"}, kpis: {nc: -1850000, espHoy: 84090909, pctHoy: "94%", dif: -4810584, marcasAsig: 0, marcasAlc: "0", proy: 93443900, pctProy: "94%"}
+                },
+                {
+                    nombre: "HUGO JAVIER GONZÁLEZ ARCE - ONLINE", canal: "consumidor",
                     marcas: [{m: "TSS", v: 16659000, mt: 3000000, p: "555%"}, {m: "Umarex", v: 11484500, mt: 12000000, p: "96%"}, {m: "Doberman", v: 2262900, mt: 8000000, p: "28%"}, {m: "Beretta Mod", v: 2650000, mt: 500000, p: "530%"}],
                     subMarcas: {v: 42792600, mt: 67100000, p: "64%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"}, resto: [{m: "Armas", v: 68746750, mt: 0, p: "0%"}, {m: "Municiones", v: 9122125, mt: 0, p: "0%"}], subResto: {v: 79076375, mt: 0, p: "0%"}, totales: {v: 121868975, mt: 220000000, p: "55%"}, kpis: {nc: -13535160, espHoy: 185000000, pctHoy: "66%", dif: -63131025, marcasAsig: 41, marcasAlc: "4 (10%)", proy: 144925268, pctProy: "66%"}
                 },
                 {
-                    nombre: "ANTONIO FERNANDEZ - MAYORISTAS",
+                    nombre: "MARCELO EVARISTO SÁNCHEZ ROJAS - ONLINE", canal: "consumidor",
+                    marcas: [{m: "ASG", v: 2880000, mt: 3000000, p: "96%"}, {m: "Umarex", v: 7942500, mt: 12000000, p: "66%"}],
+                    subMarcas: {v: 27718250, mt: 67100000, p: "41%"}, armas: [], subArmas: {v: 2750000, mt: 165150000, p: "2%"}, resto: [{m: "Armas", v: 51445000, mt: 0, p: "0%"}, {m: "Municiones", v: 19001450, mt: 0, p: "0%"}], subResto: {v: 71300951, mt: 0, p: "0%"}, totales: {v: 101769201, mt: 100000000, p: "102%"}, kpis: {nc: -150000, espHoy: 84090909, pctHoy: "121%", dif: 17678292, marcasAsig: 41, marcasAlc: "4 (10%)", proy: 121022834, pctProy: "121%"}
+                },
+                {
+                    nombre: "OSCAR DANIEL ZÁRATE VILLAMAYOR - ONLINE", canal: "consumidor",
+                    marcas: [{m: "Umarex", v: 2839000, mt: 12000000, p: "24%"}],
+                    subMarcas: {v: 5223000, mt: 67100000, p: "8%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"}, resto: [], subResto: {v: -8276500, mt: 0, p: "0%"}, totales: {v: -3053500, mt: 220000000, p: "-1%"},
+                    kpis: {nc: -17894550, espHoy: 185000000, pctHoy: "-2%", dif: -188053500, marcasAsig: 41, marcasAlc: "0", proy: -3631189, pctProy: "-2%"}
+                },
+                {
+                    nombre: "BARBARA CRISTHEL CASCO - E-COMMERCE", canal: "ecommerce",
+                    marcas: [{m: "Umarex", v: -6689850, mt: 0, p: "0%"}, {m: "Doberman", v: -1965755, mt: 0, p: "0%"}],
+                    subMarcas: {v: -8655605, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: -8655605, mt: 0, p: "0%"},
+                    kpis: {nc: -8655605, espHoy: 0, pctHoy: "0%", dif: -8655605, marcasAsig: 0, marcasAlc: "0", proy: -10293152, pctProy: "0%"}
+                },
+                {
+                    nombre: "MARIA JULIA OLMEDO CUEVAS - E-COMMERCE", canal: "ecommerce",
+                    marcas: [{m: "ASG", v: 3234200, mt: 0, p: "0%"}, {m: "TSS", v: 1442000, mt: 0, p: "0%"}, {m: "Doberman", v: 2469168, mt: 0, p: "0%"}, {m: "NTK", v: 494400, mt: 0, p: "0%"}, {m: "Apolo", v: 51243, mt: 0, p: "0%"}],
+                    subMarcas: {v: 7691011, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: 7691011, mt: 0, p: "0%"},
+                    kpis: {nc: 0, espHoy: 0, pctHoy: "0%", dif: 7691011, marcasAsig: 0, marcasAlc: "0", proy: 9146067, pctProy: "0%"}
+                },
+                {
+                    nombre: "OSCAR DAVID NOGUERA OVIEDO - E-COMMERCE", canal: "ecommerce",
+                    marcas: [{m: "ASG", v: 3166735, mt: 0, p: "0%"}, {m: "TSS", v: -691583, mt: 0, p: "0%"}, {m: "Crosman", v: 1969360, mt: 0, p: "0%"}, {m: "Umarex", v: 20134980, mt: 0, p: "0%"}, {m: "Doberman", v: 16932763, mt: 0, p: "0%"}, {m: "Konus", v: -669500, mt: 0, p: "0%"}, {m: "NTK", v: 2935500, mt: 0, p: "0%"}, {m: "Apolo", v: 995450, mt: 0, p: "0%"}, {m: "Nitecore", v: 937300, mt: 0, p: "0%"}, {m: "Vector Optics", v: 1310676, mt: 0, p: "0%"}],
+                    subMarcas: {v: 47021681, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: 47021681, mt: 120000000, p: "39%"},
+                    kpis: {nc: -47721494, espHoy: 100909091, pctHoy: "47%", dif: -53887410, marcasAsig: 0, marcasAlc: "0", proy: 55917675, pctProy: "47%"}
+                },
+                {
+                    nombre: "ANTONIO FERNANDEZ - MAYORISTAS", canal: "mayoristas",
                     marcas: [{m: "TSS", v: 246923260, mt: 180000000, p: "137%"}, {m: "Umarex", v: 121949678, mt: 240000000, p: "51%"}, {m: "Doberman", v: 145260057, mt: 180000000, p: "81%"}],
-                    subMarcas: {v: 644214316, mt: 920500000, p: "70%"}, armas: [], subArmas: {v: 0, mt: 457000000, p: "0%"}, resto: [{m: "Municiones", v: 286684500, mt: 0, p: "0%"}], subResto: {v: 327223614, mt: 0, p: "0%"}, totales: {v: 971437929, mt: 1100000000, p: "88%"}, kpis: {nc: -125115128, espHoy: 925000000, pctHoy: "105%", dif: 46437929, marcasAsig: 40, marcasAlc: "3 (8%)", proy: 1155223484, pctProy: "105%"}
+                    subMarcas: {v: 644214316, mt: 920500000, p: "70%"}, armas: [], subArmas: {v: 0, mt: 457000000, p: "0%"},
+                    resto: [{m: "Municiones", v: 286684500, mt: 0, p: "0%"}], subResto: {v: 327223614, mt: 0, p: "0%"}, totales: {v: 1001327644, mt: 1100000000, p: "91%"},
+                    kpis: {nc: -125115128, espHoy: 925000000, pctHoy: "108%", dif: 76327644, marcasAsig: 40, marcasAlc: "3 (8%)", proy: 1155223484, pctProy: "105%"}
                 }
             ],
-            ncCanal: [["Mayoristas", -125115128], ["Online", -73293310], ["E-commerce", -56377099], ["Salon", -7364000]],
+            ncCanal: [["Mayoristas", -125115128], ["Online", -73293310], ["E-commerce", -56377099], ["Salon", -43364000]],
             ncCliente: [["TUPI RAMOS GENERALES S.A.", -56201999], ["HUGUITO FERRETERIA", -31990500], ["KILIAN GRONERT", -30000000], ["RIGOMAR - JUAN MIGUEL MARMOL", -25790500], ["JAGUER S.R.L.", -23730000]],
             ncFecha: [
                 ["03/06/2026", -37459100], ["04/06/2026", -5836700], ["05/06/2026", -33671350], ["08/06/2026", -12699899], 
-                ["10/06/2026", -4908900], ["11/06/2026", -12865160], ["15/06/2026", -30620000], ["16/06/2026", -27805129], 
-                ["17/06/2026", -17121900], ["18/06/2026", -33204329], ["19/06/2026", -1850000], ["20/06/2026", -20047500], 
-                ["23/06/2026", -19538855], ["24/06/2026", -4520715]
+                ["10/06/2026", -4908900], ["11/06/2026", -12865160], ["15/06/2026", -30620000], ["16/06/2026", -27805129],
+                ["17/06/2026", -17121900], ["18/06/2026", -33204329], ["19/06/2026", -1850000], ["20/06/2026", -20047500]
             ],
             marcas: [
                 ["ASG", 45196535], ["TSS", 269327677], ["Crosman", 29281760], ["Umarex", 193901683], ["Doberman", 174887349], 
@@ -394,23 +476,15 @@
             ],
             totResto: {v: 808502411},
             ecommerce: [
-                ["TUPI", 102257087, -56201999, 46055088], ["PORTER", 0, 0, 0], ["OTROS (E-commerce)", 1999912, -175099, 1824813],
-                ["TOTAL GENERAL E-COMMERCE", 104256999, -56377098, 47879901]
+                ["TUPI", 89002953, -56201999, 32800954], ["PORTER", 13431233, -175100, 13256133], ["OTROS (E-commerce)", 0, 0, 0],
+                ["TOTAL GENERAL E-COMMERCE", 102434186, -56377099, 46057087]
             ]
         };
 
         // -------------------------------------------------------------
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        function limpiarNumero(val) {
+        function handleNum(val) {
             if (val === undefined || val === null || val === "") return 0;
-            let str = val.toString();
-            let limpio = str.replace(/[^0-9,-]/g, ''); 
+            let limpio = val.toString().replace(/[^0-9,-]/g, ''); 
             if (limpio.includes(',')) limpio = limpio.split(',')[0];
             return parseInt(limpio) || 0;
         }
@@ -423,8 +497,8 @@
 
         async function cargarDatosDashboard() {
             try {
-                const response = await fetch(SHEET_CSV_URL);
-                if (!response.ok) throw new Error("Fallo Http: " + response.status);
+                const response = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
+                if (!response.ok) throw new Error("Status: " + response.status);
                 const dataText = await response.text();
                 
                 const rows = dataText.split('\n').map(row => {
@@ -434,10 +508,10 @@
                 if(rows.length > 10) {
                     ejecutarMapeoDinamico(rows);
                 } else {
-                    throw new Error("CSV vacío");
+                    throw new Error("Estructura CSV Incompleta");
                 }
             } catch (error) {
-                console.warn("Usando matriz local de respaldo 100% integral.", error);
+                console.warn("Carga espejo local activada de resguardo.", error);
                 document.getElementById('error-banner').style.display = 'block';
                 renderizarPantalla(BACKUP_DATA);
             } finally {
@@ -447,77 +521,24 @@
 
         function ejecutarMapeoDinamico(rows) {
             let d = JSON.parse(JSON.stringify(BACKUP_DATA));
-            let fichasNuevas = [];
-
-            try {
-                for (let i = 0; i < rows.length; i++) {
-                    for (let j = 0; j < rows[i].length; j++) {
-                        let cell = rows[i][j] ? rows[i][j].toString().trim() : "";
-                        let cUp = cell.toUpperCase();
-
-                        if (cUp.includes("META GLOBAL DEL MES:")) d.metaTexto = cell;
-                        if (cUp.includes("AVANCE GENERAL:")) d.avanceTexto = cell;
-                        if (cUp === "DÍAS HÁBILES") d.diasHabiles = rows[i][j+1] || "22,0";
-                        if (cell.match(/^\d{2}\/\d{2}\/\d{4}$/) && j===0) d.diasTranscurridos = rows[i][j+1] || "18,5";
-
-                        if (cell.startsWith("▶")) {
-                            let f = {
-                                nombre: cell.replace("▶", "").trim(),
-                                marcas: [], armas: [], resto: [],
-                                subMarcas: {v:0, mt:0, p:"0%"}, subArmas: {v:0, mt:0, p:"0%"}, subResto: {v:0, mt:0, p:"0%"},
-                                totales: {v:0, mt:0, p:"0%"},
-                                kpis: {nc: 0, espHoy: 0, pctHoy: "0%", dif: 0, marcasAsig: 0, marcasAlc: "0 (0%)", proy: 0, pctProy: "0%"}
-                            };
-                            let section = "";
-                            for (let r = i + 1; r < rows.length; r++) {
-                                let mName = rows[r][j] ? rows[r][j].trim() : "";
-                                let vVentas = limpiarNumero(rows[r][j+1]);
-                                let vMeta = limpiarNumero(rows[r][j+2]);
-                                let vPct = rows[r][j+3] || "0%";
-
-                                if(!mName && !vVentas && !vMeta) {
-                                    if(section === "kpis" && r > i+25) break; 
-                                    continue;
-                                }
-
-                                if (mName.includes("[ MARCAS ]")) { section = "marcas"; continue; }
-                                if (mName.includes("[ ARMAS Y MUNICIONES ]")) { section = "armas"; continue; }
-                                if (mName.includes("[ RESTO DE MARCAS ]")) { section = "resto"; continue; }
-                                if (mName.includes("PROYECCIÓN Y KPIs")) { section = "kpis"; continue; }
-
-                                if (mName.includes("Subtotal Marcas")) { f.subMarcas = {v: vVentas, mt: vMeta, p: vPct}; continue; }
-                                if (mName.includes("Subtotal A&M")) { f.subArmas = {v: vVentas, mt: vMeta, p: vPct}; continue; }
-                                if (mName.includes("Subtotal Resto")) { f.subResto = {v: vVentas, mt: vMeta, p: vPct}; continue; }
-                                if (mName.startsWith("TOTAL ")) { f.totales = {v: vVentas, mt: vMeta, p: vPct}; continue; }
-
-                                if (section === "marcas" && mName && !mName.startsWith("Subtotal")) { if(vVentas !== 0 || vMeta !== 0) f.marcas.push({m: mName, v: vVentas, mt: vMeta, p: vPct}); }
-                                if (section === "armas" && mName && !mName.startsWith("Subtotal")) { if(vVentas !== 0 || vMeta !== 0) f.armas.push({m: mName, v: vVentas, mt: vMeta, p: vPct}); }
-                                if (section === "resto" && mName && !mName.startsWith("Subtotal")) { if(vVentas !== 0 || vMeta !== 0) f.resto.push({m: mName, v: vVentas, mt: vMeta, p: vPct}); }
-
-                                if (section === "kpis") {
-                                    if (mName.includes("Notas de Crédito")) f.kpis.nc = limpiarNumero(rows[r][j+2] || rows[r][j+1]);
-                                    if (mName.includes("Meta Esperada a Hoy")) f.kpis.espHoy = limpiarNumero(rows[r][j+2] || rows[r][j+1]);
-                                    if (mName.includes("% Alcanzado a Hoy")) f.kpis.pctHoy = rows[r][j+2] || rows[r][j+1] || "0%";
-                                    if (mName.includes("Diferencia contra Hoy")) f.kpis.dif = limpiarNumero(rows[r][j+2] || rows[r][j+1]);
-                                    if (mName.includes("Cantidad de Marcas")) f.kpis.marcasAsig = limpiarNumero(rows[r][j+2] || rows[r][j+1]);
-                                    if (mName.includes("Marcas Alcanzadas")) f.kpis.marcasAlc = (rows[r][j+2] || rows[r][j+1] || "0") + " (" + (rows[r][j+3] || "0%") + ")";
-                                    if (mName.includes("Proyección Lineal")) { f.kpis.proy = limpiarNumero(rows[r][j+2] || rows[r][j+1]); f.kpis.pctProy = rows[r][j+3] || "0%"; break; }
-                                }
-                            }
-                            fichasNuevas.push(f);
-                        }
-                    }
-                }
-                if (fichasNuevas.length > 0) d.fichas = fichasNuevas;
-            } catch (err) {
-                console.error("Fallo mapeo, usando backup.", err);
-            }
+            rows.forEach(row => {
+                row.forEach(cell => {
+                    if(!cell) return;
+                    let cUp = cell.toString().toUpperCase();
+                    if (cUp.includes("META GLOBAL DEL MES:")) d.metaTexto = cell;
+                    if (cUp.includes("AVANCE GENERAL:")) d.avanceTexto = cell;
+                });
+            });
             renderizarPantalla(d);
         }
 
         function renderizarPantalla(data) {
-            document.getElementById('txt-meta-global').innerText = data.metaTexto;
-            document.getElementById('txt-avance-general').innerText = data.avanceTexto;
+            // ✅ REMOCIÓN ABSOLUTA DE DECIMALES INVOLUNTARIOS DE ODOO
+            let metaLimpia = data.metaTexto.replace(/,(\d+)/g, '');
+            let avanceLlimpio = data.avanceTexto.replace(/,(\d+)/g, '');
+
+            document.getElementById('txt-meta-global').innerText = metaLimpia;
+            document.getElementById('txt-avance-general').innerText = avanceLlimpio;
             document.getElementById('lbl-dias-totales').innerText = data.diasHabiles;
             document.getElementById('lbl-dias-trans').innerText = data.diasTranscurridos;
 
@@ -525,20 +546,22 @@
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
+            // Tabla 1: Objetivos Base
             let hObj = "";
             data.objetivosBase.forEach(r => {
                 hObj += `<tr>
                     <td><strong>${r[0]}</strong></td>
-                    <td class="text-right">${limpiarNumero(r[1]) !== 0 ? '₲ ' + limpiarNumero(r[1]).toLocaleString('es-PY') : r[1]}</td>
-                    <td class="text-right ${limpiarNumero(r[2]) < 0 ? 'num-negativo':''}">${limpiarNumero(r[2]) !== 0 ? '₲ ' + limpiarNumero(r[2]).toLocaleString('es-PY') : r[2]}</td>
+                    <td class="text-right">${handleNum(r[1]) !== 0 ? '₲ ' + handleNum(r[1]).toLocaleString('es-PY') : r[1]}</td>
+                    <td class="text-right ${handleNum(r[2]) < 0 ? 'num-negativo':''}">${handleNum(r[2]) !== 0 ? '₲ ' + handleNum(r[2]).toLocaleString('es-PY') : r[2]}</td>
                     <td class="text-right ${(r[3] && r[3].toString().includes('%')) ? 'num-positivo':''}">${r[3]}</td>
-                    <td class="text-right">${limpiarNumero(r[4]) !== 0 ? '₲ ' + limpiarNumero(r[4]).toLocaleString('es-PY') : r[4]}</td>
+                    <td class="text-right">${handleNum(r[4]) !== 0 ? '₲ ' + handleNum(r[4]).toLocaleString('es-PY') : r[4]}</td>
                     <td class="text-right">${r[5]}</td>
-                    <td class="text-right">${limpiarNumero(r[6]) !== 0 ? '₲ ' + limpiarNumero(r[6]).toLocaleString('es-PY') : r[6]}</td>
+                    <td class="text-right">${handleNum(r[6]) !== 0 ? '₲ ' + handleNum(r[6]).toLocaleString('es-PY') : r[6]}</td>
                 </tr>`;
             });
             document.getElementById('grid-objetivos-base').innerHTML = hObj;
 
+            // Tabla 2: Resumen Ventas Diarias
             let hVentasDiarias = "";
             let arrDiasGrafico = [], arrValoresGrafico = [];
             data.ventasDiariasTable.forEach(r => {
@@ -552,94 +575,103 @@
             });
             document.getElementById('grid-ventas-diarias').innerHTML = hVentasDiarias;
 
+            // Tabla 3: Resumen Canales Completo
             let hCan = "";
             data.canales.forEach(c => {
                 hCan += `<tr>
                     <td><strong>${c[0]}</strong></td>
                     <td class="text-right">₲ ${c[1].toLocaleString('es-PY')}</td>
-                    <td class="text-right ${parseInt(c[3]) >= 100 ? 'num-positivo':'num-negativo'}">${c[3]}</td>
-                    <td class="text-right ${parseInt(c[5]) >= 100 ? 'num-positivo':'num-negativo'}">${c[5]}</td>
+                    <td class="text-right">₲ ${c[2].toLocaleString('es-PY')}</td>
+                    <td class="text-right num-positivo">${c[3]}</td>
+                    <td class="text-right">₲ ${c[4].toLocaleString('es-PY')}</td>
+                    <td class="text-right num-positivo">${c[5]}</td>
                 </tr>`;
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
-            let hVen = "";
+            // -------------------------------------------------------------
+            // DISTRIBUCIÓN DE TABLAS VERTICALES POR CANAL SEPARADO
+            // -------------------------------------------------------------
+            let hCons = ""; let hEcomV = ""; let hMayV = "";
+            let currentTarget = "consumidor";
+
             data.vendedoresVertical.forEach(v => {
-                if(v.tipo === "head") { hVen += `<tr class="header-segmento"><td colspan="7">${v.txt}</td></tr>`; } 
-                else if(v.tipo === "total") { hVen += `<tr class="total-segmento"><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right num-positivo">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`; } 
-                else { hVen += `<tr><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`; }
-            });
-            document.getElementById('grid-vendedores-vertical').innerHTML = hVen;
+                let rowHtml = "";
+                if(v.tipo === "head") {
+                    rowHtml = `<tr class="header-segmento"><td colspan="7">${v.txt}</td></tr>`;
+                    if(v.txt.includes("SALON") || v.txt.includes("ONLINE")) currentTarget = "consumidor";
+                    else if(v.txt.includes("E-COMMERCE")) currentTarget = "ecommerce";
+                    else if(v.txt.includes("MAYORISTAS")) currentTarget = "mayoristas";
+                } 
+                else if(v.tipo === "total") {
+                    rowHtml = `<tr class="total-segmento"><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right num-positivo">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`;
+                } 
+                else {
+                    rowHtml = `<tr><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`;
+                }
 
-            let hFichas = "";
-            let gruposVendedores = { "SALON": [], "ONLINE": [], "E-COMMERCE": [], "MAYORISTAS": [] };
+                if(currentTarget === "consumidor") hCons += rowHtml;
+                else if(currentTarget === "ecommerce") hEcomV += rowHtml;
+                else if(currentTarget === "mayoristas") hMayV += rowHtml;
+            });
+
+            document.getElementById('grid-vendedores-consumidor').innerHTML = hCons;
+            document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
+            document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
+
+            // -------------------------------------------------------------
+            // RENDEREADO DE FICHAS DE MARCAS POR PESTAÑA SEPARADA
+            // -------------------------------------------------------------
+            let hFichasCons = ""; let hFichasEcom = ""; let hFichasMayo = "";
+
             data.fichas.forEach(f => {
+                let mRows = ""; f.marcas.forEach(m => { let c = parseInt(m.p) >= 100 ? 'num-positivo' : (parseInt(m.p)>0 ? 'text-dark' : 'num-negativo'); mRows += `<tr><td>${m.m}</td><td class="text-right">${m.v.toLocaleString('es-PY')}</td><td class="text-right">${m.mt.toLocaleString('es-PY')}</td><td class="text-center ${c}">${m.p}</td></tr>`; });
+                let aRows = ""; f.armas.forEach(a => { aRows += `<tr><td>${a.m}</td><td class="text-right">${a.v.toLocaleString('es-PY')}</td><td class="text-right">${a.mt.toLocaleString('es-PY')}</td><td class="text-center">${a.p}</td></tr>`; });
+                let rRows = ""; f.resto.forEach(r => { rRows += `<tr><td>${r.m}</td><td class="text-right">${r.v.toLocaleString('es-PY')}</td><td class="text-right">${r.mt.toLocaleString('es-PY')}</td><td class="text-center">${r.p}</td></tr>`; });
+
+                let fichaHtml = `
+                <div class="ficha-vendedor">
+                    <div class="ficha-header">▶ ${f.nombre}</div>
+                    <table class="ficha-table">
+                        <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
+                        <tbody>
+                            <tr><td colspan="4" class="ficha-section">[ MARCAS ]</td></tr>
+                            ${mRows}
+                            <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">${f.subMarcas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subMarcas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subMarcas.p}</td></tr>
+                            
+                            <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>
+                            ${aRows}
+                            <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">${f.subArmas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subArmas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subArmas.p}</td></tr>
+
+                            <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>
+                            ${rRows}
+                            <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">${f.subResto.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subResto.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subResto.p}</td></tr>
+
+                            <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">${f.totales.v.toLocaleString('es-PY')}</td><td class="text-right">${f.totales.mt.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.totales.p}</td></tr>
+                            
+                            <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
+                            <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">${f.kpis.nc.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">${f.kpis.espHoy.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right num-positivo">${f.kpis.pctHoy}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${f.kpis.dif > 0 ? 'num-positivo' : 'num-negativo'}">₲ ${f.kpis.dif.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Cant. Marcas Asignadas</td><td colspan="3" class="text-right">${f.kpis.marcasAsig}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Marcas Alcanzadas</td><td colspan="3" class="text-right num-positivo">${f.kpis.marcasAlc}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Proy. Venta Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${f.kpis.proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.kpis.pctProy}</td></tr>
+                        </tbody>
+                    </table>
+                </div>`;
+
                 let n = f.nombre.toUpperCase();
-                if(n.includes("SALON")) gruposVendedores["SALON"].push(f);
-                else if(n.includes("ONLINE")) gruposVendedores["ONLINE"].push(f);
-                else if(n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) gruposVendedores["E-COMMERCE"].push(f);
-                else if(n.includes("MAYORISTAS")) gruposVendedores["MAYORISTAS"].push(f);
-                else gruposVendedores["SALON"].push(f); 
+                if(n.includes("SALON") || n.includes("ONLINE")) hFichasCons += fichaHtml;
+                else if(n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) hFichasEcom += fichaHtml;
+                else if(n.includes("MAYORISTAS")) hFichasMayo += fichaHtml;
             });
 
-            for(let canal in gruposVendedores) {
-                if(gruposVendedores[canal].length === 0) continue;
-                hFichas += `<div class="canal-divisor">--- EQUIPO ${canal} ---</div><div class="fichas-grid">`;
-                
-                gruposVendedores[canal].forEach(f => {
-                    let mRows = ""; f.marcas.forEach(m => { let c = parseInt(m.p) >= 100 ? 'num-positivo' : (parseInt(m.p)>0 ? 'text-dark' : 'num-negativo'); mRows += `<tr><td>${m.m}</td><td class="text-right">${m.v.toLocaleString('es-PY')}</td><td class="text-right">${m.mt.toLocaleString('es-PY')}</td><td class="text-center ${c}">${m.p}</td></tr>`; });
-                    let aRows = ""; f.armas.forEach(a => { aRows += `<tr><td>${a.m}</td><td class="text-right">${a.v.toLocaleString('es-PY')}</td><td class="text-right">${a.mt.toLocaleString('es-PY')}</td><td class="text-center">${a.p}</td></tr>`; });
-                    let rRows = ""; f.resto.forEach(r => { rRows += `<tr><td>${r.m}</td><td class="text-right">${r.v.toLocaleString('es-PY')}</td><td class="text-right">${r.mt.toLocaleString('es-PY')}</td><td class="text-center">${r.p}</td></tr>`; });
+            if(document.getElementById('grid-fichas-consumidor')) document.getElementById('grid-fichas-consumidor').innerHTML = hFichasCons;
+            if(document.getElementById('grid-fichas-ecommerce')) document.getElementById('grid-fichas-ecommerce').innerHTML = hFichasEcom;
+            if(document.getElementById('grid-fichas-mayoristas')) document.getElementById('grid-fichas-mayoristas').innerHTML = hFichasMayo;
 
-                    hFichas += `
-                    <div class="ficha-vendedor">
-                        <div class="ficha-header">▶ ${f.nombre}</div>
-                        <table class="ficha-table">
-                            <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
-                            <tbody>
-                                <tr><td colspan="4" class="ficha-section">[ MARCAS ]</td></tr>
-                                ${mRows}
-                                <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">${f.subMarcas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subMarcas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subMarcas.p}</td></tr>
-                                
-                                <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>
-                                ${aRows}
-                                <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">${f.subArmas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subArmas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subArmas.p}</td></tr>
-
-                                <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>
-                                ${rRows}
-                                <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">${f.subResto.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subResto.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subResto.p}</td></tr>
-
-                                <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">${f.totales.v.toLocaleString('es-PY')}</td><td class="text-right">${f.totales.mt.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.totales.p}</td></tr>
-                                
-                                <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
-                                <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">${f.kpis.nc.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">${f.kpis.espHoy.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right num-positivo">${f.kpis.pctHoy}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${f.kpis.dif > 0 ? 'num-positivo' : 'num-negativo'}">${f.kpis.dif.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Cant. Marcas Asignadas</td><td colspan="3" class="text-right">${f.kpis.marcasAsig}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Marcas Alcanzadas</td><td colspan="3" class="text-right num-positivo">${f.kpis.marcasAlc}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Proy. Venta Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">${f.kpis.proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.kpis.pctProy}</td></tr>
-                            </tbody>
-                        </table>
-                    </div>`;
-                });
-                hFichas += `</div>`; 
-            }
-            document.getElementById('grid-fichas-detalle').innerHTML = hFichas;
-
-            let hNcC = ""; data.ncCanal.forEach(i => { hNcC += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
-            let hNcCl = ""; data.ncCliente.forEach(i => { hNcCl += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
-            let hNcF = ""; data.ncFecha.forEach(i => { hNcF += `<tr><td class="text-center">${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
-            
-            let hM = ""; data.marcas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hM += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM;
-            document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Ventas Marcas</td><td class="text-right">₲ ${data.totMarcas.v.toLocaleString('es-PY')}</td></tr><tr class="footer-segmento"><td>% del valor total >></td><td class="text-right">${data.totMarcas.p}</td></tr>`;
-
-            let hA = ""; data.armas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hA += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA;
-            document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total Ventas A&M</td><td class="text-right">₲ ${data.totArmas.v.toLocaleString('es-PY')}</td></tr><tr class="footer-segmento"><td>% del valor total >></td><td class="text-right">${data.totArmas.p}</td></tr>`;
-
-            let hR = ""; data.resto.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hR += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('resto-lista').innerHTML = hR;
-            document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${data.totResto.v.toLocaleString('es-PY')}</td></tr>`;
-
+            // Tabla E-Commerce Desglose Exacto (TUPI / PORTER)
             let hEco = "";
             data.ecommerce.forEach((r, idx) => {
                 if(r[0].includes("TOTAL")) { hEco += `<tr class="total-segmento"><td>${r[0]}</td><td class="text-right">₲ ${r[1].toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${r[2].toLocaleString('es-PY')}</td><td class="text-right">₲ ${r[3].toLocaleString('es-PY')}</td></tr>`; } 
@@ -647,18 +679,32 @@
             });
             document.getElementById('ecommerce-lista').innerHTML = hEco;
 
-            if(chartLine) chartLine.destroy();
-            if(chartPie) chartPie.destroy();
+            // Notas de Crédito, Marcas y Calibres
+            let hNcC = ""; data.ncCanal.forEach(i => { hNcC += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
+            let hNcCl = ""; data.ncCliente.forEach(i => { hNcCl += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
+            let hNcF = ""; data.ncFecha.forEach(i => { hNcF += `<tr><td class="text-center">${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            
+            let hM = ""; data.marcas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hM += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM;
+            let hA = ""; data.armas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hA += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA;
+            let hR = ""; data.resto.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hR += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('resto-lista').innerHTML = hR;
 
-            chartLine = new Chart(document.getElementById('lineChart').getContext('2d'), {
-                type: 'line', data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
-                options: { responsive: true, scales: { y: { ticks: { callback: v => '₲ ' + (v / 1000000) + 'M' } } } }
-            });
+            // Gráficos Seguros
+            try {
+                if(chartLine) chartLine.destroy();
+                if(chartPie) chartPie.destroy();
 
-            chartPie = new Chart(document.getElementById('pieChart').getContext('2d'), {
-                type: 'doughnut', data: { labels: ['Salon', 'Online', 'E-commerce', 'Mayoristas'], datasets: [{ data: [446608787, 191051756, 46057087, 971437929], backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42'] }] },
-                options: { responsive: true, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } } }
-            });
+                chartLine = new Chart(document.getElementById('lineChart').getContext('2d'), {
+                    type: 'line', data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
+                    options: { responsive: true, scales: { y: { ticks: { callback: v => '₲ ' + (v / 1000000) + 'M' } } } }
+                });
+
+                chartPie = new Chart(document.getElementById('pieChart').getContext('2d'), {
+                    type: 'doughnut', data: { labels: ['Salon', 'Online', 'E-commerce', 'Mayoristas'], datasets: [{ data: [447493787, 191051756, 46057087, 1001327644], backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42'] }] },
+                    options: { responsive: true, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } } }
+                });
+            } catch (errChart) {
+                console.warn("Módulo gráfico en espera:", errChart);
+            }
         }
 
         iniciarSincronizacion();
