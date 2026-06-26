@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Comercial Avanzado - CAMPING 44</title>
+    <title>Dashboard Comercial BI - CAMPING 44</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -18,12 +18,33 @@
             --text-dark: #2d3748;
             --text-muted: #718096;
             --bg-zero: #fed7d7;
+            
+            --green-banner-bg: #def7ec;
+            --green-banner-text: #03543f;
+            --green-banner-border: #84e1bc;
+            --red-banner-bg: #fde8e8;
+            --red-banner-text: #9b1c1c;
+            --red-banner-border: #f8b4b4;
         }
 
         body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); overflow: hidden; }
 
         /* Barra Lateral Fija */
         .sidebar { width: 260px; background-color: var(--navy-main); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
+        
+        /* DISEÑO DE LOGO CORREGIDO Y PREMIUM */
+        .sidebar-logo { 
+            width: 90%; 
+            max-width: 180px; 
+            margin: 0 auto 25px auto; 
+            display: block; 
+            background-color: white; 
+            border-radius: 12px; 
+            padding: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            object-fit: contain; 
+        }
+
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 15px; margin-bottom: 25px; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
         .menu-item { padding: 12px 15px; margin-bottom: 8px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
@@ -31,6 +52,16 @@
 
         /* Contenido Principal */
         .main-content { flex-grow: 1; padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+        /* Filtros BI Modernos */
+        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 200px; }
+        .filter-group label { font-size: 11px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group select, .filter-group input[type="date"] { padding: 10px 14px; font-size: 13px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
+        .filter-group select:focus, .filter-group input[type="date"]:focus { border-color: var(--teal-accent); }
+        
+        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 10px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-clear-filters:hover { background-color: #e2e8f0; }
 
         /* Cabecera Superior */
         .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
@@ -43,14 +74,17 @@
         .time-box-table { border-collapse: collapse; font-size: 12px; background: white; }
         .time-box-table td { padding: 5px 12px; border: 1px solid var(--gray-border); }
 
-        #error-banner { display: none; background: #fed7d7; color: #c53030; padding: 10px; border-radius: 6px; border: 1px solid #feb2b2; margin-bottom: 20px; font-weight: bold; font-size: 13px; text-align: center; }
+        /* Banner de Notificaciones */
+        #status-banner { display: block; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 13px; text-align: center; border: 1px solid transparent; }
+        .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
+        .banner-error { background-color: var(--red-banner-bg); color: var(--red-banner-text); border-color: var(--red-banner-border); }
 
-        /* Contenedores de Pestañas */
+        /* Pestañas */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Estilos de Tablas de Estructura Excel */
+        /* Tablas */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .excel-title { font-size: 13px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         
@@ -60,10 +94,9 @@
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; }
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         table.excel-table tr.footer-segmento td { background-color: #a0aec0 !important; color: white !important; font-weight: bold; }
-        
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* Fichas de Vendedores por Rejilla */
+        /* Fichas BI Desglosadas */
         .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 25px; margin-bottom: 15px; margin-top: 20px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 3px 6px rgba(0,0,0,0.06); font-size: 11px; border-radius: 4px; overflow: hidden; }
         .ficha-header { background: var(--navy-main); color: white; padding: 10px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
@@ -86,7 +119,7 @@
         .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
 
-        /* Pantalla de Carga */
+        /* Loader */
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -96,12 +129,14 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Sistema Comercial en Vivo...</div>
-        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;" id="loader-msg">Extrayendo matrices completas de vendedores y canales...</div>
+        <div>Sincronizando Base de Datos Transaccional...</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;">Aplicando fórmulas dinámicas de BI...</div>
     </div>
 
     <div class="sidebar">
-        <h2>CAMPING 44 - LIVE</h2>
+        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" onerror="this.style.display='none'">
+        
+        <h2>CAMPING 44 - BI</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
         <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 E-Commerce</div>
@@ -112,11 +147,27 @@
 
     <div class="main-content">
         
-        <div id="error-banner">⚠️ Conexión en vivo sincronizada. Desplegando informe transaccional completo de Odoo.</div>
+        <div class="filter-panel">
+            <div class="filter-group">
+                <label>👤 Vendedor</label>
+                <select id="select-vendedor" onchange="aplicarFiltrosDropdown()"></select>
+            </div>
+            <div class="filter-group">
+                <label>🏷️ Canal / Equipo</label>
+                <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
+            </div>
+            <div class="filter-group">
+                <label>📅 Acumulado hasta (Máquina del Tiempo)</label>
+                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" title="Calcula el progreso del mes hasta la fecha que elijas">
+            </div>
+            <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()">❌ Limpiar Filtros</button>
+        </div>
+
+        <div id="status-banner" class="banner-success">Sincronizando canal de datos en vivo...</div>
 
         <div class="sheet-header-box">
             <div class="sheet-title-main">
-                <h2 id="txt-meta-global">Cargando Meta Global del Mes...</h2>
+                <h2 id="txt-meta-global">Cargando Estructura de Google Sheets...</h2>
                 <h3 id="txt-avance-general">AVANCE GENERAL: --%</h3>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -124,7 +175,7 @@
                     <tr><td style="background:var(--gray-bg); font-weight:bold;">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
                     <tr><td style="background:var(--gray-bg); font-weight:bold;">Transcurridos</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
                 </table>
-                <button class="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Datos</button>
+                <button class="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
         </div>
 
@@ -136,10 +187,10 @@
                         <tr>
                             <th>Canales</th>
                             <th class="text-right">Ventas Acumuladas</th>
-                            <th class="text-right">Hoy deberías estar en:</th>
+                            <th class="text-right">Esperado al Día Filtrado:</th>
                             <th class="text-right">% Logrado a Hoy</th>
                             <th class="text-right">Objetivo mes</th>
-                            <th class="text-right">% Logrado</th>
+                            <th class="text-right">% Logrado Final</th>
                             <th class="text-right">Proyección venta</th>
                         </tr>
                     </thead>
@@ -149,9 +200,11 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 HAZ CLIC EN UN PUNTO PARA FILTRAR O DESELECCIONAR UNA FECHA</span>
                     <canvas id="lineChart" height="95"></canvas>
                 </div>
                 <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 HAZ CLIC EN UNA PORCIÓN PARA FILTRAR O DESELECCIONAR UN CANAL</span>
                     <canvas id="pieChart"></canvas>
                 </div>
             </div>
@@ -179,10 +232,10 @@
                             <tr>
                                 <th>Canal</th>
                                 <th class="text-right">Ventas Neta</th>
-                                <th class="text-right">Esperado Hoy</th>
-                                <th class="text-right">% Log. Hoy</th>
-                                <th class="text-right">Objetivo Mes</th>
+                                <th class="text-right">Esperado Día Filtrado</th>
                                 <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Mes</th>
+                                <th class="text-right">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-canales-resumen"></tbody>
@@ -200,15 +253,15 @@
                             <th>Vendedor / Canal</th>
                             <th class="text-right">Ventas Netas</th>
                             <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Hoy</th>
-                            <th class="text-right">% Log. Hoy</th>
-                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">Esperado Día Filtrado</th>
                             <th class="text-right">% Logrado</th>
+                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">% Logrado Mes</th>
                         </tr>
                     </thead>
                     <tbody id="grid-vendedores-consumidor"></tbody>
                 </table>
-                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE DETALLADO - CONSUMIDOR FINAL</h3>
+                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE ANALÍTICO DETALLADO POR MARCA - CONSUMIDOR FINAL</h3>
                 <div class="fichas-grid" id="grid-fichas-consumidor"></div>
             </div>
         </div>
@@ -227,17 +280,17 @@
                     </thead>
                     <tbody id="ecommerce-lista"></tbody>
                 </table>
-                <div class="excel-title">👥 RESUMEN VENDEDORES E-COMMERCE</div>
+                <div class="excel-title">👥 RESUMEN VENDEDORES ASIGNADOS A E-COMMERCE</div>
                 <table class="excel-table">
                     <thead>
                         <tr>
                             <th>Vendedor / Canal</th>
                             <th class="text-right">Ventas Netas</th>
                             <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Hoy</th>
-                            <th class="text-right">% Log. Hoy</th>
-                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">Esperado Día Filtrado</th>
                             <th class="text-right">% Logrado</th>
+                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">% Logrado Mes</th>
                         </tr>
                     </thead>
                     <tbody id="grid-vendedores-ecommerce"></tbody>
@@ -255,15 +308,15 @@
                             <th>Vendedor / Canal</th>
                             <th class="text-right">Ventas Netas</th>
                             <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Hoy</th>
-                            <th class="text-right">% Log. Hoy</th>
-                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">Esperado Día Filtrado</th>
                             <th class="text-right">% Logrado</th>
+                            <th class="text-right">Objetivo Mes</th>
+                            <th class="text-right">% Logrado Mes</th>
                         </tr>
                     </thead>
                     <tbody id="grid-vendedores-mayoristas"></tbody>
                 </table>
-                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE DETALLADO - MAYORISTAS</h3>
+                <h3 style="margin-top:35px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
                 <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
             </div>
         </div>
@@ -287,7 +340,7 @@
                         </table>
                     </div>
                     <div>
-                        <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Cronología de Devoluciones</span>
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Cronología Completa</span>
                         <table class="excel-table">
                             <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-fecha"></tbody>
@@ -332,7 +385,6 @@
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
@@ -340,368 +392,496 @@
     </script>
 
     <script>
-        // Base de Datos Estructural Rectificada Sincronizada con tus capturas de pantalla
-        const BACKUP_DATA = {
-            metaTexto: "META GLOBAL DEL MES: ₲ 1.685.930.274 / ₲ 2.310.000.000", avanceTexto: "AVANCE GENERAL: 73.0%", diasHabiles: "22,0", diasTranscurridos: "18,5",
-            bruta: 1984079811, nc: -298149537, neta: 1655155559,
-            objetivosBase: [
-                ["Todos los canales", "1.685.930.274", "1.942.500.000", "87%", "2.310.000.000", "73%", "1.968.293.098"],
-                ["Acumulado día anterior", "1.621.801.309", "-287.344.441", "Diferencia", "", "Diferencia", "-341.706.902"],
-                ["Facturado x dif. (día anterior)", "64.128.965", "", "", "", "", ""]
-            ],
-            ventasDiariasTable: [
-                ["01/06/2026", 87853522, 87853522], ["02/06/2026", 94240900, 182094422], ["03/06/2026", 29725350, 211819772], ["04/06/2026", 117599805, 329419577],
-                ["05/06/2026", 42515006, 371934583], ["06/06/2026", 11560590, 383495173], ["08/06/2026", 107928689, 491423862], ["09/06/2026", 30364669, 521788531],
-                ["10/06/2026", 67420422, 589208953], ["11/06/2026", 51774803, 640983756], ["13/06/2026", 103024660, 744008416], ["15/06/2026", 89729313, 833737729],
-                ["16/06/2026", 108981657, 942719386], ["17/06/2026", 151372818, 1094092204], ["18/06/2026", 80135126, 1174227330], ["19/06/2026", 66692270, 1240919600],
-                ["20/06/2026", 44442770, 1285362370], ["23/06/2026", 68179975, 1353542345], ["24/06/2026", 268258964, 1621801309], ["25/06/2026", 64128965, 1685930274]
-            ],
-            canales: [
-                ["Salon", 447493787, 357386364, "125%", 425000000, "105%"],
-                ["Online", 191051756, 559204545, "34%", 665000000, "29%"],
-                ["E-commerce", 46057087, 100909091, "46%", 120000000, "38%"],
-                ["Mayoristas", 1001327644, 925000000, "108%", 1100000000, "91%"],
-                ["Directorio", 0, 0, "0%", 0, "0%"]
-            ],
-            vendedoresVertical: [
-                {tipo: "head", txt: "--- SALON ---"},
-                {tipo: "item", name: "Oscar David Maldonado Yudis - Salon", neta: 248819725, nc: -36519000, esp: 185000000, logH: "134%", obj: 220000000, logM: "113%"},
-                {tipo: "item", name: "Oscar David Noguera Oviedo - Salon", neta: 118862330, nc: -4995000, esp: 84090909, logH: "141%", obj: 100000000, logM: "119%"},
-                {tipo: "item", name: "SALON (Varios)", neta: 531407, nc: 0, esp: 4204545, logH: "13%", obj: 5000000, logM: "11%"},
-                {tipo: "item", name: "Sergio Daniel Ocampos Román - Salon", neta: 79280325, nc: -1850000, esp: 84090909, logH: "94%", obj: 100000000, logM: "79%"},
-                {tipo: "total", name: "Total Salon", neta: 447493787, nc: -43364000, esp: 357386364, logH: "125%", obj: 425000000, logM: "105%"},
-                {tipo: "head", txt: "--- ONLINE ---"},
-                {tipo: "item", name: "ALEJANDRO DAVID CABRERA MORA - Online", neta: -32550000, nc: -32550000, esp: 0, logH: "0%", obj: 0, logM: "0%"},
-                {tipo: "item", name: "Hugo Javier González Arce - Online", neta: 121868975, nc: -13535160, esp: 185000000, logH: "66%", obj: 220000000, logM: "55%"},
-                {tipo: "item", name: "Marcelo Evaristo Sánchez Rojas - Online", neta: 101769201, nc: -150000, esp: 84090909, logH: "121%", obj: 100000000, logM: "102%"},
-                {tipo: "item", name: "ONLINE (Varios)", neta: 3115000, nc: -9163600, esp: 4204545, logH: "74%", obj: 5000000, logM: "62%"},
-                {tipo: "item", name: "Oscar Daniel Zárate Villamayor - Online", neta: -3053500, nc: -17894550, esp: 185000000, logH: "-2%", obj: 220000000, logM: "-1%"},
-                {tipo: "total", name: "Total Online", neta: 191149676, nc: -73293310, esp: 458295455, logH: "42%", obj: 545000000, logM: "35%"},
-                {tipo: "head", txt: "--- E-COMMERCE ---"},
-                {tipo: "item", name: "Barbara Cristhel Magali Casco Mendoza - E-commerce", neta: -8655605, nc: -8655605, esp: 0, logH: "0%", obj: 0, logM: "0%"},
-                {tipo: "item", name: "Maria Julia Olmedo Cuevas - E-commerce", neta: 7691011, nc: 0, esp: 0, logH: "0%", obj: 0, logM: "0%"},
-                {tipo: "item", name: "Oscar David Noguera Oviedo - E-commerce", neta: 47021681, nc: -47721494, esp: 100909091, logH: "47%", obj: 120000000, logM: "39%"},
-                {tipo: "total", name: "Total E-commerce", neta: 46057087, nc: -56377099, esp: 100909091, logH: "46%", obj: 120000000, logM: "38%"},
-                {tipo: "head", txt: "--- MAYORISTAS ---"},
-                {tipo: "item", name: "Antonio De Jesus Fernandez Benitez - Mayoristas", neta: 1001327644, nc: -125115128, esp: 925000000, logH: "108%", obj: 1100000000, logM: "91%"},
-                {tipo: "total", name: "Total Mayoristas", neta: 1001327644, nc: -125115128, esp: 925000000, logH: "108%", obj: 1100000000, logM: "91%"}
-            ],
-            fichas: [
-                {
-                    nombre: "OSCAR DAVID MALDONADO YUDIS - SALON", canal: "consumidor",
-                    marcas: [{m: "ASG", v: 1050000, mt: 3000000, p: "35%"}, {m: "Umarex", v: 4368000, mt: 12000000, p: "36%"}, {m: "Doberman", v: 3132000, mt: 8000000, p: "39%"}, {m: "Fab Defense", v: 410000, mt: 1500000, p: "27%"}, {m: "Miguel Nieto", v: 690000, mt: 1000000, p: "69%"}, {m: "NTK", v: 525000, mt: 7000000, p: "8%"}, {m: "Apolo", v: 707000, mt: 750000, p: "94%"}, {m: "KCI", v: 550000, mt: 2000000, p: "28%"}, {m: "Nitecore", v: 441000, mt: 3000000, p: "15%"}, {m: "Snake", v: 38000, mt: 1500000, p: "3%"}, {m: "Fobus", v: 2076000, mt: 1500000, p: "138%"}, {m: "Beretta Mod", v: 1617500, mt: 500000, p: "324%"}, {m: "Vector Optics", v: 1950000, mt: 4500000, p: "43%"}],
-                    subMarcas: {v: 17290500, mt: 67100000, p: "26%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"},
-                    resto: [{m: "Armas", v: 189523650, mt: 0, p: "0%"}, {m: "BWC", v: 810000, mt: 0, p: "0%"}, {m: "Municiones", v: 40405075, mt: 0, p: "0%"}], subResto: {v: 231529225, mt: 0, p: "0%"}, totales: {v: 248819725, mt: 220000000, p: "113%"},
-                    kpis: {nc: -36519000, espHoy: 185000000, pctHoy: "134%", dif: 63819725, marcasAsig: 41, marcasAlc: "2 (5%)", proy: 295893727, pctProy: "134%"}
-                },
-                {
-                    nombre: "OSCAR DAVID NOGUERA OVIEDO - SALON", canal: "consumidor",
-                    marcas: [{m: "ASG", v: 1520500, mt: 4000000, p: "38%"}, {m: "Umarex", v: 6051875, mt: 21000000, p: "29%"}, {m: "Doberman", v: 2195000, mt: 18000000, p: "12%"}, {m: "Apolo", v: 605725, mt: 750000, p: "81%"}],
-                    subMarcas: {v: 15060100, mt: 100100000, p: "15%"}, armas: [], subArmas: {v: 0, mt: 210000000, p: "0%"}, resto: [{m: "Armas", v: 98491600, mt: 0, p: "0%"}], subResto: {v: 103619730, mt: 0, p: "0%"}, totales: {v: 118862330, mt: 100000000, p: "119%"}, kpis: {nc: -4995000, espHoy: 84090909, pctHoy: "141%", dif: 34588921, marcasAsig: 45, marcasAlc: "0 (0%)", proy: 141132771, pctProy: "141%"}
-                },
-                {
-                    nombre: "SERGIO DANIEL OCAMPOS ROMÁN - SALON", canal: "consumidor",
-                    marcas: [{m: "ASG", v: 260000, mt: 0, p: "0%"}, {m: "Umarex", v: 25821000, mt: 0, p: "0%"}],
-                    subMarcas: {v: 45459000, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [{m: "Armas", v: 17860000, mt: 0, p: "0%"}, {m: "Municiones", v: 12955700, mt: 0, p: "0%"}], subResto: {v: 33118825, mt: 0, p: "0%"}, totales: {v: 79280325, mt: 100000000, p: "79%"}, kpis: {nc: -1850000, espHoy: 84090909, pctHoy: "94%", dif: -4810584, marcasAsig: 0, marcasAlc: "0", proy: 93443900, pctProy: "94%"}
-                },
-                {
-                    nombre: "HUGO JAVIER GONZÁLEZ ARCE - ONLINE", canal: "consumidor",
-                    marcas: [{m: "TSS", v: 16659000, mt: 3000000, p: "555%"}, {m: "Umarex", v: 11484500, mt: 12000000, p: "96%"}, {m: "Doberman", v: 2262900, mt: 8000000, p: "28%"}, {m: "Beretta Mod", v: 2650000, mt: 500000, p: "530%"}],
-                    subMarcas: {v: 42792600, mt: 67100000, p: "64%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"}, resto: [{m: "Armas", v: 68746750, mt: 0, p: "0%"}, {m: "Municiones", v: 9122125, mt: 0, p: "0%"}], subResto: {v: 79076375, mt: 0, p: "0%"}, totales: {v: 121868975, mt: 220000000, p: "55%"}, kpis: {nc: -13535160, espHoy: 185000000, pctHoy: "66%", dif: -63131025, marcasAsig: 41, marcasAlc: "4 (10%)", proy: 144925268, pctProy: "66%"}
-                },
-                {
-                    nombre: "MARCELO EVARISTO SÁNCHEZ ROJAS - ONLINE", canal: "consumidor",
-                    marcas: [{m: "ASG", v: 2880000, mt: 3000000, p: "96%"}, {m: "Umarex", v: 7942500, mt: 12000000, p: "66%"}],
-                    subMarcas: {v: 27718250, mt: 67100000, p: "41%"}, armas: [], subArmas: {v: 2750000, mt: 165150000, p: "2%"}, resto: [{m: "Armas", v: 51445000, mt: 0, p: "0%"}, {m: "Municiones", v: 19001450, mt: 0, p: "0%"}], subResto: {v: 71300951, mt: 0, p: "0%"}, totales: {v: 101769201, mt: 100000000, p: "102%"}, kpis: {nc: -150000, espHoy: 84090909, pctHoy: "121%", dif: 17678292, marcasAsig: 41, marcasAlc: "4 (10%)", proy: 121022834, pctProy: "121%"}
-                },
-                {
-                    nombre: "OSCAR DANIEL ZÁRATE VILLAMAYOR - ONLINE", canal: "consumidor",
-                    marcas: [{m: "Umarex", v: 2839000, mt: 12000000, p: "24%"}],
-                    subMarcas: {v: 5223000, mt: 67100000, p: "8%"}, armas: [], subArmas: {v: 0, mt: 165150000, p: "0%"}, resto: [], subResto: {v: -8276500, mt: 0, p: "0%"}, totales: {v: -3053500, mt: 220000000, p: "-1%"},
-                    kpis: {nc: -17894550, espHoy: 185000000, pctHoy: "-2%", dif: -188053500, marcasAsig: 41, marcasAlc: "0", proy: -3631189, pctProy: "-2%"}
-                },
-                {
-                    nombre: "BARBARA CRISTHEL CASCO - E-COMMERCE", canal: "ecommerce",
-                    marcas: [{m: "Umarex", v: -6689850, mt: 0, p: "0%"}, {m: "Doberman", v: -1965755, mt: 0, p: "0%"}],
-                    subMarcas: {v: -8655605, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: -8655605, mt: 0, p: "0%"},
-                    kpis: {nc: -8655605, espHoy: 0, pctHoy: "0%", dif: -8655605, marcasAsig: 0, marcasAlc: "0", proy: -10293152, pctProy: "0%"}
-                },
-                {
-                    nombre: "MARIA JULIA OLMEDO CUEVAS - E-COMMERCE", canal: "ecommerce",
-                    marcas: [{m: "ASG", v: 3234200, mt: 0, p: "0%"}, {m: "TSS", v: 1442000, mt: 0, p: "0%"}, {m: "Doberman", v: 2469168, mt: 0, p: "0%"}, {m: "NTK", v: 494400, mt: 0, p: "0%"}, {m: "Apolo", v: 51243, mt: 0, p: "0%"}],
-                    subMarcas: {v: 7691011, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: 7691011, mt: 0, p: "0%"},
-                    kpis: {nc: 0, espHoy: 0, pctHoy: "0%", dif: 7691011, marcasAsig: 0, marcasAlc: "0", proy: 9146067, pctProy: "0%"}
-                },
-                {
-                    nombre: "OSCAR DAVID NOGUERA OVIEDO - E-COMMERCE", canal: "ecommerce",
-                    marcas: [{m: "ASG", v: 3166735, mt: 0, p: "0%"}, {m: "TSS", v: -691583, mt: 0, p: "0%"}, {m: "Crosman", v: 1969360, mt: 0, p: "0%"}, {m: "Umarex", v: 20134980, mt: 0, p: "0%"}, {m: "Doberman", v: 16932763, mt: 0, p: "0%"}, {m: "Konus", v: -669500, mt: 0, p: "0%"}, {m: "NTK", v: 2935500, mt: 0, p: "0%"}, {m: "Apolo", v: 995450, mt: 0, p: "0%"}, {m: "Nitecore", v: 937300, mt: 0, p: "0%"}, {m: "Vector Optics", v: 1310676, mt: 0, p: "0%"}],
-                    subMarcas: {v: 47021681, mt: 0, p: "0%"}, armas: [], subArmas: {v: 0, mt: 0, p: "0%"}, resto: [], subResto: {v: 0, mt: 0, p: "0%"}, totales: {v: 47021681, mt: 120000000, p: "39%"},
-                    kpis: {nc: -47721494, espHoy: 100909091, pctHoy: "47%", dif: -53887410, marcasAsig: 0, marcasAlc: "0", proy: 55917675, pctProy: "47%"}
-                },
-                {
-                    nombre: "ANTONIO FERNANDEZ - MAYORISTAS", canal: "mayoristas",
-                    marcas: [{m: "TSS", v: 246923260, mt: 180000000, p: "137%"}, {m: "Umarex", v: 121949678, mt: 240000000, p: "51%"}, {m: "Doberman", v: 145260057, mt: 180000000, p: "81%"}],
-                    subMarcas: {v: 644214316, mt: 920500000, p: "70%"}, armas: [], subArmas: {v: 0, mt: 457000000, p: "0%"},
-                    resto: [{m: "Municiones", v: 286684500, mt: 0, p: "0%"}], subResto: {v: 327223614, mt: 0, p: "0%"}, totales: {v: 1001327644, mt: 1100000000, p: "91%"},
-                    kpis: {nc: -125115128, espHoy: 925000000, pctHoy: "108%", dif: 76327644, marcasAsig: 40, marcasAlc: "3 (8%)", proy: 1155223484, pctProy: "105%"}
-                }
-            ],
-            ncCanal: [["Mayoristas", -125115128], ["Online", -73293310], ["E-commerce", -56377099], ["Salon", -43364000]],
-            ncCliente: [["TUPI RAMOS GENERALES S.A.", -56201999], ["HUGUITO FERRETERIA", -31990500], ["KILIAN GRONERT", -30000000], ["RIGOMAR - JUAN MIGUEL MARMOL", -25790500], ["JAGUER S.R.L.", -23730000]],
-            ncFecha: [
-                ["03/06/2026", -37459100], ["04/06/2026", -5836700], ["05/06/2026", -33671350], ["08/06/2026", -12699899], 
-                ["10/06/2026", -4908900], ["11/06/2026", -12865160], ["15/06/2026", -30620000], ["16/06/2026", -27805129],
-                ["17/06/2026", -17121900], ["18/06/2026", -33204329], ["19/06/2026", -1850000], ["20/06/2026", -20047500]
-            ],
-            marcas: [
-                ["ASG", 45196535], ["TSS", 269327677], ["Crosman", 29281760], ["Umarex", 193901683], ["Doberman", 174887349], 
-                ["Konus", 21121000], ["GSM", 0], ["Truglo", 0], ["Fab Defense", 1460000], ["Miguel Nieto", 1445000], 
-                ["NTK", 8051500], ["Coleman", 660000], ["Imalent", 0], ["Apolo", 56608268], ["Aitor", 0], ["Rocky Boots", 0], 
-                ["KCI", 1550000], ["Nitecore", 4333300], ["Caterpillar", 0], ["Polymer", 110000], ["Snake", 1420500], 
-                ["Fobus", 6201000], ["Beretta Mod", 5892500], ["B.E Armor", 9980000], ["Vector Optics", 21148726], 
-                ["Camping 44", -7685729], ["Descuentos", -890000]
-            ],
-            totMarcas: {v: 844001069, p: "51.0%"},
-            armas: [
-                ["Mendoza", 0], ["Boito", 0], ["Derya", 0], ["Armed", 0], ["Tinck", 0], ["Emtan", 0], ["Rexio", 0], 
-                ["Ruger", 0], ["Tanfoglio", 0], ["Walther", 0], ["AHSS", 950000], ["KOR", 0], ["Beretta", 1800000], 
-                ["Rock Island", 0], ["GB", 0], ["Saga", 0], ["Sellier & Bellot", 0], ["Armscor", 0], ["IMI", 0], 
-                ["Golden Eagle", 0], ["Federal", 0]
-            ],
-            totArmas: {v: 2750000, p: "0.2%"},
-            resto: [
-                ["Armadillo", 100000], ["Armas", 415886100], ["BWC", 4350000], ["Duracell", 445691], ["Glock", 245000], 
-                ["Indunaylon", 246000], ["Maverick", 275000], ["Municiones", 382611350], ["Olight", 1180000], 
-                ["Sin Marca", 2283270], ["Sumax", 880000]
-            ],
-            totResto: {v: 808502411},
-            ecommerce: [
-                ["TUPI", 89002953, -56201999, 32800954], ["PORTER", 13431233, -175100, 13256133], ["OTROS (E-commerce)", 0, 0, 0],
-                ["TOTAL GENERAL E-COMMERCE", 102434186, -56377099, 46057087]
-            ]
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv';
+
+        let lineasDeDatosGlobales = [];
+        let fechasGlobalesOrdenadas = []; 
+        let filtrosActivos = { vendedor: "", canal: "", fecha: "" };
+
+        let METAS_DINAMICAS = {
+            global: 2310000000, diasMes: 22.0, diasTranscurridos: 19.5,
+            canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 50000000 },
+            vendedoresTotales: {}, vendedorMarca: {}
         };
 
-        // -------------------------------------------------------------
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
+
+        function parseDateToTime(dStr) {
+            if(!dStr) return 0;
+            let p = dStr.split('/');
+            if(p.length === 3) return new Date(p[2], parseInt(p[1])-1, parseInt(p[0])).getTime();
+            return 0;
+        }
+
+        function getIsoTime(isoStr) {
+            if(!isoStr) return 0;
+            let p = isoStr.split('-');
+            return new Date(p[0], parseInt(p[1])-1, parseInt(p[2])).getTime();
+        }
+
+        function dateToIsoString(dStr) {
+            let p = dStr.split('/');
+            if(p.length === 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            return "";
+        }
+
+        function isoToLocal(iso) {
+            if(!iso) return "";
+            let p = iso.split('-'); 
+            return `${p[2]}/${p[1]}/${p[0]}`; 
+        }
+
         function handleNum(val) {
             if (val === undefined || val === null || val === "") return 0;
-            let limpio = val.toString().replace(/[^0-9,-]/g, ''); 
-            if (limpio.includes(',')) limpio = limpio.split(',')[0];
-            return parseInt(limpio) || 0;
+            let str = String(val).replace(/\./g, ''); 
+            if (str.includes(',')) str = str.split(',')[0]; 
+            let limpio = str.replace(/[^0-9-]/g, ''); 
+            return parseInt(limpio, 10) || 0;
+        }
+
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
         }
 
         function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
-            document.getElementById('error-banner').style.display = 'none';
-            cargarDatosDashboard();
+            descargarDatosCruzadosBI();
         }
 
-        async function cargarDatosDashboard() {
+        async function descargarDatosCruzadosBI() {
             try {
-                const response = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
-                if (!response.ok) throw new Error("Status: " + response.status);
-                const dataText = await response.text();
-                
-                const rows = dataText.split('\n').map(row => {
-                    return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/"/g, '').trim());
-                });
+                const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
+                const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
-                if(rows.length > 10) {
-                    ejecutarMapeoDinamico(rows);
-                } else {
-                    throw new Error("Estructura CSV Incompleta");
-                }
-            } catch (error) {
-                console.warn("Carga espejo local activada de resguardo.", error);
-                document.getElementById('error-banner').style.display = 'block';
-                renderizarPantalla(BACKUP_DATA);
-            } finally {
-                setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 600);
+                const [resConfig, resData] = await Promise.all([fetch(urlConfig), fetch(urlData)]);
+                
+                if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
+
+                const txtConfig = await resConfig.text();
+                const txtData = await resData.text();
+
+                let filasConfig = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim()));
+                let filasData = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim()));
+
+                procesarMetasConfig(filasConfig);
+                procesarVentasData(filasData);
+
+                let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                actualizarBannerEstado('success', `✅ Sincronizado en tiempo real. Cruzando metas e información transaccional correctamente a las: ${horaStr}`);
+            } catch (err) {
+                console.error("Fallo estructural:", err);
+                actualizarBannerEstado('error', `⚠️ Error de red. Intentando reconectar con Google Sheets...`);
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
-        function ejecutarMapeoDinamico(rows) {
-            let d = JSON.parse(JSON.stringify(BACKUP_DATA));
-            rows.forEach(row => {
-                row.forEach(cell => {
-                    if(!cell) return;
-                    let cUp = cell.toString().toUpperCase();
-                    if (cUp.includes("META GLOBAL DEL MES:")) d.metaTexto = cell;
-                    if (cUp.includes("AVANCE GENERAL:")) d.avanceTexto = cell;
-                });
+        function procesarMetasConfig(filas) {
+            filas.forEach((row, idx) => {
+                if (row[0] === "Días Hábiles del Mes:") METAS_DINAMICAS.diasMes = parseFloat(String(row[1]).replace(',', '.')) || 22.0;
+                if (row[0] === "Días Hábiles Transcurridos:") METAS_DINAMICAS.diasTranscurridos = parseFloat(String(row[1]).replace(',', '.')) || 19.5;
+                if (row[3] && idx === 3) METAS_DINAMICAS.global = handleNum(row[3]) || 2310000000;
+
+                if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
+                    METAS_DINAMICAS.canales[row[5]] = handleNum(row[6]);
+                }
+                if (row[8] && idx >= 3 && row[8] !== "Vendedor") {
+                    METAS_DINAMICAS.vendedoresTotales[row[8]] = handleNum(row[9]);
+                }
             });
-            renderizarPantalla(d);
+
+            METAS_DINAMICAS.vendedorMarca = {};
+            if (filas[2]) {
+                for (let col = 11; col < filas[2].length; col += 3) {
+                    let vend = filas[2][col];
+                    if (vend) {
+                        for (let r = 4; r < filas.length; r++) {
+                            let marc = filas[r][col];
+                            let metaVal = filas[r][col+1];
+                            if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
+                                METAS_DINAMICAS.vendedorMarca[vend + "|||" + marc] = handleNum(metaVal);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        function renderizarPantalla(data) {
-            // ✅ REMOCIÓN ABSOLUTA DE DECIMALES INVOLUNTARIOS DE ODOO
-            let metaLimpia = data.metaTexto.replace(/,(\d+)/g, '');
-            let avanceLlimpio = data.avanceTexto.replace(/,(\d+)/g, '');
+        function procesarVentasData(filas) {
+            lineasDeDatosGlobales = [];
+            let vendedoresSet = new Set();
+            let canalesSet = new Set();
+            let fechasSet = new Set();
 
-            document.getElementById('txt-meta-global').innerText = metaLimpia;
-            document.getElementById('txt-avance-general').innerText = avanceLlimpio;
-            document.getElementById('lbl-dias-totales').innerText = data.diasHabiles;
-            document.getElementById('lbl-dias-trans').innerText = data.diasTranscurridos;
+            for (let i = 1; i < filas.length; i++) {
+                let r = filas[i];
+                if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
+
+                let d = {
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
+                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
+                };
+
+                vendedoresSet.add(d.vendedor);
+                canalesSet.add(d.canal);
+                fechasSet.add(d.fecha);
+
+                lineasDeDatosGlobales.push(d);
+            }
+
+            fechasGlobalesOrdenadas = Array.from(fechasSet).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
+
+            popularDropdownFiltros(vendedoresSet, canalesSet);
+            filtrarYRenderizarTodo();
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function popularDropdownFiltros(vendedores, canales) {
+            let selV = document.getElementById('select-vendedor');
+            let selC = document.getElementById('select-canal');
+
+            let optV = `<option value="">-- Todos los Vendedores --</option>`;
+            Array.from(vendedores).sort().forEach(v => optV += `<option value="${v}">${v}</option>`);
+            if(selV) selV.innerHTML = optV;
+
+            let optC = `<option value="">-- Todos los Canales --</option>`;
+            Array.from(canales).sort().forEach(c => optC += `<option value="${c}">${c}</option>`);
+            if(selC) selC.innerHTML = optC;
+        }
+
+        function aplicarFiltrosDropdown() {
+            filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
+            filtrosActivos.canal = document.getElementById('select-canal').value;
+            filtrosActivos.fecha = document.getElementById('select-fecha').value;
+            filtrarYRenderizarTodo();
+        }
+
+        function limpiarTodosLosFiltros() {
+            filtrosActivos = { vendedor: "", canal: "", fecha: "" };
+            if(document.getElementById('select-vendedor')) document.getElementById('select-vendedor').value = "";
+            if(document.getElementById('select-canal')) document.getElementById('select-canal').value = "";
+            if(document.getElementById('select-fecha')) document.getElementById('select-fecha').value = "";
+            filtrarYRenderizarTodo();
+        }
+
+        function filtrarYRenderizarTodo() {
+            let data = { bruta: 0, nc: 0, neta: 0 };
+            let acumDias = {}, acumCanales = {}, acumVend = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
+            let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
+            let dataFichasVend = {};
+
+            Object.keys(METAS_DINAMICAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 });
+
+            let diasTranscurridosActivos = METAS_DINAMICAS.diasTranscurridos; 
+            let filtroTime = 0;
+            
+            if (filtrosActivos.fecha) {
+                filtroTime = getIsoTime(filtrosActivos.fecha);
+                let diasPasados = 0;
+                fechasGlobalesOrdenadas.forEach(f => {
+                    if (parseDateToTime(f) <= filtroTime) diasPasados++;
+                });
+                
+                if (diasPasados > 0) {
+                    if (diasPasados === fechasGlobalesOrdenadas.length) {
+                        diasTranscurridosActivos = METAS_DINAMICAS.diasTranscurridos;
+                    } else {
+                        diasTranscurridosActivos = diasPasados;
+                    }
+                } else {
+                    diasTranscurridosActivos = 1;
+                }
+            }
+
+            lineasDeDatosGlobales.forEach(r => {
+                if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
+                if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
+                
+                if (filtroTime > 0) {
+                    if (parseDateToTime(r.fecha) > filtroTime) return;
+                }
+
+                let esNC = (r.documento === "Nota de Crédito");
+                let m = r.totalGs;
+
+                if (esNC) {
+                    data.nc += m;
+                    acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
+                    acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
+                    if(acumCanales[r.canal]) acumCanales[r.canal].nc += m;
+                    if(!acumVend[r.vendedor]) acumVend[r.vendedor] = { bruto: 0, nc: 0 };
+                    acumVend[r.vendedor].nc += m;
+                } else {
+                    data.bruta += m;
+                    if(acumCanales[r.canal]) acumCanales[r.canal].bruto += m;
+                    if(!acumVend[r.vendedor]) acumVend[r.vendedor] = { bruto: 0, nc: 0 };
+                    acumVend[r.vendedor].bruto += m;
+                }
+                data.neta += m;
+
+                if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
+                acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
+
+                if (r.canal === "E-commerce") {
+                    if (String(r.cliente).toUpperCase().includes("TUPI")) {
+                        if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
+                    } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
+                        if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m;
+                    } else {
+                        if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
+                    }
+                }
+
+                if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { marcas: {}, nc: 0, bruto: 0 };
+                if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
+                if(!esNC && !String(r.marcaFinal).includes("Intereses")) {
+                    dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
+                }
+            });
+
+            renderizarEstructuraVisual(data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
+        }
+
+        let chartLine = null;
+        let chartPie = null;
+
+        function renderizarEstructuraVisual(data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
+            let dMes = METAS_DINAMICAS.diasMes;
+            let dTr = dTrActivo; 
+
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL MES: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${METAS_DINAMICAS.global.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${((data.neta / METAS_DINAMICAS.global) * 100).toFixed(1)}%`;
+            document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
+            document.getElementById('lbl-dias-trans').innerText = dTr.toFixed(1).replace('.', ',');
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
-            // Tabla 1: Objetivos Base
-            let hObj = "";
-            data.objetivosBase.forEach(r => {
-                hObj += `<tr>
-                    <td><strong>${r[0]}</strong></td>
-                    <td class="text-right">${handleNum(r[1]) !== 0 ? '₲ ' + handleNum(r[1]).toLocaleString('es-PY') : r[1]}</td>
-                    <td class="text-right ${handleNum(r[2]) < 0 ? 'num-negativo':''}">${handleNum(r[2]) !== 0 ? '₲ ' + handleNum(r[2]).toLocaleString('es-PY') : r[2]}</td>
-                    <td class="text-right ${(r[3] && r[3].toString().includes('%')) ? 'num-positivo':''}">${r[3]}</td>
-                    <td class="text-right">${handleNum(r[4]) !== 0 ? '₲ ' + handleNum(r[4]).toLocaleString('es-PY') : r[4]}</td>
-                    <td class="text-right">${r[5]}</td>
-                    <td class="text-right">${handleNum(r[6]) !== 0 ? '₲ ' + handleNum(r[6]).toLocaleString('es-PY') : r[6]}</td>
-                </tr>`;
-            });
-            document.getElementById('grid-objetivos-base').innerHTML = hObj;
+            let esperadoGlobal = Math.round((METAS_DINAMICAS.global / dMes) * dTr);
+            let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
+            let pctGlobalMes = ((data.neta / METAS_DINAMICAS.global) * 100).toFixed(0) + "%";
+            let proyGlobal = Math.round((data.neta / dTr) * dMes);
+            
+            document.getElementById('grid-objetivos-base').innerHTML = `
+                <tr>
+                    <td><strong>Todos los canales</strong></td>
+                    <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
+                    <td class="text-right num-positivo">${pctGlobalHoy}</td>
+                    <td class="text-right">₲ ${METAS_DINAMICAS.global.toLocaleString('es-PY')}</td>
+                    <td class="text-right">${pctGlobalMes}</td>
+                    <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
+                </tr>
+            `;
 
-            // Tabla 2: Resumen Ventas Diarias
+            let arrDiasGrafico = [], arrValoresGrafico = [], arrFechasOriginales = [];
+            let acumuladoDiarioSuma = 0;
             let hVentasDiarias = "";
-            let arrDiasGrafico = [], arrValoresGrafico = [];
-            data.ventasDiariasTable.forEach(r => {
-                hVentasDiarias += `<tr>
-                    <td class="text-center">${r[0]}</td>
-                    <td class="text-right">₲ ${r[1].toLocaleString('es-PY')}</td>
-                    <td class="text-right num-positivo" style="font-weight:bold;">₲ ${r[2].toLocaleString('es-PY')}</td>
-                </tr>`;
-                arrDiasGrafico.push(r[0].substring(0,5)); 
-                arrValoresGrafico.push(r[1]); 
+            Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
+                acumuladoDiarioSuma += acumDias[f];
+                hVentasDiarias += `<tr><td class="text-center">${f}</td><td class="text-right">₲ ${acumDias[f].toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
+                
+                arrFechasOriginales.push(f);
+                arrDiasGrafico.push(f.split('/').slice(0,2).join('/')); 
+                arrValoresGrafico.push(acumDias[f]);
             });
             document.getElementById('grid-ventas-diarias').innerHTML = hVentasDiarias;
 
-            // Tabla 3: Resumen Canales Completo
+            let arrCanalesLabels = [];
+            let arrCanalesData = [];
+
             let hCan = "";
-            data.canales.forEach(c => {
-                hCan += `<tr>
-                    <td><strong>${c[0]}</strong></td>
-                    <td class="text-right">₲ ${c[1].toLocaleString('es-PY')}</td>
-                    <td class="text-right">₲ ${c[2].toLocaleString('es-PY')}</td>
-                    <td class="text-right num-positivo">${c[3]}</td>
-                    <td class="text-right">₲ ${c[4].toLocaleString('es-PY')}</td>
-                    <td class="text-right num-positivo">${c[5]}</td>
-                </tr>`;
+            Object.keys(acumCanales).forEach(c => {
+                let obj = METAS_DINAMICAS.canales[c] || 0;
+                let net = acumCanales[c].bruto + acumCanales[c].nc;
+                let esp = Math.round((obj / dMes) * dTr);
+                hCan += `<tr><td><strong>${c}</strong></td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                
+                if (net !== 0) { // Mostrar incluso negativos para no dejar en blanco
+                    arrCanalesLabels.push(c);
+                    arrCanalesData.push(net);
+                }
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
-            // -------------------------------------------------------------
-            // DISTRIBUCIÓN DE TABLAS VERTICALES POR CANAL SEPARADO
-            // -------------------------------------------------------------
             let hCons = ""; let hEcomV = ""; let hMayV = "";
-            let currentTarget = "consumidor";
+            let canalesSegmentos = ["Salon", "Online", "E-commerce", "Mayoristas"];
+            
+            canalesSegmentos.forEach(canal => {
+                let currentTarget = "consumidor";
+                if(canal === "E-commerce") currentTarget = "ecommerce";
+                if(canal === "Mayoristas") currentTarget = "mayoristas";
 
-            data.vendedoresVertical.forEach(v => {
-                let rowHtml = "";
-                if(v.tipo === "head") {
-                    rowHtml = `<tr class="header-segmento"><td colspan="7">${v.txt}</td></tr>`;
-                    if(v.txt.includes("SALON") || v.txt.includes("ONLINE")) currentTarget = "consumidor";
-                    else if(v.txt.includes("E-COMMERCE")) currentTarget = "ecommerce";
-                    else if(v.txt.includes("MAYORISTAS")) currentTarget = "mayoristas";
-                } 
-                else if(v.tipo === "total") {
-                    rowHtml = `<tr class="total-segmento"><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right num-positivo">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`;
-                } 
-                else {
-                    rowHtml = `<tr><td>${v.name}</td><td class="text-right">₲ ${v.neta.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${v.nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${v.esp.toLocaleString('es-PY')}</td><td class="text-right">${v.logH}</td><td class="text-right">₲ ${v.obj.toLocaleString('es-PY')}</td><td class="text-right">${v.logM}</td></tr>`;
-                }
+                let headHtml = `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
+                if(currentTarget === "consumidor") hCons += headHtml;
+                else if(currentTarget === "ecommerce") hEcomV += headHtml;
+                else if(currentTarget === "mayoristas") hMayV += headHtml;
 
-                if(currentTarget === "consumidor") hCons += rowHtml;
-                else if(currentTarget === "ecommerce") hEcomV += rowHtml;
-                else if(currentTarget === "mayoristas") hMayV += rowHtml;
+                let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
+                
+                Object.keys(acumVend).sort().forEach(v => {
+                    let esDeCanal = false;
+                    if(canal === "Salon" && v.includes("Salon")) esDeCanal = true;
+                    else if(canal === "Online" && v.includes("Online")) esDeCanal = true;
+                    else if(canal === "E-commerce" && v.includes("E-commerce")) esDeCanal = true;
+                    else if(canal === "Mayoristas" && v.includes("Mayoristas")) esDeCanal = true;
+
+                    if(esDeCanal) {
+                        let net = acumVend[v].bruto + acumVend[v].nc;
+                        let obj = METAS_DINAMICAS.vendedoresTotales[v] || 0;
+                        let esp = Math.round((obj / dMes) * dTr);
+                        subNet += net; subNC += acumVend[v].nc; subEsp += esp; subObj += obj;
+
+                        let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${acumVend[v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                        if(currentTarget === "consumidor") hCons += rowHtml;
+                        else if(currentTarget === "ecommerce") hEcomV += rowHtml;
+                        else if(currentTarget === "mayoristas") hMayV += rowHtml;
+                    }
+                });
+
+                let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                if(currentTarget === "consumidor") hCons += totalHtml;
+                else if(currentTarget === "ecommerce") hEcomV += totalHtml;
+                else if(currentTarget === "mayoristas") hMayV += totalHtml;
             });
 
-            document.getElementById('grid-vendedores-consumidor').innerHTML = hCons;
-            document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
-            document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
+            if(document.getElementById('grid-vendedores-consumidor')) document.getElementById('grid-vendedores-consumidor').innerHTML = hCons;
+            if(document.getElementById('grid-vendedores-ecommerce')) document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
+            if(document.getElementById('grid-vendedores-mayoristas')) document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
 
-            // -------------------------------------------------------------
-            // RENDEREADO DE FICHAS DE MARCAS POR PESTAÑA SEPARADA
-            // -------------------------------------------------------------
             let hFichasCons = ""; let hFichasEcom = ""; let hFichasMayo = "";
+            Object.keys(dataFichasVend).sort().forEach(v => {
+                let vData = dataFichasVend[v];
+                let mRows = "", aRows = "", rRows = "";
+                let subMV = 0, subAV = 0, subRV = 0;
 
-            data.fichas.forEach(f => {
-                let mRows = ""; f.marcas.forEach(m => { let c = parseInt(m.p) >= 100 ? 'num-positivo' : (parseInt(m.p)>0 ? 'text-dark' : 'num-negativo'); mRows += `<tr><td>${m.m}</td><td class="text-right">${m.v.toLocaleString('es-PY')}</td><td class="text-right">${m.mt.toLocaleString('es-PY')}</td><td class="text-center ${c}">${m.p}</td></tr>`; });
-                let aRows = ""; f.armas.forEach(a => { aRows += `<tr><td>${a.m}</td><td class="text-right">${a.v.toLocaleString('es-PY')}</td><td class="text-right">${a.mt.toLocaleString('es-PY')}</td><td class="text-center">${a.p}</td></tr>`; });
-                let rRows = ""; f.resto.forEach(r => { rRows += `<tr><td>${r.m}</td><td class="text-right">${r.v.toLocaleString('es-PY')}</td><td class="text-right">${r.mt.toLocaleString('es-PY')}</td><td class="text-center">${r.p}</td></tr>`; });
+                Object.keys(vData.marcas).sort().forEach(m => {
+                    let val = vData.marcas[m];
+                    let mAsig = METAS_DINAMICAS.vendedorMarca[v + "|||" + m] || 0;
+                    let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
+                    let row = `<tr><td>${m}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                    
+                    if (LISTA_MARCAS.includes(m)) { mRows += row; subMV += val; }
+                    else if (LISTA_ARMAS.includes(m)) { aRows += row; subAV += val; }
+                    else { rRows += row; subRV += val; }
+                });
+
+                let net = vData.bruto + vData.nc;
+                let obj = METAS_DINAMICAS.vendedoresTotales[v] || 0;
+                let esp = Math.round((obj / dMes) * dTr);
+                let dif = net - esp;
+                let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
 
                 let fichaHtml = `
                 <div class="ficha-vendedor">
-                    <div class="ficha-header">▶ ${f.nombre}</div>
+                    <div class="ficha-header">▶ ${v}</div>
                     <table class="ficha-table">
                         <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
                         <tbody>
-                            <tr><td colspan="4" class="ficha-section">[ MARCAS ]</td></tr>
-                            ${mRows}
-                            <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">${f.subMarcas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subMarcas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subMarcas.p}</td></tr>
-                            
-                            <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>
-                            ${aRows}
-                            <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">${f.subArmas.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subArmas.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subArmas.p}</td></tr>
-
-                            <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>
-                            ${rRows}
-                            <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">${f.subResto.v.toLocaleString('es-PY')}</td><td class="text-right">${f.subResto.mt.toLocaleString('es-PY')}</td><td class="text-center">${f.subResto.p}</td></tr>
-
-                            <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">${f.totales.v.toLocaleString('es-PY')}</td><td class="text-right">${f.totales.mt.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.totales.p}</td></tr>
-                            
+                            <tr><td colspan="4" class="ficha-section">[ MARCAS ]</td></tr>${mRows}
+                            <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${subMV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                            <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows}
+                            <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                            <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows}
+                            <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${subRV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                            <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                             <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
-                            <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">${f.kpis.nc.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">${f.kpis.espHoy.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right num-positivo">${f.kpis.pctHoy}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${f.kpis.dif > 0 ? 'num-positivo' : 'num-negativo'}">₲ ${f.kpis.dif.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Cant. Marcas Asignadas</td><td colspan="3" class="text-right">${f.kpis.marcasAsig}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Marcas Alcanzadas</td><td colspan="3" class="text-right num-positivo">${f.kpis.marcasAlc}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Proy. Venta Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${f.kpis.proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${f.kpis.pctProy}</td></tr>
+                            <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Meta Esperada a Fecha Filtrada</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>% Alcanzado</td><td colspan="3" class="text-right num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Diferencia</td><td colspan="3" class="text-right ${dif > 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Proy. Venta Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((proy/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                         </tbody>
                     </table>
                 </div>`;
 
-                let n = f.nombre.toUpperCase();
-                if(n.includes("SALON") || n.includes("ONLINE")) hFichasCons += fichaHtml;
-                else if(n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) hFichasEcom += fichaHtml;
-                else if(n.includes("MAYORISTAS")) hFichasMayo += fichaHtml;
+                let n = v.toUpperCase();
+                if(n.includes("E-COMMERCE") || n.includes("ECOMMERCE") || n.includes("OLMEDO") || n.includes("CASCO")) hFichasEcom += fichaHtml;
+                else if(n.includes("MAYORISTAS") || n.includes("ANTONIO")) hFichasMayo += fichaHtml;
+                else hFichasCons += fichaHtml;
             });
-
             if(document.getElementById('grid-fichas-consumidor')) document.getElementById('grid-fichas-consumidor').innerHTML = hFichasCons;
             if(document.getElementById('grid-fichas-ecommerce')) document.getElementById('grid-fichas-ecommerce').innerHTML = hFichasEcom;
             if(document.getElementById('grid-fichas-mayoristas')) document.getElementById('grid-fichas-mayoristas').innerHTML = hFichasMayo;
 
-            // Tabla E-Commerce Desglose Exacto (TUPI / PORTER)
-            let hEco = "";
-            data.ecommerce.forEach((r, idx) => {
-                if(r[0].includes("TOTAL")) { hEco += `<tr class="total-segmento"><td>${r[0]}</td><td class="text-right">₲ ${r[1].toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${r[2].toLocaleString('es-PY')}</td><td class="text-right">₲ ${r[3].toLocaleString('es-PY')}</td></tr>`; } 
-                else { hEco += `<tr><td><strong>${r[0]}</strong></td><td class="text-right">₲ ${r[1].toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${r[2].toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${r[3].toLocaleString('es-PY')}</td></tr>`; }
-            });
-            document.getElementById('ecommerce-lista').innerHTML = hEco;
+            if(document.getElementById('ecommerce-lista')) document.getElementById('ecommerce-lista').innerHTML = `
+                <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
+                <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
+            `;
 
-            // Notas de Crédito, Marcas y Calibres
-            let hNcC = ""; data.ncCanal.forEach(i => { hNcC += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
-            let hNcCl = ""; data.ncCliente.forEach(i => { hNcCl += `<tr><td>${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
-            let hNcF = ""; data.ncFecha.forEach(i => { hNcF += `<tr><td class="text-center">${i[0]}</td><td class="text-right num-negativo">₲ ${i[1].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-canal')) document.getElementById('nc-por-canal').innerHTML = hNcC;
+            let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-cliente')) document.getElementById('nc-por-cliente').innerHTML = hNcCl;
+            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-fecha')) document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            let hM = ""; data.marcas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hM += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM;
-            let hA = ""; data.armas.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hA += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA;
-            let hR = ""; data.resto.forEach(i => { let bClass = i[1] === 0 ? "bg-zero" : ""; hR += `<tr><td class="${bClass}">${i[0]}</td><td class="text-right ${bClass}">${i[1] !== 0 ? '₲ ' + i[1].toLocaleString('es-PY') : 0}</td></tr>`; }); document.getElementById('resto-lista').innerHTML = hR;
+            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); if(document.getElementById('marcas-lista')) document.getElementById('marcas-lista').innerHTML = hM; if(document.getElementById('marcas-footer')) document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); if(document.getElementById('armas-lista')) document.getElementById('armas-lista').innerHTML = hA; if(document.getElementById('armas-footer')) document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); if(document.getElementById('resto-lista')) document.getElementById('resto-lista').innerHTML = hR; if(document.getElementById('resto-footer')) document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            // Gráficos Seguros
+            // ✅ GRÁFICOS CON EFECTO TOGGLE (Clic = Filtrar, Clic de nuevo = Limpiar)
             try {
                 if(chartLine) chartLine.destroy();
                 if(chartPie) chartPie.destroy();
 
-                chartLine = new Chart(document.getElementById('lineChart').getContext('2d'), {
-                    type: 'line', data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
-                    options: { responsive: true, scales: { y: { ticks: { callback: v => '₲ ' + (v / 1000000) + 'M' } } } }
-                });
+                let elLine = document.getElementById('lineChart');
+                if(elLine && arrFechasOriginales.length > 0) {
+                    chartLine = new Chart(elLine.getContext('2d'), {
+                        type: 'line', data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
+                        options: { 
+                            responsive: true,
+                            onClick: (e, elements) => {
+                                if (elements.length > 0) {
+                                    let idx = elements[0].index;
+                                    let fObj = arrFechasOriginales[idx];
+                                    let isoDate = dateToIsoString(fObj);
+                                    let filterInput = document.getElementById('select-fecha');
+                                    
+                                    // Efecto Toggle (Prende/Apaga)
+                                    if(filterInput.value === isoDate) {
+                                        filterInput.value = ""; 
+                                    } else {
+                                        filterInput.value = isoDate;
+                                    }
+                                    aplicarFiltrosDropdown();
+                                }
+                            }
+                        }
+                    });
+                }
 
-                chartPie = new Chart(document.getElementById('pieChart').getContext('2d'), {
-                    type: 'doughnut', data: { labels: ['Salon', 'Online', 'E-commerce', 'Mayoristas'], datasets: [{ data: [447493787, 191051756, 46057087, 1001327644], backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42'] }] },
-                    options: { responsive: true, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } } }
-                });
+                let elPie = document.getElementById('pieChart');
+                if(elPie && arrCanalesLabels.length > 0) {
+                    chartPie = new Chart(elPie.getContext('2d'), {
+                        type: 'doughnut', 
+                        data: { 
+                            labels: arrCanalesLabels, 
+                            datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] 
+                        },
+                        options: { 
+                            responsive: true, plugins: { legend: { position: 'right' } },
+                            onClick: (e, elements) => {
+                                if (elements.length > 0) {
+                                    let c = arrCanalesLabels[elements[0].index];
+                                    let filterSelect = document.getElementById('select-canal');
+                                    
+                                    // Efecto Toggle (Prende/Apaga)
+                                    if(filterSelect.value === c) {
+                                        filterSelect.value = ""; 
+                                    } else {
+                                        filterSelect.value = c;
+                                    }
+                                    aplicarFiltrosDropdown();
+                                }
+                            }
+                        }
+                    });
+                }
             } catch (errChart) {
                 console.warn("Módulo gráfico en espera:", errChart);
             }
