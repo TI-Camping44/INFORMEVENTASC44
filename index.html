@@ -92,10 +92,10 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Base de Datos BI Avanzada...</div>
+        <div>Sincronizando Base de Datos YTD...</div>
     </div>
 
-    <div class="sidebar">
+    <div class="sidebar" id="main-sidebar">
         <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
@@ -108,9 +108,9 @@
 
     <div class="main-content">
         
-        <div class="filter-panel">
+        <div class="filter-panel" id="main-filters">
             <div class="filter-group">
-                <label>📆 Mes / Período de Análisis</label>
+                <label>📆 Mes / Período</label>
                 <select id="select-mes" onchange="aplicarFiltrosDropdown()">
                     <option value="">-- Año Completo (YTD) --</option>
                     <option value="1">Enero 2026</option>
@@ -125,6 +125,9 @@
                 <label>👤 Vendedor</label>
                 <select id="select-vendedor" onchange="aplicarFiltrosDropdown()"></select>
             </div>
+            
+            <button id="btn-share-vendor" class="btn-clear-filters" style="background-color: #3182ce; color: white; border: none; margin-bottom: 2px;" onclick="copiarLinkVendedor()">🔗 Compartir a Comercial</button>
+            
             <div class="filter-group">
                 <label>🏷️ Canal / Equipo</label>
                 <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
@@ -134,10 +137,10 @@
                 <select id="select-marca" onchange="aplicarFiltrosDropdown()"></select>
             </div>
             <div class="filter-group">
-                <label>📅 Filtrar Día Exacto</label>
+                <label>📅 Día Exacto</label>
                 <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()">
             </div>
-            <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()">❌ Limpiar Filtros</button>
+            <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()" id="btn-reset">❌ Limpiar</button>
         </div>
 
         <div id="status-banner" class="banner-success">Sincronizando canal de datos en vivo...</div>
@@ -152,7 +155,7 @@
                     <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
                     <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
                 </table>
-                <button class="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
+                <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
         </div>
 
@@ -177,13 +180,13 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 HAZ CLIC EN UN PUNTO DEL GRÁFICO PARA TRAER EL PROGRESO HASTA ESE DÍA</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 HAZ CLIC PARA FILTRAR EL DÍA EXACTO</span>
                     <div style="height: 250px; width: 100%; position: relative;">
                         <canvas id="lineChart"></canvas>
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 HAZ CLIC EN UNA PORCIÓN PARA AISLAR EL CANAL</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 HAZ CLIC PARA AISLAR EL CANAL</span>
                     <div style="height: 250px; width: 100%; position: relative;">
                         <canvas id="pieChart"></canvas>
                     </div>
@@ -370,10 +373,26 @@
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
         }
+
+        // GENERADOR DE LINK PARA VENDEDOR
+        function copiarLinkVendedor() {
+            let v = document.getElementById('select-vendedor').value;
+            if (!v) {
+                alert("⚠️ Primero seleccioná un vendedor en el menú de la izquierda.");
+                return;
+            }
+            let urlObj = new URL(window.location.href);
+            urlObj.searchParams.set('vendedor', v);
+            
+            navigator.clipboard.writeText(urlObj.toString()).then(() => {
+                actualizarBannerEstado('success', `✅ Enlace copiado al portapapeles. Mandáselo a ${v} para que solo vea su panel.`);
+            }).catch(err => {
+                prompt("Copiá este enlace y mandáselo al vendedor:", urlObj.toString());
+            });
+        }
     </script>
 
     <script>
-        // VARIABLES GLOBALES PARA GRÁFICOS (Simple y Oficial)
         var chartLine = null;
         var chartPie = null;
 
@@ -423,12 +442,10 @@
             let datePart = String(dStr).split(' ')[0]; 
             if (datePart.includes('/')) {
                 let p = datePart.split('/');
-                if (p[2] && p[2].length === 4) return new Date(p[2], parseInt(p[1], 10)-1, parseInt(p[0], 10)).getTime(); 
-                if (p[0] && p[0].length === 4) return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime(); 
+                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
             } else if (datePart.includes('-')) {
                 let p = datePart.split('-');
-                if (p[0] && p[0].length === 4) return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime(); 
-                if (p[2] && p[2].length === 4) return new Date(p[2], parseInt(p[1], 10)-1, parseInt(p[0], 10)).getTime(); 
+                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
             }
             return 0;
         }
@@ -463,11 +480,39 @@
             return "";
         }
 
+        // ✅ REPARADO AL 100%: RESTAURADO EL FILTRO DE NÚMEROS LIMPIOS QUE EVITA EL 0% DE LOS VENDEDORES
         function handleNum(val) {
             if (val === undefined || val === null || val === "") return 0;
             let str = String(val).replace(/\./g, ''); 
             if (str.includes(',')) str = str.split(',')[0]; 
-            return parseInt(str, 10) || 0;
+            let limpio = str.replace(/[^0-9-]/g, ''); 
+            return parseInt(limpio, 10) || 0;
+        }
+
+        // ✅ BUSCADOR INTELIGENTE PARA VENDEDORES Y MARCAS
+        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
+            if(!diccionarioMetas) return 0;
+            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
+            let nameUpper = nombreOdoo.toUpperCase();
+            for (let k in diccionarioMetas) {
+                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) return diccionarioMetas[k];
+            }
+            return 0;
+        }
+
+        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
+            if(!diccionarioVM) return 0;
+            let query = nombreOdoo + "|||" + marca;
+            if(diccionarioVM[query]) return diccionarioVM[query];
+            let nameUpper = nombreOdoo.toUpperCase();
+            let marcaUpper = marca.toUpperCase();
+            for (let k in diccionarioVM) {
+                let parts = k.split('|||');
+                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) {
+                    return diccionarioVM[k];
+                }
+            }
+            return 0;
         }
 
         function actualizarBannerEstado(tipo, mensaje) {
@@ -484,6 +529,16 @@
         }
 
         async function descargarDatosCruzadosBI() {
+            let escapeTimeout = setTimeout(() => {
+                let loader = document.getElementById('loader');
+                if (loader && loader.style.display !== 'none') {
+                    console.warn("Retardo de red. Levantando motor local...");
+                    filtrarYRenderizarTodo();
+                    loader.style.display = 'none';
+                    actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
+                }
+            }, 3000);
+
             try {
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
@@ -497,6 +552,8 @@
                 let filasConfig = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasData = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
+                clearTimeout(escapeTimeout);
+
                 procesarMetasConfigActuales(filasConfig);
                 procesarVentasData(filasData);
 
@@ -504,14 +561,19 @@
                 actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos anual conectada correctamente a las: ${horaStr}`);
                 document.getElementById('loader').style.display = 'none';
             } catch (err) {
-                console.error(err);
-                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
+                clearTimeout(escapeTimeout);
+                filtrarYRenderizarTodo();
+                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos. Sistema corriendo en modo seguro.`);
                 document.getElementById('loader').style.display = 'none';
             }
         }
 
         function procesarMetasConfigActuales(filas) {
             try {
+                METAS_JUNIO_LIVE.canales = {};
+                METAS_JUNIO_LIVE.vendedoresTotales = {};
+                METAS_JUNIO_LIVE.vendedorMarca = {};
+
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return;
                     if (row[0] === "Días Hábiles del Mes:") {
@@ -532,7 +594,6 @@
                     }
                 });
 
-                METAS_JUNIO_LIVE.vendedorMarca = {};
                 if (filas[2]) {
                     for (let col = 11; col < filas[2].length; col += 3) {
                         let vend = filas[2][col];
@@ -552,34 +613,59 @@
         }
 
         function procesarVentasData(filas) {
-            try {
-                lineasDeDatosGlobales = [];
-                let vendedoresSet = new Set();
-                let canalesSet = new Set();
-                let marcasSet = new Set();
+            lineasDeDatosGlobales = [];
+            let vendedoresSet = new Set();
+            let canalesSet = new Set();
+            let marcasSet = new Set();
 
-                for (let i = 1; i < filas.length; i++) {
-                    let r = filas[i];
-                    if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
+            for (let i = 1; i < filas.length; i++) {
+                let r = filas[i];
+                if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
-                    let d = {
-                        fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
-                        unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30]),
-                        mesIdx: getMonthFromDate(r[1])
-                    };
+                let d = {
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
+                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
+                };
+                
+                let dp = String(d.fecha).split(' ')[0];
+                if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
+                else if(dp.includes('-')) d.mesIdx = parseInt(dp.split('-')[1], 10);
 
-                    if(d.vendedor) vendedoresSet.add(d.vendedor);
-                    if(d.canal) canalesSet.add(d.canal);
-                    if(d.marcaFinal) marcasSet.add(d.marcaFinal);
+                if(d.vendedor) vendedoresSet.add(d.vendedor);
+                if(d.canal) canalesSet.add(d.canal);
+                if(d.marcaFinal) marcasSet.add(d.marcaFinal);
 
-                    lineasDeDatosGlobales.push(d);
-                }
+                lineasDeDatosGlobales.push(d);
+            }
 
-                fechasGlobalesOrdenadas = Array.from(new Set(lineasDeDatosGlobales.map(d=>d.fecha))).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
+            fechasGlobalesOrdenadas = Array.from(new Set(lineasDeDatosGlobales.map(d=>d.fecha))).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
+            popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
 
-                popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
+            const urlParams = new URLSearchParams(window.location.search);
+            const vendorQuery = urlParams.get('vendedor');
+            
+            if (vendorQuery) {
+                setTimeout(() => {
+                    let selV = document.getElementById('select-vendedor');
+                    if (selV) {
+                        selV.value = vendorQuery;
+                        selV.disabled = true; 
+                    }
+                    filtrosActivos.vendedor = vendorQuery;
+                    
+                    document.getElementById('select-mes').disabled = true;
+                    document.getElementById('select-canal').disabled = true;
+                    document.getElementById('select-fecha').disabled = true;
+                    document.getElementById('select-marca').disabled = true;
+                    document.getElementById('btn-share-vendor').style.display = 'none';
+                    document.getElementById('btn-reset').style.display = 'none';
+                    document.getElementById('btn-sync').style.display = 'none';
+                    
+                    filtrarYRenderizarTodo();
+                }, 100);
+            } else {
                 filtrarYRenderizarTodo();
-            } catch(e) { }
+            }
         }
 
         function popularDropdownFiltros(vendedores, canales, marcas) {
@@ -592,13 +678,11 @@
                 Array.from(vendedores).sort().forEach(v => { if(v) optV += `<option value="${v}">${v}</option>`; });
                 selV.innerHTML = optV;
             }
-
             if(selC) {
                 let optC = `<option value="">-- Todos los Canales --</option>`;
                 Array.from(canales).sort().forEach(c => { if(c) optC += `<option value="${c}">${c}</option>`; });
                 selC.innerHTML = optC;
             }
-
             if(selM) {
                 let optM = `<option value="">-- Todas las Marcas --</option>`;
                 Array.from(marcas).sort().forEach(m => {
@@ -613,24 +697,23 @@
             filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
             filtrosActivos.canal = document.getElementById('select-canal').value;
             filtrosActivos.fecha = document.getElementById('select-fecha').value; 
-            let selM = document.getElementById('select-marca');
-            if(selM) filtrosActivos.marca = selM.value;
+            filtrosActivos.marca = document.getElementById('select-marca').value;
             filtrarYRenderizarTodo();
         }
 
         function limpiarTodosLosFiltros() {
-            filtrosActivos = { mes: "", vendedor: "", canal: "", fecha: "", marca: "" };
-            if(document.getElementById('select-mes')) document.getElementById('select-mes').value = "";
-            if(document.getElementById('select-vendedor')) document.getElementById('select-vendedor').value = "";
-            if(document.getElementById('select-canal')) document.getElementById('select-canal').value = "";
-            if(document.getElementById('select-fecha')) document.getElementById('select-fecha').value = "";
-            if(document.getElementById('select-marca')) document.getElementById('select-marca').value = "";
+            filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "" };
+            document.getElementById('select-mes').value = "6";
+            document.getElementById('select-vendedor').value = "";
+            document.getElementById('select-canal').value = "";
+            document.getElementById('select-fecha').value = "";
+            document.getElementById('select-marca').value = "";
             filtrarYRenderizarTodo();
         }
 
-        // ✅ REPARADO: EL CÁLCULO YTD AHORA SUMA CORRECTAMENTE TODO
+        // ✅ REPARADO: SUMATORIA LIMPIA DE AÑO COMPLETO (YTD) 
         function obtenerMetasEstructuraBI() {
-            if (filtrosActivos.mes === "") {
+            if (filtrosActivos.mes === "") { 
                 let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
                 for (let m = 1; m <= 6; m++) {
                     let mData = (m === 6) ? METAS_JUNIO_LIVE : HISTORICO_METAS[m];
@@ -651,144 +734,108 @@
         }
 
         function filtrarYRenderizarTodo() {
-            try {
-                let METAS_ACTIVAS = obtenerMetasEstructuraBI();
-                let data = { bruta: 0, nc: 0, neta: 0 };
-                let acumDias = {}, acumCanales = {}, acumVend = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
-                let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
-                let dataFichasVend = {};
+            let METAS_ACTIVAS = obtenerMetasEstructuraBI();
+            let data = { bruta: 0, nc: 0, neta: 0 };
+            let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
+            let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
+            let dataFichasVend = {};
 
-                if(METAS_ACTIVAS.canales) {
-                    Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 });
+            if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
+
+            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
+            let filtroTime = 0;
+            
+            if (filtrosActivos.fecha) {
+                filtroTime = getIsoTime(filtrosActivos.fecha);
+                diasTranscurridosActivos = 1; 
+            } else if (filtrosActivos.mes !== "" && filtrosActivos.mes !== "6") {
+                diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
+            }
+
+            lineasDeDatosGlobales.forEach(r => {
+                if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
+                if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
+                if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
+                if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
+                if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
+
+                let esNC = (r.documento === "Nota de Crédito");
+                let m = r.totalGs;
+
+                if (esNC) {
+                    data.nc += m;
+                    acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
+                    acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
+                    if(acumCanales[r.canal]) acumCanales[r.canal].nc += m;
+                } else {
+                    data.bruta += m;
+                    if(acumCanales[r.canal]) acumCanales[r.canal].bruto += m;
+                }
+                data.neta += m;
+
+                if(r.canal && r.vendedor) {
+                    if(!acumVendPorCanal[r.canal]) acumVendPorCanal[r.canal] = {};
+                    if(!acumVendPorCanal[r.canal][r.vendedor]) acumVendPorCanal[r.canal][r.vendedor] = { bruto: 0, nc: 0 };
+                    if(esNC) acumVendPorCanal[r.canal][r.vendedor].nc += m;
+                    else acumVendPorCanal[r.canal][r.vendedor].bruto += m;
                 }
 
-                let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
-                let filtroTime = 0;
-                
-                if (filtrosActivos.mes !== "" && filtrosActivos.mes !== "6" && !filtrosActivos.fecha) {
-                    diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
-                }
+                if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
+                if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
 
-                if (filtrosActivos.fecha) {
-                    filtroTime = getIsoTime(filtrosActivos.fecha);
-                    let mesFiltrado = new Date(filtroTime).getMonth() + 1;
-                    
-                    if (filtrosActivos.mes === "") { 
-                        let sumaDias = 0;
-                        for (let m = 1; m < mesFiltrado; m++) {
-                            let mData = (m === 6) ? METAS_JUNIO_LIVE : HISTORICO_METAS[m];
-                            if(mData) sumaDias += mData.diasMes;
-                        }
-                        let diasPasadosEnEsteMes = 0;
-                        fechasGlobalesOrdenadas.forEach(f => {
-                            if (parseDateToTime(f) <= filtroTime && getMonthFromDate(f) === mesFiltrado) diasPasadosEnEsteMes++;
-                        });
-                        diasTranscurridosActivos = sumaDias + (diasPasadosEnEsteMes > 0 ? diasPasadosEnEsteMes : 1);
-                    } else { 
-                        let diasPasadosEnEsteMes = 0;
-                        fechasGlobalesOrdenadas.forEach(f => {
-                            if (parseDateToTime(f) <= filtroTime && getMonthFromDate(f) === parseInt(filtrosActivos.mes, 10)) diasPasadosEnEsteMes++;
-                        });
-                        diasTranscurridosActivos = diasPasadosEnEsteMes > 0 ? diasPasadosEnEsteMes : 1;
-                    }
-                }
-
-                lineasDeDatosGlobales.forEach(r => {
-                    if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
-                    if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
-                    if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
-                    if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
-                    if (filtroTime > 0 && parseDateToTime(r.fecha) > filtroTime) return;
-
-                    let esNC = (r.documento === "Nota de Crédito");
-                    let m = r.totalGs;
-
-                    if (esNC) {
-                        data.nc += m;
-                        acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
-                        acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
-                        if(acumCanales[r.canal]) acumCanales[r.canal].nc += m;
-                        if(!acumVend[r.vendedor]) acumVend[r.vendedor] = { bruto: 0, nc: 0 };
-                        acumVend[r.vendedor].nc += m;
+                if (r.canal === "E-commerce") {
+                    if (String(r.cliente).toUpperCase().includes("TUPI")) {
+                        if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
+                    } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
+                        if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m; 
                     } else {
-                        data.bruta += m;
-                        if(acumCanales[r.canal]) acumCanales[r.canal].bruto += m;
-                        if(!acumVend[r.vendedor]) acumVend[r.vendedor] = { bruto: 0, nc: 0 };
-                        acumVend[r.vendedor].bruto += m;
+                        if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
                     }
-                    data.neta += m;
+                }
 
-                    if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
-                    if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
-
-                    if (r.canal === "E-commerce") {
-                        if (String(r.cliente).toUpperCase().includes("TUPI")) {
-                            if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
-                        } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
-                            if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m; 
-                        } else {
-                            if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
-                        }
+                if(r.vendedor) {
+                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
+                    if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
+                    if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
+                        dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
                     }
+                }
+            });
 
-                    if(r.vendedor) {
-                        if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { marcas: {}, nc: 0, bruto: 0 };
-                        if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
-                        if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
-                            dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
-                        }
-                    }
-                });
-
-                renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
-            } catch(errMain) { console.error("Error en renderización:", errMain); }
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
         }
 
-        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
             let dMes = METAS_ACTIVAS.diasMes || 22;
             let dTr = dTrActivo || 19.5; 
 
-            let elHabiles = document.getElementById('lbl-txt-habiles');
-            let elTranscurridos = document.getElementById('lbl-txt-transcurridos');
-            if(elHabiles) elHabiles.innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : "Días hábiles del mes";
-            if(elTranscurridos) elTranscurridos.innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : "Transcurridos (Corte)";
+            document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : "Días hábiles";
+            document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : "Transcurridos (Corte)";
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
+            document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
+            document.getElementById('lbl-dias-trans').innerText = dTr.toFixed(1).replace('.', ',');
 
-            let elMeta = document.getElementById('txt-meta-global');
-            let elAvance = document.getElementById('txt-avance-general');
-            let elTotH = document.getElementById('lbl-dias-totales');
-            let elTotTr = document.getElementById('lbl-dias-trans');
-
-            if(elMeta) elMeta.innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
-            if(elAvance) elAvance.innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
-            if(elTotH) elTotH.innerText = dMes.toFixed(1).replace('.', ',');
-            if(elTotTr) elTotTr.innerText = dTr.toFixed(1).replace('.', ',');
-
-            let elB = document.getElementById('tot-bruta');
-            let elNc = document.getElementById('tot-nc');
-            let elN = document.getElementById('tot-neta');
-            if(elB) elB.innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
-            if(elNc) elNc.innerText = '₲ ' + data.nc.toLocaleString('es-PY');
-            if(elN) elN.innerText = '₲ ' + data.neta.toLocaleString('es-PY');
+            document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
+            document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
+            document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
             let esperadoGlobal = Math.round(((METAS_ACTIVAS.global || 0) / dMes) * dTr);
             let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
             let pctGlobalMes = METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(0) + "%" : "0%";
             let proyGlobal = Math.round(dTr > 0 ? (data.neta / dTr) * dMes : 0);
             
-            let elObjBase = document.getElementById('grid-objetivos-base');
-            if(elObjBase) {
-                elObjBase.innerHTML = `
-                    <tr>
-                        <td><strong>Todos los canales</strong></td>
-                        <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
-                        <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
-                        <td class="text-right num-positivo">${pctGlobalHoy}</td>
-                        <td class="text-right">₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}</td>
-                        <td class="text-right">${pctGlobalMes}</td>
-                        <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
-                    </tr>
-                `;
-            }
+            document.getElementById('grid-objetivos-base').innerHTML = `
+                <tr>
+                    <td><strong>Todos los canales</strong></td>
+                    <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
+                    <td class="text-right num-positivo">${pctGlobalHoy}</td>
+                    <td class="text-right">₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}</td>
+                    <td class="text-right">${pctGlobalMes}</td>
+                    <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
+                </tr>
+            `;
 
             let arrDiasGrafico = [], arrValoresGrafico = [], arrFechasOriginales = [];
             let acumuladoDiarioSuma = 0;
@@ -796,19 +843,11 @@
             Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
                 acumuladoDiarioSuma += acumDias[f];
                 hVentasDiarias += `<tr><td class="text-center">${f}</td><td class="text-right">₲ ${acumDias[f].toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
-                
                 arrFechasOriginales.push(f);
-                let fPart = String(f).split(' ')[0];
-                if (fPart.includes('/')) {
-                    let p = fPart.split('/');
-                    arrDiasGrafico.push(p[0] + '/' + p[1]);
-                } else {
-                    arrDiasGrafico.push(fPart);
-                }
+                arrDiasGrafico.push(f.split(' ')[0].substring(0,5)); 
                 arrValoresGrafico.push(acumDias[f]);
             });
-            let elVentasD = document.getElementById('grid-ventas-diarias');
-            if(elVentasD) elVentasD.innerHTML = hVentasDiarias;
+            document.getElementById('grid-ventas-diarias').innerHTML = hVentasDiarias;
 
             let arrCanalesLabels = [];
             let arrCanalesData = [];
@@ -819,62 +858,38 @@
                 let net = acumCanales[c].bruto + acumCanales[c].nc;
                 let esp = Math.round((obj / dMes) * dTr);
                 hCan += `<tr><td><strong>${c}</strong></td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
-                
-                if (net !== 0) { 
-                    arrCanalesLabels.push(c);
-                    arrCanalesData.push(net);
-                }
+                if (net !== 0) { arrCanalesLabels.push(c); arrCanalesData.push(net); }
             });
-            let elCanRes = document.getElementById('grid-canales-resumen');
-            if(elCanRes) elCanRes.innerHTML = hCan;
+            document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
             let hCons = ""; let hEcomV = ""; let hMayV = "";
             let canalesSegmentos = ["Salon", "Online", "E-commerce", "Mayoristas"];
             
             canalesSegmentos.forEach(canal => {
-                let currentTarget = "consumidor";
-                if(canal === "E-commerce") currentTarget = "ecommerce";
-                if(canal === "Mayoristas") currentTarget = "mayoristas";
-
                 let headHtml = `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
-                if(currentTarget === "consumidor") hCons += headHtml;
-                else if(currentTarget === "ecommerce") hEcomV += headHtml;
-                else if(currentTarget === "mayoristas") hMayV += headHtml;
+                if(canal === "E-commerce") hEcomV += headHtml; else if(canal === "Mayoristas") hMayV += headHtml; else hCons += headHtml;
 
                 let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
                 
-                Object.keys(acumVend).sort().forEach(v => {
-                    let esDeCanal = false;
-                    if(canal === "Salon" && v.includes("Salon")) esDeCanal = true;
-                    else if(canal === "Online" && v.includes("Online")) esDeCanal = true;
-                    else if(canal === "E-commerce" && v.includes("E-commerce")) esDeCanal = true;
-                    else if(canal === "Mayoristas" && v.includes("Mayoristas")) esDeCanal = true;
-
-                    if(esDeCanal) {
-                        let net = acumVend[v].bruto + acumVend[v].nc;
-                        let obj = (METAS_ACTIVAS.vendedoresTotales && METAS_ACTIVAS.vendedoresTotales[v]) ? METAS_ACTIVAS.vendedoresTotales[v] : 0;
+                if (acumVendPorCanal[canal]) {
+                    Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
+                        let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
+                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
                         let esp = Math.round((obj / dMes) * dTr);
-                        subNet += net; subNC += acumVend[v].nc; subEsp += esp; subObj += obj;
+                        subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
-                        let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${acumVend[v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
-                        if(currentTarget === "consumidor") hCons += rowHtml;
-                        else if(currentTarget === "ecommerce") hEcomV += rowHtml;
-                        else if(currentTarget === "mayoristas") hMayV += rowHtml;
-                    }
-                });
+                        let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                        if(canal === "E-commerce") hEcomV += rowHtml; else if(canal === "Mayoristas") hMayV += rowHtml; else hCons += rowHtml;
+                    });
+                }
 
                 let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
-                if(currentTarget === "consumidor") hCons += totalHtml;
-                else if(currentTarget === "ecommerce") hEcomV += totalHtml;
-                else if(currentTarget === "mayoristas") hMayV += totalHtml;
+                if(canal === "E-commerce") hEcomV += totalHtml; else if(canal === "Mayoristas") hMayV += totalHtml; else hCons += totalHtml;
             });
 
-            let elGridVendC = document.getElementById('grid-vendedores-consumidor');
-            if(elGridVendC) elGridVendC.innerHTML = hCons;
-            let elGridVendE = document.getElementById('grid-vendedores-ecommerce');
-            if(elGridVendE) elGridVendE.innerHTML = hEcomV;
-            let elGridVendM = document.getElementById('grid-vendedores-mayoristas');
-            if(elGridVendM) elGridVendM.innerHTML = hMayV;
+            document.getElementById('grid-vendedores-consumidor').innerHTML = hCons;
+            document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
+            document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
 
             let hFichasCons = ""; let hFichasEcom = ""; let hFichasMayo = "";
             Object.keys(dataFichasVend).sort().forEach(v => {
@@ -886,18 +901,16 @@
                 if(vData.marcas) {
                     Object.keys(vData.marcas).sort().forEach(m => {
                         let val = vData.marcas[m] || 0;
-                        let mAsig = (METAS_ACTIVAS.vendedorMarca && METAS_ACTIVAS.vendedorMarca[v + "|||" + m]) ? METAS_ACTIVAS.vendedorMarca[v + "|||" + m] : 0;
+                        let mAsig = getMetaVendedorMarca(v, m, METAS_ACTIVAS.vendedorMarca);
                         let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                         let row = `<tr><td>${m}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                         
-                        if (LISTA_MARCAS.includes(m)) { mRows += row; subMV += val; }
-                        else if (LISTA_ARMAS.includes(m)) { aRows += row; subAV += val; }
-                        else { rRows += row; subRV += val; }
+                        if (LISTA_MARCAS.includes(m)) { mRows += row; subMV += val; } else if (LISTA_ARMAS.includes(m)) { aRows += row; subAV += val; } else { rRows += row; subRV += val; }
                     });
                 }
 
                 let net = vData.bruto + vData.nc;
-                let obj = (METAS_ACTIVAS.vendedoresTotales && METAS_ACTIVAS.vendedoresTotales[v]) ? METAS_ACTIVAS.vendedoresTotales[v] : 0;
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales);
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -917,46 +930,38 @@
                             <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                             <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
                             <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Meta Esperada al Corte</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Meta Esperada al Período Filtrado</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                             <tr class="ficha-kpi-normal"><td>% Alcanzado</td><td colspan="3" class="text-right num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td></tr>
                             <tr class="ficha-kpi-normal"><td>Diferencia</td><td colspan="3" class="text-right ${dif > 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Proyección Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((proy/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Proyección</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((proy/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                         </tbody>
                     </table>
                 </div>`;
 
-                let n = v.toUpperCase();
-                if(n.includes("E-COMMERCE") || n.includes("ECOMMERCE") || n.includes("OLMEDO") || n.includes("CASCO")) hFichasEcom += fichaHtml;
-                else if(n.includes("MAYORISTAS") || n.includes("ANTONIO")) hFichasMayo += fichaHtml;
+                if(vData.canal === "E-commerce") hFichasEcom += fichaHtml;
+                else if(vData.canal === "Mayoristas") hFichasMayo += fichaHtml;
                 else hFichasCons += fichaHtml;
             });
             
-            let elFichasC = document.getElementById('grid-fichas-consumidor');
-            if(elFichasC) elFichasC.innerHTML = hFichasCons;
-            let elFichasE = document.getElementById('grid-fichas-ecommerce');
-            if(elFichasE) elFichasE.innerHTML = hFichasEcom;
-            let elFichasM = document.getElementById('grid-fichas-mayoristas');
-            if(elFichasM) elFichasM.innerHTML = hFichasMayo;
+            document.getElementById('grid-fichas-consumidor').innerHTML = hFichasCons;
+            document.getElementById('grid-fichas-ecommerce').innerHTML = hFichasEcom;
+            document.getElementById('grid-fichas-mayoristas').innerHTML = hFichasMayo;
 
-            let elEcoLista = document.getElementById('ecommerce-lista');
-            if(elEcoLista) {
-                elEcoLista.innerHTML = `
-                    <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
-                    <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
-                    <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
-                    <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
-                `;
-            }
+            document.getElementById('ecommerce-lista').innerHTML = `
+                <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
+                <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
+            `;
 
-            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-canal')) document.getElementById('nc-por-canal').innerHTML = hNcC;
-            let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-cliente')) document.getElementById('nc-por-cliente').innerHTML = hNcCl;
-            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); if(document.getElementById('nc-por-fecha')) document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
+            let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
+            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); if(document.getElementById('marcas-lista')) document.getElementById('marcas-lista').innerHTML = hM; if(document.getElementById('marcas-footer')) document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); if(document.getElementById('armas-lista')) document.getElementById('armas-lista').innerHTML = hA; if(document.getElementById('armas-footer')) document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); if(document.getElementById('resto-lista')) document.getElementById('resto-lista').innerHTML = hR; if(document.getElementById('resto-footer')) document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
+            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            // ✅ MÉTODO OFICIAL BÁSICO DE GRÁFICOS (GARANTIZADO)
             try {
                 if (window.chartLine) { window.chartLine.destroy(); }
                 if (window.chartPie) { window.chartPie.destroy(); }
@@ -965,30 +970,18 @@
                 if (elLine && arrDiasGrafico.length > 0) {
                     window.chartLine = new Chart(elLine.getContext('2d'), {
                         type: 'line', 
-                        data: { 
-                            labels: arrDiasGrafico, 
-                            datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] 
-                        },
+                        data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
                         options: { 
-                            responsive: true,
-                            maintainAspectRatio: false,
+                            responsive: true, maintainAspectRatio: false,
                             onClick: (e, elements) => {
                                 if (elements.length > 0) {
-                                    let idx = elements[0].index;
-                                    let fObj = arrFechasOriginales[idx];
-                                    let isoDate = dateToIsoString(fObj);
+                                    let fObj = arrFechasOriginales[elements[0].index];
                                     let filterInput = document.getElementById('select-fecha');
-                                    if(filterInput.value === isoDate) filterInput.value = ""; 
-                                    else filterInput.value = isoDate;
+                                    if(filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
                                     aplicarFiltrosDropdown();
                                 }
                             }
                         }
-                    });
-                } else if (elLine) {
-                    // Si no hay datos, dibujar uno vacío para evitar que quede colgado
-                    window.chartLine = new Chart(elLine.getContext('2d'), {
-                        type: 'line', data: { labels: ['Sin datos'], datasets: [{ label: 'Ventas', data: [0] }] }, options: { responsive: true, maintainAspectRatio: false }
                     });
                 }
 
@@ -996,28 +989,18 @@
                 if (elPie && arrCanalesLabels.length > 0) {
                     window.chartPie = new Chart(elPie.getContext('2d'), {
                         type: 'doughnut', 
-                        data: { 
-                            labels: arrCanalesLabels, 
-                            datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] 
-                        },
+                        data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] },
                         options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: 'right' } },
+                            responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
                             onClick: (e, elements) => {
                                 if (elements.length > 0) {
                                     let c = arrCanalesLabels[elements[0].index];
                                     let filterSelect = document.getElementById('select-canal');
-                                    if(filterSelect.value === c) filterSelect.value = ""; 
-                                    else filterSelect.value = c;
+                                    if(filterSelect.value === c) filterSelect.value = ""; else filterSelect.value = c;
                                     aplicarFiltrosDropdown();
                                 }
                             }
                         }
-                    });
-                } else if (elPie) {
-                    window.chartPie = new Chart(elPie.getContext('2d'), {
-                        type: 'doughnut', data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] }, options: { responsive: true, maintainAspectRatio: false }
                     });
                 }
             } catch (errChart) {
