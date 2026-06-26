@@ -3,77 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Comercial BI - CAMPING 44</title>
+    <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-app: #f4f7f6;
-            --navy-main: #1a2c42;
-            --navy-light: #2c4a6b;
-            --teal-accent: #2b7a78;
-            --red-alert: #e53e3e;
-            --green-success: #38a169;
-            --gray-border: #e2e8f0;
-            --gray-bg: #edf2f7;
-            --text-dark: #2d3748;
-            --text-muted: #718096;
-            --bg-zero: #fed7d7;
-            
-            --green-banner-bg: #def7ec;
-            --green-banner-text: #03543f;
-            --green-banner-border: #84e1bc;
-            --red-banner-bg: #fde8e8;
-            --red-banner-text: #9b1c1c;
-            --red-banner-border: #f8b4b4;
+            --bg-app: #f4f7f6; --navy-main: #1a2c42; --navy-light: #2c4a6b; --teal-accent: #2b7a78;
+            --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
+            --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
+            --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
+            --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
         }
 
         body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); overflow: hidden; }
 
-        /* Barra Lateral Fija */
         .sidebar { width: 260px; background-color: var(--navy-main); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
-        
         .sidebar-logo { width: 90%; max-width: 180px; margin: 0 auto 25px auto; display: block; background-color: white; border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
-
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 15px; margin-bottom: 25px; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
         .menu-item { padding: 12px 15px; margin-bottom: 8px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
         .menu-item.active { background-color: var(--teal-accent); color: white; }
 
-        /* Contenido Principal */
         .main-content { flex-grow: 1; padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
-        /* Filtros BI Modernos */
-        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 180px; }
+        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 160px; }
         .filter-group label { font-size: 11px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        .filter-group select, .filter-group input[type="date"] { padding: 10px 14px; font-size: 13px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
+        .filter-group select, .filter-group input[type="date"] { padding: 9px 12px; font-size: 13px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-group select:focus, .filter-group input[type="date"]:focus { border-color: var(--teal-accent); }
-        
-        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 10px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 9px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 2px;}
         .btn-clear-filters:hover { background-color: #e2e8f0; }
 
-        /* Cabecera Superior */
         .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .sheet-title-main { flex-grow: 1; }
         .sheet-title-main h2 { margin: 0; font-size: 17px; font-weight: 800; color: var(--navy-main); letter-spacing: 0.5px; }
         .sheet-title-main h3 { margin: 5px 0 0 0; font-size: 14px; font-weight: 700; color: var(--teal-accent); }
-        
         .btn-sync { background-color: var(--teal-accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease; }
         .btn-sync:hover { background-color: #236162; transform: translateY(-1px); }
         .time-box-table { border-collapse: collapse; font-size: 12px; background: white; }
         .time-box-table td { padding: 5px 12px; border: 1px solid var(--gray-border); }
 
-        /* Banner de Notificaciones */
         #status-banner { display: block; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 13px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
         .banner-error { background-color: var(--red-banner-bg); color: var(--red-banner-text); border-color: var(--red-banner-border); }
 
-        /* Pestañas */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Estilos Tablas */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .excel-title { font-size: 13px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         
@@ -85,7 +61,6 @@
         table.excel-table tr.footer-segmento td { background-color: #a0aec0 !important; color: white !important; font-weight: bold; }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* Fichas BI Desglosadas */
         .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 25px; margin-bottom: 15px; margin-top: 20px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 3px 6px rgba(0,0,0,0.06); font-size: 11px; border-radius: 4px; overflow: hidden; }
         .ficha-header { background: var(--navy-main); color: white; padding: 10px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
@@ -108,7 +83,6 @@
         .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
 
-        /* Loader */
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -118,14 +92,13 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Entorno e Información Cruzada BI...</div>
-        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;">Aplicando fórmulas dinámicas de BI...</div>
+        <div>Sincronizando Base de Datos YTD...</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-top:5px;">Cruzando Metas Históricas y Transacciones de Odoo...</div>
     </div>
 
     <div class="sidebar">
         <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" onerror="this.style.display='none'">
-        
-        <h2>CAMPING 44 - BI</h2>
+        <h2>CAMPING 44 - BI YTD</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
         <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 E-Commerce</div>
@@ -138,6 +111,18 @@
         
         <div class="filter-panel">
             <div class="filter-group">
+                <label>📆 Mes de Análisis</label>
+                <select id="select-mes" onchange="aplicarFiltrosDropdown()">
+                    <option value="">-- Año Completo (YTD) --</option>
+                    <option value="1">Enero 2026</option>
+                    <option value="2">Febrero 2026</option>
+                    <option value="3">Marzo 2026</option>
+                    <option value="4">Abril 2026</option>
+                    <option value="5">Mayo 2026</option>
+                    <option value="6" selected>Junio 2026 (Actual)</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label>👤 Vendedor</label>
                 <select id="select-vendedor" onchange="aplicarFiltrosDropdown()"></select>
             </div>
@@ -146,14 +131,10 @@
                 <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
             </div>
             <div class="filter-group">
-                <label>🎯 Marca</label>
-                <select id="select-marca" onchange="aplicarFiltrosDropdown()"></select>
+                <label>📅 Filtrar Día Exacto</label>
+                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" title="Aislar y calcular progreso hasta una fecha puntual">
             </div>
-            <div class="filter-group">
-                <label>📅 Máquina del Tiempo</label>
-                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" title="Calcula el progreso del mes hasta la fecha que elijas">
-            </div>
-            <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()">❌ Limpiar Filtros</button>
+            <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()">❌ Limpiar</button>
         </div>
 
         <div id="status-banner" class="banner-success">Sincronizando canal de datos en vivo...</div>
@@ -165,8 +146,8 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;">Transcurridos</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;">Días hábiles del mes</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;">Días Transcurridos (Corte)</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
                 </table>
                 <button class="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -261,7 +242,7 @@
 
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
-                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE (TUPI / PORTER)</div>
+                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
                 <table class="excel-table" style="margin-bottom: 25px;">
                     <thead>
                         <tr style="background:var(--navy-main); color:white;">
@@ -389,21 +370,70 @@
 
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { vendedor: "", canal: "", fecha: "", marca: "" }; // SE AGREGÓ MARCA AL ESTADO
+        let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "" };
 
-        let METAS_DINAMICAS = {
+        // BASE DE DATOS INTERNA: Histórico YTD
+        const HISTORICO_METAS = {
+            "1": { diasMes: 23.5, global: 2200000000, 
+                   canales: { "Mayoristas": 970000000, "Online": 615000000, "Salon": 615000000, "E-commerce": 0, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - E-commerce": 485000000, "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Sergio Daniel Ocampos Román - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000 }
+            },
+            "2": { diasMes: 22.0, global: 2200000000, 
+                   canales: { "Mayoristas": 970000000, "Online": 615000000, "Salon": 615000000, "E-commerce": 0, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - E-commerce": 485000000, "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Sergio Daniel Ocampos Román - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000 }
+            },
+            "3": { diasMes: 23.0, global: 2455000000, 
+                   canales: { "Mayoristas": 1370000000, "Online": 615000000, "Salon": 470000000, "E-commerce": 0, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - E-commerce": 685000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000 }
+            },
+            "4": { diasMes: 22.0, global: 2455000000, 
+                   canales: { "Mayoristas": 1370000000, "Online": 615000000, "Salon": 470000000, "E-commerce": 0, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - E-commerce": 270000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000 }
+            },
+            "5": { diasMes: 20.5, global: 2300000000, 
+                   canales: { "Mayoristas": 1100000000, "Online": 685000000, "Salon": 395000000, "E-commerce": 120000000, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000 }
+            }
+        };
+
+        // Memoria para el mes actual que se pisa con la pestaña CONFIG en vivo
+        let METAS_MES_ACTUAL = {
             global: 2310000000, diasMes: 22.0, diasTranscurridos: 19.5,
-            canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 50000000 },
+            canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
             vendedoresTotales: {}, vendedorMarca: {}
         };
 
         const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
         const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
+        // ✅ TRADUCTOR UNIVERSAL DE FECHAS (Soporta Odoo Export, Google Sheets Export, y Formatos Combinados)
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
-            let p = dStr.split('/');
-            if(p.length === 3) return new Date(p[2], parseInt(p[1])-1, parseInt(p[0])).getTime();
+            let datePart = dStr.split(' ')[0]; // Descarta la hora si existe
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                if (p[2] && p[2].length === 4) return new Date(p[2], parseInt(p[1])-1, parseInt(p[0])).getTime(); // DD/MM/YYYY
+                if (p[0] && p[0].length === 4) return new Date(p[0], parseInt(p[1])-1, parseInt(p[2])).getTime(); // YYYY/MM/DD
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                if (p[0] && p[0].length === 4) return new Date(p[0], parseInt(p[1])-1, parseInt(p[2])).getTime(); // YYYY-MM-DD
+                if (p[2] && p[2].length === 4) return new Date(p[2], parseInt(p[1])-1, parseInt(p[0])).getTime(); // DD-MM-YYYY
+            }
+            return 0;
+        }
+
+        function getMonthFromDate(dStr) {
+            if(!dStr) return 0;
+            let datePart = dStr.split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                if (p[2] && p[2].length === 4) return parseInt(p[1]); 
+                if (p[0] && p[0].length === 4) return parseInt(p[1]); 
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                if (p[0] && p[0].length === 4) return parseInt(p[1]); 
+                if (p[2] && p[2].length === 4) return parseInt(p[1]); 
+            }
             return 0;
         }
 
@@ -414,8 +444,11 @@
         }
 
         function dateToIsoString(dStr) {
-            let p = dStr.split('/');
-            if(p.length === 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            let datePart = dStr.split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                if (p[2] && p[2].length === 4) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            }
             return "";
         }
 
@@ -452,7 +485,6 @@
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
                 const [resConfig, resData] = await Promise.all([fetch(urlConfig), fetch(urlData)]);
-                
                 if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
 
                 const txtConfig = await resConfig.text();
@@ -461,11 +493,11 @@
                 let filasConfig = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim()));
                 let filasData = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim()));
 
-                procesarMetasConfig(filasConfig);
+                procesarMetasConfigActuales(filasConfig);
                 procesarVentasData(filasData);
 
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado en tiempo real. Cruzando metas e información transaccional correctamente a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos anual conectada correctamente a las: ${horaStr}`);
             } catch (err) {
                 console.error("Fallo estructural:", err);
                 actualizarBannerEstado('error', `⚠️ Error de red. Intentando reconectar con Google Sheets...`);
@@ -473,21 +505,21 @@
             }
         }
 
-        function procesarMetasConfig(filas) {
+        function procesarMetasConfigActuales(filas) {
             filas.forEach((row, idx) => {
-                if (row[0] === "Días Hábiles del Mes:") METAS_DINAMICAS.diasMes = parseFloat(String(row[1]).replace(',', '.')) || 22.0;
-                if (row[0] === "Días Hábiles Transcurridos:") METAS_DINAMICAS.diasTranscurridos = parseFloat(String(row[1]).replace(',', '.')) || 19.5;
-                if (row[3] && idx === 3) METAS_DINAMICAS.global = handleNum(row[3]) || 2310000000;
+                if (row[0] === "Días Hábiles del Mes:") METAS_MES_ACTUAL.diasMes = parseFloat(String(row[1]).replace(',', '.')) || 22.0;
+                if (row[0] === "Días Hábiles Transcurridos:") METAS_MES_ACTUAL.diasTranscurridos = parseFloat(String(row[1]).replace(',', '.')) || 19.5;
+                if (row[3] && idx === 3) METAS_MES_ACTUAL.global = handleNum(row[3]) || 2310000000;
 
                 if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
-                    METAS_DINAMICAS.canales[row[5]] = handleNum(row[6]);
+                    METAS_MES_ACTUAL.canales[row[5]] = handleNum(row[6]);
                 }
                 if (row[8] && idx >= 3 && row[8] !== "Vendedor") {
-                    METAS_DINAMICAS.vendedoresTotales[row[8]] = handleNum(row[9]);
+                    METAS_MES_ACTUAL.vendedoresTotales[row[8]] = handleNum(row[9]);
                 }
             });
 
-            METAS_DINAMICAS.vendedorMarca = {};
+            METAS_MES_ACTUAL.vendedorMarca = {};
             if (filas[2]) {
                 for (let col = 11; col < filas[2].length; col += 3) {
                     let vend = filas[2][col];
@@ -496,7 +528,7 @@
                             let marc = filas[r][col];
                             let metaVal = filas[r][col+1];
                             if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
-                                METAS_DINAMICAS.vendedorMarca[vend + "|||" + marc] = handleNum(metaVal);
+                                METAS_MES_ACTUAL.vendedorMarca[vend + "|||" + marc] = handleNum(metaVal);
                             }
                         }
                     }
@@ -509,7 +541,6 @@
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let fechasSet = new Set();
-            let marcasSet = new Set(); // Novedad: Recolector de marcas
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
@@ -517,28 +548,27 @@
 
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
-                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
+                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30]),
+                    mesIdx: getMonthFromDate(r[1])
                 };
 
                 vendedoresSet.add(d.vendedor);
                 canalesSet.add(d.canal);
                 fechasSet.add(d.fecha);
-                if(d.marcaFinal) marcasSet.add(d.marcaFinal);
 
                 lineasDeDatosGlobales.push(d);
             }
 
             fechasGlobalesOrdenadas = Array.from(fechasSet).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
 
-            popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
+            popularDropdownFiltros(vendedoresSet, canalesSet);
             filtrarYRenderizarTodo();
             document.getElementById('loader').style.display = 'none';
         }
 
-        function popularDropdownFiltros(vendedores, canales, marcas) {
+        function popularDropdownFiltros(vendedores, canales) {
             let selV = document.getElementById('select-vendedor');
             let selC = document.getElementById('select-canal');
-            let selM = document.getElementById('select-marca'); // Novedad
 
             let optV = `<option value="">-- Todos los Vendedores --</option>`;
             Array.from(vendedores).sort().forEach(v => optV += `<option value="${v}">${v}</option>`);
@@ -547,68 +577,65 @@
             let optC = `<option value="">-- Todos los Canales --</option>`;
             Array.from(canales).sort().forEach(c => optC += `<option value="${c}">${c}</option>`);
             if(selC) selC.innerHTML = optC;
-
-            let optM = `<option value="">-- Todas las Marcas --</option>`;
-            Array.from(marcas).sort().forEach(m => {
-                if(m && !m.includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
-            });
-            if(selM) selM.innerHTML = optM;
         }
 
         function aplicarFiltrosDropdown() {
+            filtrosActivos.mes = document.getElementById('select-mes').value;
             filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
             filtrosActivos.canal = document.getElementById('select-canal').value;
-            filtrosActivos.fecha = document.getElementById('select-fecha').value;
-            filtrosActivos.marca = document.getElementById('select-marca').value; // Novedad
+            filtrosActivos.fecha = document.getElementById('select-fecha').value; 
             filtrarYRenderizarTodo();
         }
 
         function limpiarTodosLosFiltros() {
-            filtrosActivos = { vendedor: "", canal: "", fecha: "", marca: "" };
+            filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "" };
+            if(document.getElementById('select-mes')) document.getElementById('select-mes').value = "6";
             if(document.getElementById('select-vendedor')) document.getElementById('select-vendedor').value = "";
             if(document.getElementById('select-canal')) document.getElementById('select-canal').value = "";
             if(document.getElementById('select-fecha')) document.getElementById('select-fecha').value = "";
-            if(document.getElementById('select-marca')) document.getElementById('select-marca').value = "";
             filtrarYRenderizarTodo();
         }
 
+        function obtenerMetasDelMes() {
+            let mesSelec = filtrosActivos.mes;
+            if(!mesSelec || mesSelec === "6") return METAS_MES_ACTUAL; 
+            if(HISTORICO_METAS[mesSelec]) return HISTORICO_METAS[mesSelec]; 
+            return METAS_MES_ACTUAL; 
+        }
+
         function filtrarYRenderizarTodo() {
+            let METAS_ACTIVAS = obtenerMetasDelMes();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVend = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let dataFichasVend = {};
 
-            Object.keys(METAS_DINAMICAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 });
+            Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 });
 
-            let diasTranscurridosActivos = METAS_DINAMICAS.diasTranscurridos; 
+            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
             let filtroTime = 0;
             
+            if (filtrosActivos.mes && filtrosActivos.mes !== "6" && !filtrosActivos.fecha) {
+                diasTranscurridosActivos = METAS_ACTIVAS.diasMes;
+            }
+
             if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
-                let diasPasados = 0;
+                let diasPasadosEnElMes = 0;
                 fechasGlobalesOrdenadas.forEach(f => {
-                    if (parseDateToTime(f) <= filtroTime) diasPasados++;
+                    let t = parseDateToTime(f);
+                    let m = getMonthFromDate(f);
+                    if (t <= filtroTime && m === parseInt(filtrosActivos.mes || "6")) diasPasadosEnElMes++;
                 });
-                
-                if (diasPasados > 0) {
-                    if (diasPasados === fechasGlobalesOrdenadas.length) {
-                        diasTranscurridosActivos = METAS_DINAMICAS.diasTranscurridos;
-                    } else {
-                        diasTranscurridosActivos = diasPasados;
-                    }
-                } else {
-                    diasTranscurridosActivos = 1;
-                }
+                diasTranscurridosActivos = diasPasadosEnElMes > 0 ? diasPasadosEnElMes : 1;
             }
 
             lineasDeDatosGlobales.forEach(r => {
+                if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes)) return;
+
                 if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
                 if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
-                if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return; // Novedad: Exclusión por marca
-                
-                if (filtroTime > 0) {
-                    if (parseDateToTime(r.fecha) > filtroTime) return;
-                }
+                if (filtroTime > 0 && parseDateToTime(r.fecha) > filtroTime) return;
 
                 let esNC = (r.documento === "Nota de Crédito");
                 let m = r.totalGs;
@@ -648,18 +675,18 @@
                 }
             });
 
-            renderizarEstructuraVisual(data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
         }
 
         let chartLine = null;
         let chartPie = null;
 
-        function renderizarEstructuraVisual(data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
-            let dMes = METAS_DINAMICAS.diasMes;
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVend, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
+            let dMes = METAS_ACTIVAS.diasMes;
             let dTr = dTrActivo; 
 
-            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL MES: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${METAS_DINAMICAS.global.toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${((data.neta / METAS_DINAMICAS.global) * 100).toFixed(1)}%`;
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL MES: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${METAS_ACTIVAS.global.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1)}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             document.getElementById('lbl-dias-trans').innerText = dTr.toFixed(1).replace('.', ',');
 
@@ -667,9 +694,9 @@
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
-            let esperadoGlobal = Math.round((METAS_DINAMICAS.global / dMes) * dTr);
+            let esperadoGlobal = Math.round((METAS_ACTIVAS.global / dMes) * dTr);
             let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
-            let pctGlobalMes = ((data.neta / METAS_DINAMICAS.global) * 100).toFixed(0) + "%";
+            let pctGlobalMes = ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(0) + "%";
             let proyGlobal = Math.round((data.neta / dTr) * dMes);
             
             document.getElementById('grid-objetivos-base').innerHTML = `
@@ -678,7 +705,7 @@
                     <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
                     <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
                     <td class="text-right num-positivo">${pctGlobalHoy}</td>
-                    <td class="text-right">₲ ${METAS_DINAMICAS.global.toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${METAS_ACTIVAS.global.toLocaleString('es-PY')}</td>
                     <td class="text-right">${pctGlobalMes}</td>
                     <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
                 </tr>
@@ -690,7 +717,6 @@
             Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
                 acumuladoDiarioSuma += acumDias[f];
                 hVentasDiarias += `<tr><td class="text-center">${f}</td><td class="text-right">₲ ${acumDias[f].toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
-                
                 arrFechasOriginales.push(f);
                 arrDiasGrafico.push(f.split('/').slice(0,2).join('/')); 
                 arrValoresGrafico.push(acumDias[f]);
@@ -702,7 +728,7 @@
 
             let hCan = "";
             Object.keys(acumCanales).forEach(c => {
-                let obj = METAS_DINAMICAS.canales[c] || 0;
+                let obj = METAS_ACTIVAS.canales[c] || 0;
                 let net = acumCanales[c].bruto + acumCanales[c].nc;
                 let esp = Math.round((obj / dMes) * dTr);
                 hCan += `<tr><td><strong>${c}</strong></td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
@@ -738,7 +764,7 @@
 
                     if(esDeCanal) {
                         let net = acumVend[v].bruto + acumVend[v].nc;
-                        let obj = METAS_DINAMICAS.vendedoresTotales[v] || 0;
+                        let obj = METAS_ACTIVAS.vendedoresTotales[v] || 0;
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVend[v].nc; subEsp += esp; subObj += obj;
 
@@ -767,7 +793,7 @@
 
                 Object.keys(vData.marcas).sort().forEach(m => {
                     let val = vData.marcas[m];
-                    let mAsig = METAS_DINAMICAS.vendedorMarca[v + "|||" + m] || 0;
+                    let mAsig = (METAS_ACTIVAS.vendedorMarca && METAS_ACTIVAS.vendedorMarca[v + "|||" + m]) ? METAS_ACTIVAS.vendedorMarca[v + "|||" + m] : 0;
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                     let row = `<tr><td>${m}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
@@ -777,7 +803,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = METAS_DINAMICAS.vendedoresTotales[v] || 0;
+                let obj = METAS_ACTIVAS.vendedoresTotales[v] || 0;
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -797,10 +823,10 @@
                             <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                             <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
                             <tr class="ficha-kpi-row"><td>Notas de Crédito (Dev.)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Meta Esperada a Fecha Filtrada</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Meta Esperada al Corte</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                             <tr class="ficha-kpi-normal"><td>% Alcanzado</td><td colspan="3" class="text-right num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td></tr>
                             <tr class="ficha-kpi-normal"><td>Diferencia</td><td colspan="3" class="text-right ${dif > 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Proy. Venta Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((proy/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
+                            <tr class="ficha-kpi-normal"><td>Proyección Fin de Mes</td><td colspan="2" class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((proy/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                         </tbody>
                     </table>
                 </div>`;
