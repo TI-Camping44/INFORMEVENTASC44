@@ -32,18 +32,7 @@
         /* Barra Lateral Fija */
         .sidebar { width: 260px; background-color: var(--navy-main); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
         
-        /* DISEÑO DE LOGO CORREGIDO Y PREMIUM */
-        .sidebar-logo { 
-            width: 90%; 
-            max-width: 180px; 
-            margin: 0 auto 25px auto; 
-            display: block; 
-            background-color: white; 
-            border-radius: 12px; 
-            padding: 10px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-            object-fit: contain; 
-        }
+        .sidebar-logo { width: 90%; max-width: 180px; margin: 0 auto 25px auto; display: block; background-color: white; border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
 
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 15px; margin-bottom: 25px; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
         .menu-item { padding: 12px 15px; margin-bottom: 8px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease; user-select: none; }
@@ -55,7 +44,7 @@
 
         /* Filtros BI Modernos */
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px 25px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 200px; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 180px; }
         .filter-group label { font-size: 11px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { padding: 10px 14px; font-size: 13px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-group select:focus, .filter-group input[type="date"]:focus { border-color: var(--teal-accent); }
@@ -84,7 +73,7 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Tablas */
+        /* Estilos Tablas */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .excel-title { font-size: 13px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         
@@ -129,7 +118,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Base de Datos Transaccional...</div>
+        <div>Sincronizando Entorno e Información Cruzada BI...</div>
         <div style="font-size:13px; color:var(--text-muted); margin-top:5px;">Aplicando fórmulas dinámicas de BI...</div>
     </div>
 
@@ -157,7 +146,11 @@
                 <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
             </div>
             <div class="filter-group">
-                <label>📅 Acumulado hasta (Máquina del Tiempo)</label>
+                <label>🎯 Marca</label>
+                <select id="select-marca" onchange="aplicarFiltrosDropdown()"></select>
+            </div>
+            <div class="filter-group">
+                <label>📅 Máquina del Tiempo</label>
                 <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" title="Calcula el progreso del mes hasta la fecha que elijas">
             </div>
             <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()">❌ Limpiar Filtros</button>
@@ -200,11 +193,11 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 HAZ CLIC EN UN PUNTO PARA FILTRAR O DESELECCIONAR UNA FECHA</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 HAZ CLIC EN UN PUNTO PARA VIAJAR EN EL TIEMPO A ESE DÍA</span>
                     <canvas id="lineChart" height="95"></canvas>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 HAZ CLIC EN UNA PORCIÓN PARA FILTRAR O DESELECCIONAR UN CANAL</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 HAZ CLIC EN UNA PORCIÓN PARA FILTRAR EL CANAL</span>
                     <canvas id="pieChart"></canvas>
                 </div>
             </div>
@@ -396,7 +389,7 @@
 
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { vendedor: "", canal: "", fecha: "" };
+        let filtrosActivos = { vendedor: "", canal: "", fecha: "", marca: "" }; // SE AGREGÓ MARCA AL ESTADO
 
         let METAS_DINAMICAS = {
             global: 2310000000, diasMes: 22.0, diasTranscurridos: 19.5,
@@ -516,6 +509,7 @@
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let fechasSet = new Set();
+            let marcasSet = new Set(); // Novedad: Recolector de marcas
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
@@ -529,20 +523,22 @@
                 vendedoresSet.add(d.vendedor);
                 canalesSet.add(d.canal);
                 fechasSet.add(d.fecha);
+                if(d.marcaFinal) marcasSet.add(d.marcaFinal);
 
                 lineasDeDatosGlobales.push(d);
             }
 
             fechasGlobalesOrdenadas = Array.from(fechasSet).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
 
-            popularDropdownFiltros(vendedoresSet, canalesSet);
+            popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
             filtrarYRenderizarTodo();
             document.getElementById('loader').style.display = 'none';
         }
 
-        function popularDropdownFiltros(vendedores, canales) {
+        function popularDropdownFiltros(vendedores, canales, marcas) {
             let selV = document.getElementById('select-vendedor');
             let selC = document.getElementById('select-canal');
+            let selM = document.getElementById('select-marca'); // Novedad
 
             let optV = `<option value="">-- Todos los Vendedores --</option>`;
             Array.from(vendedores).sort().forEach(v => optV += `<option value="${v}">${v}</option>`);
@@ -551,20 +547,28 @@
             let optC = `<option value="">-- Todos los Canales --</option>`;
             Array.from(canales).sort().forEach(c => optC += `<option value="${c}">${c}</option>`);
             if(selC) selC.innerHTML = optC;
+
+            let optM = `<option value="">-- Todas las Marcas --</option>`;
+            Array.from(marcas).sort().forEach(m => {
+                if(m && !m.includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
+            });
+            if(selM) selM.innerHTML = optM;
         }
 
         function aplicarFiltrosDropdown() {
             filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
             filtrosActivos.canal = document.getElementById('select-canal').value;
             filtrosActivos.fecha = document.getElementById('select-fecha').value;
+            filtrosActivos.marca = document.getElementById('select-marca').value; // Novedad
             filtrarYRenderizarTodo();
         }
 
         function limpiarTodosLosFiltros() {
-            filtrosActivos = { vendedor: "", canal: "", fecha: "" };
+            filtrosActivos = { vendedor: "", canal: "", fecha: "", marca: "" };
             if(document.getElementById('select-vendedor')) document.getElementById('select-vendedor').value = "";
             if(document.getElementById('select-canal')) document.getElementById('select-canal').value = "";
             if(document.getElementById('select-fecha')) document.getElementById('select-fecha').value = "";
+            if(document.getElementById('select-marca')) document.getElementById('select-marca').value = "";
             filtrarYRenderizarTodo();
         }
 
@@ -600,6 +604,7 @@
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
                 if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
+                if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return; // Novedad: Exclusión por marca
                 
                 if (filtroTime > 0) {
                     if (parseDateToTime(r.fecha) > filtroTime) return;
@@ -702,7 +707,7 @@
                 let esp = Math.round((obj / dMes) * dTr);
                 hCan += `<tr><td><strong>${c}</strong></td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                 
-                if (net !== 0) { // Mostrar incluso negativos para no dejar en blanco
+                if (net > 0) { 
                     arrCanalesLabels.push(c);
                     arrCanalesData.push(net);
                 }
@@ -824,7 +829,6 @@
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); if(document.getElementById('armas-lista')) document.getElementById('armas-lista').innerHTML = hA; if(document.getElementById('armas-footer')) document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); if(document.getElementById('resto-lista')) document.getElementById('resto-lista').innerHTML = hR; if(document.getElementById('resto-footer')) document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            // ✅ GRÁFICOS CON EFECTO TOGGLE (Clic = Filtrar, Clic de nuevo = Limpiar)
             try {
                 if(chartLine) chartLine.destroy();
                 if(chartPie) chartPie.destroy();
@@ -842,12 +846,9 @@
                                     let isoDate = dateToIsoString(fObj);
                                     let filterInput = document.getElementById('select-fecha');
                                     
-                                    // Efecto Toggle (Prende/Apaga)
-                                    if(filterInput.value === isoDate) {
-                                        filterInput.value = ""; 
-                                    } else {
-                                        filterInput.value = isoDate;
-                                    }
+                                    if(filterInput.value === isoDate) filterInput.value = ""; 
+                                    else filterInput.value = isoDate;
+                                    
                                     aplicarFiltrosDropdown();
                                 }
                             }
@@ -870,12 +871,9 @@
                                     let c = arrCanalesLabels[elements[0].index];
                                     let filterSelect = document.getElementById('select-canal');
                                     
-                                    // Efecto Toggle (Prende/Apaga)
-                                    if(filterSelect.value === c) {
-                                        filterSelect.value = ""; 
-                                    } else {
-                                        filterSelect.value = c;
-                                    }
+                                    if(filterSelect.value === c) filterSelect.value = ""; 
+                                    else filterSelect.value = c;
+                                    
                                     aplicarFiltrosDropdown();
                                 }
                             }
