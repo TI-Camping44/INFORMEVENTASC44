@@ -50,10 +50,11 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        /* Contenedor responsivo para las tablas */
+        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .excel-title { font-size: 13px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         
-        table.excel-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table.excel-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; } /* Ancho mínimo para que no se aplaste en celular */
         table.excel-table th { background: var(--gray-bg); color: var(--text-dark); font-weight: bold; padding: 8px 10px; border: 1px solid var(--gray-border); text-align: left; }
         table.excel-table td { padding: 8px 10px; border: 1px solid var(--gray-border); }
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; }
@@ -82,10 +83,48 @@
         .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 25px; }
         .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
 
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ========================================================
+           ADAPTACIÓN RESPONSIVA (MÓVIL / TABLET)
+           ======================================================== */
+        @media (max-width: 1024px) {
+            .grid-1-2 { grid-template-columns: 1fr; }
+            .charts-row { grid-template-columns: 1fr; }
+            .three-column-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            
+            /* Menú superior deslizable en móviles */
+            .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px 15px; overflow-x: auto; white-space: nowrap; align-items: center; z-index: 1000; position: sticky; top: 0; box-sizing: border-box; }
+            .sidebar-logo { display: none; } 
+            .sidebar h2 { display: none; }
+            .menu-item { display: inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 8px 12px; font-size: 12px; }
+            
+            .main-content { padding: 15px 10px; overflow-y: visible; }
+            
+            /* Apilamiento de Filtros y Cabecera */
+            .filter-panel { flex-direction: column; align-items: stretch; padding: 15px; }
+            .filter-group { min-width: 100%; }
+            .btn-clear-filters, #btn-share-vendor { width: 100%; margin-top: 5px; }
+            
+            .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; gap: 15px; padding: 15px; }
+            .sheet-header-box > div:last-child { flex-direction: column; align-items: stretch; gap: 10px; }
+            .time-box-table { width: 100%; }
+            .btn-sync { justify-content: center; width: 100%; }
+            
+            .excel-container { padding: 10px; overflow-x: auto; }
+            .excel-title { margin: -10px -10px 10px -10px; }
+            
+            .fichas-grid { grid-template-columns: 1fr; }
+            .ficha-vendedor { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -193,7 +232,7 @@
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:25px;">
+            <div class="grid-1-2">
                 <div class="excel-container">
                     <div class="excel-title">📅 RESUMEN DE VENTAS POR DÍA</div>
                     <table class="excel-table">
@@ -309,21 +348,21 @@
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
                 <div class="three-column-grid">
-                    <div>
+                    <div class="excel-container">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Por Canal de Distribución</span>
                         <table class="excel-table">
                             <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-canal"></tbody>
                         </table>
                     </div>
-                    <div>
+                    <div class="excel-container">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Top 5 Clientes Afectados</span>
                         <table class="excel-table">
                             <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-cliente"></tbody>
                         </table>
                     </div>
-                    <div>
+                    <div class="excel-container">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:5px;">Cronología Completa</span>
                         <table class="excel-table">
                             <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
@@ -378,7 +417,7 @@
         function copiarLinkVendedor() {
             let v = document.getElementById('select-vendedor').value;
             if (!v) {
-                alert("⚠️ Primero seleccioná un vendedor en el menú de la izquierda.");
+                alert("⚠️ Primero seleccioná un vendedor en el menú desplegable.");
                 return;
             }
             let urlObj = new URL(window.location.href);
@@ -480,22 +519,29 @@
             return "";
         }
 
-        // ✅ REPARADO AL 100%: RESTAURADO EL FILTRO DE NÚMEROS LIMPIOS QUE EVITA EL 0% DE LOS VENDEDORES
         function handleNum(val) {
-            if (val === undefined || val === null || val === "") return 0;
+            if (!val) return 0;
             let str = String(val).replace(/\./g, ''); 
             if (str.includes(',')) str = str.split(',')[0]; 
-            let limpio = str.replace(/[^0-9-]/g, ''); 
-            return parseInt(limpio, 10) || 0;
+            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
         }
 
-        // ✅ BUSCADOR INTELIGENTE PARA VENDEDORES Y MARCAS
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
+        }
+
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
             let nameUpper = nombreOdoo.toUpperCase();
             for (let k in diccionarioMetas) {
-                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) return diccionarioMetas[k];
+                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) {
+                    return diccionarioMetas[k];
+                }
             }
             return 0;
         }
@@ -515,30 +561,12 @@
             return 0;
         }
 
-        function actualizarBannerEstado(tipo, mensaje) {
-            let banner = document.getElementById('status-banner');
-            if (banner) {
-                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
-                banner.innerHTML = mensaje;
-            }
-        }
-
         function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
             descargarDatosCruzadosBI();
         }
 
         async function descargarDatosCruzadosBI() {
-            let escapeTimeout = setTimeout(() => {
-                let loader = document.getElementById('loader');
-                if (loader && loader.style.display !== 'none') {
-                    console.warn("Retardo de red. Levantando motor local...");
-                    filtrarYRenderizarTodo();
-                    loader.style.display = 'none';
-                    actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
-                }
-            }, 3000);
-
             try {
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
@@ -552,28 +580,22 @@
                 let filasConfig = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasData = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
-                clearTimeout(escapeTimeout);
-
                 procesarMetasConfigActuales(filasConfig);
                 procesarVentasData(filasData);
 
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos anual conectada correctamente a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
                 document.getElementById('loader').style.display = 'none';
             } catch (err) {
-                clearTimeout(escapeTimeout);
+                console.error(err);
                 filtrarYRenderizarTodo();
-                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos. Sistema corriendo en modo seguro.`);
+                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
                 document.getElementById('loader').style.display = 'none';
             }
         }
 
         function procesarMetasConfigActuales(filas) {
             try {
-                METAS_JUNIO_LIVE.canales = {};
-                METAS_JUNIO_LIVE.vendedoresTotales = {};
-                METAS_JUNIO_LIVE.vendedorMarca = {};
-
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return;
                     if (row[0] === "Días Hábiles del Mes:") {
@@ -594,6 +616,7 @@
                     }
                 });
 
+                METAS_JUNIO_LIVE.vendedorMarca = {};
                 if (filas[2]) {
                     for (let col = 11; col < filas[2].length; col += 3) {
                         let vend = filas[2][col];
@@ -711,7 +734,6 @@
             filtrarYRenderizarTodo();
         }
 
-        // ✅ REPARADO: SUMATORIA LIMPIA DE AÑO COMPLETO (YTD) 
         function obtenerMetasEstructuraBI() {
             if (filtrosActivos.mes === "") { 
                 let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
@@ -809,8 +831,8 @@
             let dMes = METAS_ACTIVAS.diasMes || 22;
             let dTr = dTrActivo || 19.5; 
 
-            document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : "Días hábiles";
-            document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : "Transcurridos (Corte)";
+            document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles");
+            document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
@@ -962,49 +984,45 @@
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            try {
-                if (window.chartLine) { window.chartLine.destroy(); }
-                if (window.chartPie) { window.chartPie.destroy(); }
+            if (window.chartLine) { window.chartLine.destroy(); }
+            if (window.chartPie) { window.chartPie.destroy(); }
 
-                let elLine = document.getElementById('lineChart');
-                if (elLine && arrDiasGrafico.length > 0) {
-                    window.chartLine = new Chart(elLine.getContext('2d'), {
-                        type: 'line', 
-                        data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
-                        options: { 
-                            responsive: true, maintainAspectRatio: false,
-                            onClick: (e, elements) => {
-                                if (elements.length > 0) {
-                                    let fObj = arrFechasOriginales[elements[0].index];
-                                    let filterInput = document.getElementById('select-fecha');
-                                    if(filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
-                                    aplicarFiltrosDropdown();
-                                }
+            let elLine = document.getElementById('lineChart');
+            if (elLine && arrDiasGrafico.length > 0) {
+                window.chartLine = new Chart(elLine.getContext('2d'), {
+                    type: 'line', 
+                    data: { labels: arrDiasGrafico, datasets: [{ label: 'Ventas Diarias (₲)', data: arrValoresGrafico, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false,
+                        onClick: (e, elements) => {
+                            if (elements.length > 0) {
+                                let fObj = arrFechasOriginales[elements[0].index];
+                                let filterInput = document.getElementById('select-fecha');
+                                if(filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
+                                aplicarFiltrosDropdown();
                             }
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                let elPie = document.getElementById('pieChart');
-                if (elPie && arrCanalesLabels.length > 0) {
-                    window.chartPie = new Chart(elPie.getContext('2d'), {
-                        type: 'doughnut', 
-                        data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] },
-                        options: { 
-                            responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
-                            onClick: (e, elements) => {
-                                if (elements.length > 0) {
-                                    let c = arrCanalesLabels[elements[0].index];
-                                    let filterSelect = document.getElementById('select-canal');
-                                    if(filterSelect.value === c) filterSelect.value = ""; else filterSelect.value = c;
-                                    aplicarFiltrosDropdown();
-                                }
+            let elPie = document.getElementById('pieChart');
+            if (elPie && arrCanalesLabels.length > 0) {
+                window.chartPie = new Chart(elPie.getContext('2d'), {
+                    type: 'doughnut', 
+                    data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
+                        onClick: (e, elements) => {
+                            if (elements.length > 0) {
+                                let c = arrCanalesLabels[elements[0].index];
+                                let filterSelect = document.getElementById('select-canal');
+                                if(filterSelect.value === c) filterSelect.value = ""; else filterSelect.value = c;
+                                aplicarFiltrosDropdown();
                             }
                         }
-                    });
-                }
-            } catch (errChart) {
-                console.error("Error al pintar gráficos:", errChart);
+                    }
+                });
             }
         }
 
