@@ -22,7 +22,7 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
-        .sidebar-logo { width: 90%; max-width: 150px; margin: 0 auto 20px auto; display: block; background-color: white; border-radius: 8px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
+        .sidebar-logo { width: 90%; max-width: 150px; margin: 0 open auto auto; display: block; background-color: white; border-radius: 8px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 10px; margin-bottom: 20px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
         .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
@@ -32,7 +32,7 @@
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-uppercase: uppercase; letter-spacing: 0.5px; }
+        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
         .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
@@ -465,113 +465,6 @@
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
 
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "SELLIER & BELLOT", "Armscor", "IMI", "Golden Eagle", "Federal", "Armas", "Municiones", "Glock"];
-
-        function parseDateToTime(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0]; 
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
-            }
-            return 0;
-        }
-
-        function getMonthFromDate(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return parseInt(p[1], 10);
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return parseInt(p[1], 10);
-            }
-            return 0;
-        }
-
-        function getIsoTime(isoStr) {
-            if(!isoStr) return 0;
-            let p = isoStr.split('-');
-            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
-        }
-
-        function dateToIsoString(dStr) {
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-            } else if (datePart.includes('-')) {
-                return datePart; 
-            }
-            return "";
-        }
-
-        function handleNum(val) {
-            if (!val) return 0;
-            let str = String(val).replace(/\./g, ''); 
-            if (str.includes(',')) str = str.split(',')[0]; 
-            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
-        }
-
-        function actualizarBannerEstado(tipo, mensaje) {
-            let banner = document.getElementById('status-banner');
-            if (banner) {
-                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
-                banner.innerHTML = mensaje;
-            }
-        }
-
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            let nameUpper = nombreOdoo.toUpperCase();
-            for (let k in diccionarioMetas) {
-                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) return diccionarioMetas[k];
-            }
-            return 0;
-        }
-
-        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
-            if(!diccionarioVM) return 0;
-            let query = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = nombreOdoo.toUpperCase();
-            let marcaUpper = marca.toUpperCase();
-            for (let k in diccionarioVM) {
-                let parts = k.split('|||');
-                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
-            }
-            return 0;
-        }
-
-        function construirDropdownMesesDinámico(mesActualLive) {
-            let select = document.getElementById('select-mes');
-            if (!select) return;
-            let html = `<option value="">-- Año Completo (YTD) --</option>`;
-            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
-            for (let m = 1; m <= 12; m++) {
-                if (m < mesActualLive) {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                } else if (m === mesActualLive) {
-                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
-                } else {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                }
-            }
-            select.innerHTML = html;
-        }
-
-        function iniciarSincronizacion() {
-            document.getElementById('loader').style.display = 'flex';
-            descargarDatosCruzadosBI();
-        }
-
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -644,7 +537,6 @@
             let dTransFinal = 15;
 
             try {
-                // ✅ ARREGLADO EL MAP CON FILTRADO ROBUSTO DE CAMPOS VACÍOS O ESPACIOS
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0 || !row[0]) return; 
                     
@@ -738,7 +630,7 @@
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
                 let d = {
-                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
                     unidadNegocio: r[16], seller: r[17], canal: r[18], totalGs: handleNum(r[30])
                 };
                 
@@ -1131,7 +1023,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO DEFINITIVAMENTE: Vinculado al objeto dinámico del período activo. Ningún botón volverá a trabarse.
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO DEFINITIVAMENTE CON METAS_ACTIVAS: Ninguna función colapsará el renderizado.
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -1195,10 +1087,10 @@
 
             let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
-            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { if (ncPorFechaMes[vd.fechaStr]) { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${ncPorFechaMes[vd.fechaStr].toLocaleString('es-PY')}</td></tr>`; } }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vGlobalArmas.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             if (window.chartLine) { window.chartLine.destroy(); }
