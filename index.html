@@ -48,8 +48,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown estético para la simulación */
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 55px; }
+        /* Dropdown estético para simulación */
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -77,7 +77,7 @@
         .ficha-table th { background: #f8fafc; padding: 4px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; }
         .ficha-table td { padding: 3px 6px; border-bottom: 1px dashed #e2e8f0; } 
         
-        /* 🔥 Meta Lograda Fila Color */
+        /* 🔥 CLASE PARA FILA PINTADA DE VERDE SI CUMPLIÓ META */
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         
         .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
@@ -101,7 +101,6 @@
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* MODO CELULAR Y TABLET RESPONSIVO */
         @media (max-width: 1200px) {
             .fichas-grid { grid-template-columns: repeat(2, 1fr); }
             .grid-1-2 { grid-template-columns: 1fr; }
@@ -433,9 +432,9 @@
 
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
+        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         
-        // ✅ Variable de simulación reincorporada limpiamente
+        // Variable global para simulación inyectada con seguridad
         let simulacionDiasTrans = null;
 
         const HISTORICO_METAS = {
@@ -467,70 +466,34 @@
             "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
+            },
+            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
+                   canales: { "Salon": 590000000, "Online": 320000000, "E-commerce": 120000000, "Mayoristas": 1380000000, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1380000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000 }
             }
         };
 
-        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
+        // Asignación segura inicial de Julio
+        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
 
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
-
-        function parseDateToTime(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0]; 
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
+        // Dropdown con opciones de a medio día para simular transcurridos sin romper el HTML
+        function poblarDropdownDiasTranscurridos(maxDias) {
+            let selectTrans = document.getElementById('lbl-dias-trans');
+            if (!selectTrans) return;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 25;
+            let html = "";
+            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
+            for (let d = 0.5; d <= maxDias; d += 0.5) {
+                let selected = (Math.abs(d - currentVal) < 0.1) ? "selected" : "";
+                html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
             }
-            return 0;
+            selectTrans.innerHTML = html;
         }
 
-        function getMonthFromDate(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return parseInt(p[1], 10);
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return parseInt(p[1], 10);
-            }
-            return 0;
-        }
-
-        function getIsoTime(isoStr) {
-            if(!isoStr) return 0;
-            let p = isoStr.split('-');
-            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
-        }
-
-        function dateToIsoString(dStr) {
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-            } else if (datePart.includes('-')) {
-                return datePart; 
-            }
-            return "";
-        }
-
-        function handleNum(val) {
-            if (!val) return 0;
-            let str = String(val).replace(/\./g, ''); 
-            if (str.includes(',')) str = str.split(',')[0]; 
-            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
-        }
-
-        function actualizarBannerEstado(tipo, mensaje) {
-            let banner = document.getElementById('status-banner');
-            if (banner) {
-                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
-                banner.innerHTML = mensaje;
-            }
+        function recalcularSimulacionDias() {
+            let selectTrans = document.getElementById('lbl-dias-trans').value;
+            simulacionDiasTrans = parseFloat(selectTrans);
+            filtrarYRenderizarTodo();
         }
 
         // ✅ REGLA MATEMÁTICA ANTI-CRASH: Evita que nombres de personas reales coincidan con claves genéricas como "SALON"
@@ -548,7 +511,7 @@
             for (let k in diccionarioMetas) {
                 let kUpper = k.toUpperCase().trim();
                 
-                // Si la celda del Excel es genérica, NO dejamos que pise a una persona real
+                // Si la clave de la meta es una palabra genérica, NO se la asignamos a una persona real por error de aproximación
                 if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
                     if (nameUpper === kUpper) return diccionarioMetas[k];
                     continue; 
@@ -562,129 +525,25 @@
             return 0;
         }
 
-        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
-            if(!diccionarioVM) return 0;
-            let query = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = nombreOdoo.toUpperCase();
-            let marcaUpper = marca.toUpperCase();
-            for (let k in diccionarioVM) {
-                let parts = k.split('|||');
-                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
-            }
-            return 0;
-        }
-
-        function construirDropdownMesesDinámico(mesActualLive) {
-            let select = document.getElementById('select-mes');
-            if (!select) return;
-            let html = `<option value="">-- Año Completo (YTD) --</option>`;
-            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
-            for (let m = 1; m <= 12; m++) {
-                if (m < mesActualLive) {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                } else if (m === mesActualLive) {
-                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
-                } else {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                }
-            }
-            select.innerHTML = html;
-        }
-
-        // Dropdown con valores seguros de a medio día
-        function poblarDropdownDiasTranscurridos(maxDias) {
-            let selectTrans = document.getElementById('lbl-dias-trans');
-            if (!selectTrans) return;
-            if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
-            let html = "";
-            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
-            for (let d = 0.5; d <= maxDias; d += 0.5) {
-                let selected = (Math.abs(d - currentVal) < 0.1) ? "selected" : "";
-                html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
-            }
-            selectTrans.innerHTML = html;
-        }
-
-        function recalcularSimulacionDias() {
-            let selectTrans = document.getElementById('lbl-dias-trans').value;
-            simulacionDiasTrans = parseFloat(selectTrans);
-            filtrarYRenderizarTodo();
-        }
-
-        function iniciarSincronizacion() {
-            document.getElementById('loader').style.display = 'flex';
-            descargarDatosCruzadosBI();
-        }
-
-        async function descargarDatosCruzadosBI() {
-            let escapeTimeout = setTimeout(() => {
-                let loader = document.getElementById('loader');
-                if (loader && loader.style.display !== 'none') {
-                    filtrarYRenderizarTodo();
-                    loader.style.display = 'none';
-                    actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
-                }
-            }, 3000);
-
-            try {
-                const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
-                const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
-
-                const [resConfig, resData] = await Promise.all([fetch(urlConfig), fetch(urlData)]);
-                if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
-
-                const txtConfig = await resConfig.text();
-                const txtData = await resData.text();
-
-                let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
-                let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
-
-                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
-                filasConfigPlanas.forEach(row => {
-                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
-                        let mIdx = getMonthFromDate(row[1]);
-                        if(mIdx > 0 && mIdx <= 12) {
-                            filtrosActivos.mesActualLive = mIdx;
-                            filtrosActivos.mes = String(mIdx);
-                        }
-                    }
-                });
-
-                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
-
-                procesarMetasConfigActuales(filasConfigFormateadas);
-                procesarVentasData(filasDataFormateadas);
-
-                clearTimeout(escapeTimeout);
-                let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
-                document.getElementById('loader').style.display = 'none';
-            } catch (err) {
-                clearTimeout(escapeTimeout);
-                console.error(err);
-                filtrarYRenderizarTodo();
-                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
-                document.getElementById('loader').style.display = 'none';
-            }
-        }
-
         function procesarMetasConfigActuales(filas) {
             METAS_JUNIO_LIVE.canales = {};
             METAS_JUNIO_LIVE.vendedoresTotales = {};
             METAS_JUNIO_LIVE.vendedorMarca = {};
 
+            let dMesFinal = 25;
+            let dTransFinal = 4.5;
+
             try {
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0 || !row[0]) return;
-                    if (row[0] === "Días Hábiles del Mes:") {
+                    let col0 = String(row[0]).trim();
+                    if (col0 === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasMes = val;
+                        if (val > 0 && val <= 31) dMesFinal = val;
                     }
-                    if (row[0] === "Días Hábiles Transcurridos:") {
+                    if (col0 === "Días Hábiles Transcurridos:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasTranscurridos = val;
+                        if (val > 0 && val <= 31) dTransFinal = val;
                     }
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
 
@@ -696,10 +555,13 @@
                     }
                 });
 
+                METAS_JUNIO_LIVE.diasMes = dMesFinal;
+                METAS_JUNIO_LIVE.diasTranscurridos = dTransFinal;
+
                 if (simulacionDiasTrans === null) {
-                    simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+                    simulacionDiasTrans = dTransFinal;
                 }
-                poblarDropdownDiasTranscurridos(31);
+                poblarDropdownDiasTranscurridos(dMesFinal);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -757,7 +619,7 @@
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
                 let d = {
-                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
                     unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
                 };
                 
@@ -835,7 +697,7 @@
             filtrosActivos.marca = document.getElementById('select-marca').value;
             
             if (filtrosActivos.mes !== oldMes) {
-                simulacionDiasTrans = null; // Reseteo dinámico seguro para no arrastrar valores viejos
+                simulacionDiasTrans = null; // Reseteo dinámico seguro entre meses
             }
             filtrarYRenderizarTodo();
         }
@@ -889,6 +751,7 @@
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
 
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
+            let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
@@ -987,7 +850,7 @@
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // ✅ CORRECCIÓN QUIRÚRGICA DEL DROPDOWN: Se pobla dinámicamente y se desactiva solo en meses históricos
+            // ✅ CORRECCIÓN QUIRÚRGICA DEL SELECT: Se alimenta dinámicamente y conserva la posición en los cambios de mes
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive) && filtrosActivos.mes !== "") {
@@ -1216,8 +1079,6 @@
             
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            
-            // ✅ CORRECCIÓN DEFINITIVA DE TYPO: hR reincorporada correctamente
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             if (window.chartLine) { window.chartLine.destroy(); }
