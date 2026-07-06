@@ -6,6 +6,7 @@
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        /* REGLA DE ORO RESPONSIVA UNIVERSAL */
         * { box-sizing: border-box; }
         html, body { max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
 
@@ -45,7 +46,6 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown de Simulación */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px;}
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -178,16 +178,8 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr>
-                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
-                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 11px; padding-right:10px;">--</td>
-                    </tr>
-                    <tr>
-                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
-                        <td>
-                            <select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select>
-                        </td>
-                    </tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -477,6 +469,9 @@
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
 
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
+
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
             let datePart = String(dStr).split(' ')[0]; 
@@ -535,20 +530,21 @@
             }
         }
 
-        // ✅ FILTRO BLINDADO PARA EVITAR QUE METAS GENÉRICAS PISEN METAS DE VENDEDORES
+        // ✅ REGLA MATEMÁTICA ANTI-CRASH: Evita que nombres reales coincidan con "SALON" u "ONLINE" y rompan el YTD
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
             
-            let nameUpper = nombreOdoo.toUpperCase().trim();
+            let nameUpper = String(nombreOdoo).toUpperCase().trim();
             let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
 
             if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
 
+            let fallbackMatch = 0;
             for (let k in diccionarioMetas) {
-                let kUpper = k.toUpperCase().trim();
+                let kUpper = String(k).toUpperCase().trim();
                 
                 if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
                     if (nameUpper === kUpper) return diccionarioMetas[k];
@@ -556,21 +552,24 @@
                 }
                 
                 let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo || nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                if (cleanK === cleanNameOdoo) {
                     return diccionarioMetas[k];
                 }
+                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                    fallbackMatch = diccionarioMetas[k];
+                }
             }
-            return 0;
+            return fallbackMatch;
         }
 
         function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
             if(!diccionarioVM) return 0;
             let query = nombreOdoo + "|||" + marca;
             if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = nombreOdoo.toUpperCase();
-            let marcaUpper = marca.toUpperCase();
+            let nameUpper = String(nombreOdoo).toUpperCase();
+            let marcaUpper = String(marca).toUpperCase();
             for (let k in diccionarioVM) {
-                let parts = k.split('|||');
+                let parts = String(k).split('|||');
                 if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
             }
             return 0;
@@ -594,10 +593,11 @@
             select.innerHTML = html;
         }
 
+        // ✅ DROPDOWN DE SIMULACIÓN NATIVA
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
-            if (isNaN(maxDias) || maxDias <= 0) maxDias = 25;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
             let html = "";
             let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
             for (let d = 0.5; d <= maxDias; d += 0.5) {
@@ -622,7 +622,7 @@
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
                 if (loader && loader.style.display !== 'none') {
-                    filtrarYRenderizarTodo();
+                    try { filtrarYRenderizarTodo(); } catch(e){}
                     loader.style.display = 'none';
                     actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
                 }
@@ -641,17 +641,32 @@
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
+                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
+                filasConfigPlanas.forEach(row => {
+                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if(mIdx > 0 && mIdx <= 12) {
+                            filtrosActivos.mesActualLive = mIdx;
+                            filtrosActivos.mes = String(mIdx);
+                        }
+                    }
+                });
+
+                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
+                
+                try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
+
             } catch (err) {
                 clearTimeout(escapeTimeout);
                 console.error(err);
-                filtrarYRenderizarTodo();
+                try { filtrarYRenderizarTodo(); } catch(e){}
                 actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
                 document.getElementById('loader').style.display = 'none';
             }
@@ -667,27 +682,18 @@
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0 || !row[0]) return; 
-                    
+                    if(!row || row.length === 0 || !row[0]) return;
                     let col0 = String(row[0]).trim();
-                    
-                    if (col0.includes("Fecha Actual (Corte):") && row[1]) {
-                        let mIdx = getMonthFromDate(row[1]);
-                        if(mIdx > 0 && mIdx <= 12) {
-                            filtrosActivos.mesActualLive = mIdx;
-                            filtrosActivos.mes = String(mIdx);
-                        }
+                    if (col0 === "Días Hábiles del Mes:") {
+                        let val = parseFloat(String(row[1]).replace(',', '.'));
+                        if (val > 0 && val <= 31) dMesFinal = val;
                     }
-                    if (col0.includes("Días Hábiles del Mes:") && row[1]) {
-                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
-                        if (!isNaN(parsed) && parsed > 0) dMesFinal = parsed;
+                    if (col0 === "Días Hábiles Transcurridos:") {
+                        let val = parseFloat(String(row[1]).replace(',', '.'));
+                        if (val > 0 && val <= 31) dTransFinal = val;
                     }
-                    if (col0.includes("Días Hábiles Transcurridos:") && row[1]) {
-                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
-                        if (!isNaN(parsed) && parsed > 0) dTransFinal = parsed;
-                    }
-
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
+
                     if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
                         METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
                     }
@@ -703,7 +709,6 @@
                     simulacionDiasTrans = dTransFinal;
                 }
                 poblarDropdownDiasTranscurridos(dMesFinal);
-                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -725,7 +730,6 @@
                         let cellHead = (headerRow[col] || "").toString().toUpperCase().trim();
                         if (cellHead === "MARCA" || cellHead === "MARCAS") {
                             let currentVend = "";
-                            
                             for (let rUp = brandHeaderRowIdx - 1; rUp >= 0; rUp--) {
                                 let possibleName = (filas[rUp][col] || "").toString().trim();
                                 if (possibleName && !possibleName.startsWith("---") && !possibleName.toUpperCase().includes("METAS INDIVIDUALES")) {
@@ -733,7 +737,6 @@
                                     break;
                                 }
                             }
-                            
                             if (currentVend) {
                                 for (let r = brandHeaderRowIdx + 1; r < filas.length; r++) {
                                     if(!filas[r]) continue;
@@ -799,10 +802,10 @@
                     document.getElementById('btn-reset').style.display = 'none';
                     document.getElementById('btn-sync').style.display = 'none';
                     
-                    filtrarYRenderizarTodo();
+                    try { filtrarYRenderizarTodo(); } catch(e){}
                 }, 100);
             } else {
-                filtrarYRenderizarTodo();
+                try { filtrarYRenderizarTodo(); } catch(e){}
             }
         }
 
@@ -841,7 +844,7 @@
             if (filtrosActivos.mes !== oldMes && filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
                 simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
             }
-            filtrarYRenderizarTodo();
+            try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
         function limpiarTodosLosFiltros() {
@@ -854,7 +857,7 @@
             
             simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
             
-            filtrarYRenderizarTodo();
+            try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
         function obtenerMetasEstructuraBI() {
@@ -870,7 +873,11 @@
                     
                     metasYTD.global += (mData.global || 0);
                     metasYTD.diasMes += (mData.diasMes || 0);
-                    metasYTD.diasTranscurridos += (mData.diasTranscurridos || 0);
+                    
+                    // ✅ SUMA EL SIMULADOR SOLO PARA EL MES ACTUAL EN EL YTD
+                    let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
+                    metasYTD.diasTranscurridos += transVal;
+
                     if(mData.canales) { Object.keys(mData.canales).forEach(c => { metasYTD.canales[c] = (metasYTD.canales[c] || 0) + (mData.canales[c] || 0); }); }
                     if(mData.vendedoresTotales) { Object.keys(mData.vendedoresTotales).forEach(v => { metasYTD.vendedoresTotales[v] = (metasYTD.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); }); }
                     if (mData.vendedorMarca) { Object.keys(mData.vendedorMarca).forEach(vm => { metasYTD.vendedorMarca[vm] = (metasYTD.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); }); }
@@ -884,6 +891,7 @@
         }
 
         function filtrarYRenderizarTodo() {
+          try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
@@ -960,6 +968,9 @@
             });
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
+          } catch(e) {
+              console.error("FATAL ERROR IN RENDER:", e);
+          }
         }
 
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
@@ -998,6 +1009,7 @@
             
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
+                // ✅ BLOQUEA EL SELECT PARA MESES VIEJOS O YTD Y PREVIENE ERRORES
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                     selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
                     selectTransHTML.disabled = true;
@@ -1110,9 +1122,9 @@
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
                 if (METAS_ACTIVAS.vendedorMarca) {
-                    let vNameUpper = v.toUpperCase();
+                    let vNameUpper = String(v).toUpperCase();
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        let parts = k.split('|||');
+                        let parts = String(k).split('|||');
                         if (parts.length === 2 && (parts[0].toUpperCase().includes(vNameUpper) || vNameUpper.includes(parts[0].toUpperCase()))) {
                             if (METAS_ACTIVAS.vendedorMarca[k] > 0) {
                                 marcasUnicas.add(parts[1]); 
@@ -1145,9 +1157,9 @@
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                     let row = `<tr class="${rowClass}"><td>${m}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let mUpper = m.toUpperCase();
-                    let isMainBrand = LISTA_MARCAS.some(lm => lm.toUpperCase() === mUpper);
-                    let isWeapon = LISTA_ARMAS.some(la => la.toUpperCase() === mUpper);
+                    let mUpper = String(m).toUpperCase();
+                    let isMainBrand = LISTA_MARCAS.some(lm => String(lm).toUpperCase() === mUpper);
+                    let isWeapon = LISTA_ARMAS.some(la => String(la).toUpperCase() === mUpper);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1155,7 +1167,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales);
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -1193,7 +1205,7 @@
                 </div>`;
 
                 let canalReal = vData.canal || "";
-                let n = v.toUpperCase();
+                let n = String(v).toUpperCase();
                 
                 if (canalReal === "E-commerce" || n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) {
                     hFichasEcom += fichaHtml;
