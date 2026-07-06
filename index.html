@@ -6,7 +6,6 @@
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        /* REGLA DE ORO RESPONSIVA UNIVERSAL */
         * { box-sizing: border-box; }
         html, body { max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
 
@@ -16,11 +15,9 @@
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
-            /* Color para fila de meta lograda */
             --row-success-bg: #e6fffa;
         }
 
-        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
@@ -48,8 +45,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown estético para simulación */
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
+        /* Dropdown de Simulación */
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px;}
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -69,7 +66,6 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -77,7 +73,6 @@
         .ficha-table th { background: #f8fafc; padding: 4px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; }
         .ficha-table td { padding: 3px 6px; border-bottom: 1px dashed #e2e8f0; } 
         
-        /* 🔥 CLASE PARA FILA PINTADA DE VERDE SI CUMPLIÓ META */
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         
         .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
@@ -183,8 +178,16 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td></tr>
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
+                    <tr>
+                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
+                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 11px; padding-right:10px;">--</td>
+                    </tr>
+                    <tr>
+                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
+                        <td>
+                            <select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select>
+                        </td>
+                    </tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -434,7 +437,6 @@
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         
-        // Variable global para simulación inyectada con seguridad
         let simulacionDiasTrans = null;
 
         const HISTORICO_METAS = {
@@ -473,10 +475,125 @@
             }
         };
 
-        // Asignación segura inicial de Julio
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
 
-        // Dropdown con opciones de a medio día para simular transcurridos sin romper el HTML
+        function parseDateToTime(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0]; 
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
+            }
+            return 0;
+        }
+
+        function getMonthFromDate(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return parseInt(p[1], 10);
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return parseInt(p[1], 10);
+            }
+            return 0;
+        }
+
+        function getIsoTime(isoStr) {
+            if(!isoStr) return 0;
+            let p = isoStr.split('-');
+            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
+        }
+
+        function dateToIsoString(dStr) {
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else if (datePart.includes('-')) {
+                return datePart; 
+            }
+            return "";
+        }
+
+        function handleNum(val) {
+            if (!val) return 0;
+            let str = String(val).replace(/\./g, ''); 
+            if (str.includes(',')) str = str.split(',')[0]; 
+            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
+        }
+
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
+        }
+
+        // ✅ FILTRO BLINDADO PARA EVITAR QUE METAS GENÉRICAS PISEN METAS DE VENDEDORES
+        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
+            if(!diccionarioMetas) return 0;
+            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
+            
+            let nameUpper = nombreOdoo.toUpperCase().trim();
+            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+
+            if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
+                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
+            }
+
+            for (let k in diccionarioMetas) {
+                let kUpper = k.toUpperCase().trim();
+                
+                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
+                    if (nameUpper === kUpper) return diccionarioMetas[k];
+                    continue; 
+                }
+                
+                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+                if (cleanK === cleanNameOdoo || nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                    return diccionarioMetas[k];
+                }
+            }
+            return 0;
+        }
+
+        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
+            if(!diccionarioVM) return 0;
+            let query = nombreOdoo + "|||" + marca;
+            if(diccionarioVM[query]) return diccionarioVM[query];
+            let nameUpper = nombreOdoo.toUpperCase();
+            let marcaUpper = marca.toUpperCase();
+            for (let k in diccionarioVM) {
+                let parts = k.split('|||');
+                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
+            }
+            return 0;
+        }
+
+        function construirDropdownMesesDinámico(mesActualLive) {
+            let select = document.getElementById('select-mes');
+            if (!select) return;
+            let html = `<option value="">-- Año Completo (YTD) --</option>`;
+            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            for (let m = 1; m <= 12; m++) {
+                if (m < mesActualLive) {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                } else if (m === mesActualLive) {
+                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
+                } else {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                }
+            }
+            select.innerHTML = html;
+        }
+
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -496,33 +613,48 @@
             filtrarYRenderizarTodo();
         }
 
-        // ✅ REGLA MATEMÁTICA ANTI-CRASH: Evita que nombres de personas reales coincidan con claves genéricas como "SALON"
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            
-            let nameUpper = nombreOdoo.toUpperCase().trim();
-            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+        function iniciarSincronizacion() {
+            document.getElementById('loader').style.display = 'flex';
+            descargarDatosCruzadosBI();
+        }
 
-            if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
-                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
-            }
+        async function descargarDatosCruzadosBI() {
+            let escapeTimeout = setTimeout(() => {
+                let loader = document.getElementById('loader');
+                if (loader && loader.style.display !== 'none') {
+                    filtrarYRenderizarTodo();
+                    loader.style.display = 'none';
+                    actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
+                }
+            }, 3000);
 
-            for (let k in diccionarioMetas) {
-                let kUpper = k.toUpperCase().trim();
-                
-                // Si la clave de la meta es una palabra genérica, NO se la asignamos a una persona real por error de aproximación
-                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
-                    if (nameUpper === kUpper) return diccionarioMetas[k];
-                    continue; 
-                }
-                
-                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo || nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
-                    return diccionarioMetas[k];
-                }
+            try {
+                const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
+                const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
+
+                const [resConfig, resData] = await Promise.all([fetch(urlConfig), fetch(urlData)]);
+                if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
+
+                const txtConfig = await resConfig.text();
+                const txtData = await resData.text();
+
+                let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
+                let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
+
+                procesarMetasConfigActuales(filasConfigFormateadas);
+                procesarVentasData(filasDataFormateadas);
+
+                clearTimeout(escapeTimeout);
+                let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
+                document.getElementById('loader').style.display = 'none';
+            } catch (err) {
+                clearTimeout(escapeTimeout);
+                console.error(err);
+                filtrarYRenderizarTodo();
+                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
+                document.getElementById('loader').style.display = 'none';
             }
-            return 0;
         }
 
         function procesarMetasConfigActuales(filas) {
@@ -535,18 +667,27 @@
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0 || !row[0]) return;
+                    if(!row || row.length === 0 || !row[0]) return; 
+                    
                     let col0 = String(row[0]).trim();
-                    if (col0 === "Días Hábiles del Mes:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dMesFinal = val;
+                    
+                    if (col0.includes("Fecha Actual (Corte):") && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if(mIdx > 0 && mIdx <= 12) {
+                            filtrosActivos.mesActualLive = mIdx;
+                            filtrosActivos.mes = String(mIdx);
+                        }
                     }
-                    if (col0 === "Días Hábiles Transcurridos:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dTransFinal = val;
+                    if (col0.includes("Días Hábiles del Mes:") && row[1]) {
+                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
+                        if (!isNaN(parsed) && parsed > 0) dMesFinal = parsed;
                     }
-                    if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
+                    if (col0.includes("Días Hábiles Transcurridos:") && row[1]) {
+                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
+                        if (!isNaN(parsed) && parsed > 0) dTransFinal = parsed;
+                    }
 
+                    if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
                     if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
                         METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
                     }
@@ -562,6 +703,7 @@
                     simulacionDiasTrans = dTransFinal;
                 }
                 poblarDropdownDiasTranscurridos(dMesFinal);
+                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -619,7 +761,7 @@
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
                 let d = {
-                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
                 };
                 
@@ -696,8 +838,8 @@
             filtrosActivos.fecha = document.getElementById('select-fecha').value; 
             filtrosActivos.marca = document.getElementById('select-marca').value;
             
-            if (filtrosActivos.mes !== oldMes) {
-                simulacionDiasTrans = null; // Reseteo dinámico seguro entre meses
+            if (filtrosActivos.mes !== oldMes && filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
+                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
             }
             filtrarYRenderizarTodo();
         }
@@ -817,12 +959,15 @@
                 }
             });
 
-            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
         }
 
-        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
-            let dMes = METAS_ACTIVAS.diasMes || 22;
-            let dTr = dTrActivo || 19.5; 
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
+            let dMes = parseFloat(dMesActivo);
+            let dTr = parseFloat(dTrActivo); 
+
+            if (isNaN(dMes) || dMes <= 0) dMes = 25;
+            if (isNaN(dTr) || dTr <= 0) dTr = 4.5;
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
@@ -848,18 +993,18 @@
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
+            
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // ✅ CORRECCIÓN QUIRÚRGICA DEL SELECT: Se alimenta dinámicamente y conserva la posición en los cambios de mes
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
-                if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive) && filtrosActivos.mes !== "") {
+                if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                     selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
                     selectTransHTML.disabled = true;
                 } else {
                     selectTransHTML.disabled = false;
                     let html = "";
-                    let maxDiasOpciones = filtrosActivos.mes === "" ? Math.max(dMes, 180) : Math.max(dMes, 31);
+                    let maxDiasOpciones = Math.max(dMes, 31);
                     for (let d = 0.5; d <= maxDiasOpciones; d += 0.5) {
                         let selected = (Math.abs(d - dTr) < 0.1) ? "selected" : "";
                         html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
@@ -1010,7 +1155,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales);
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
