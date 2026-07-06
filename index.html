@@ -435,7 +435,7 @@
 
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
+        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         
         let simulacionDiasTrans = 0;
 
@@ -471,119 +471,16 @@
             }
         };
 
+        // Clonamos Junio como base inicial temporal
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
 
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Armas", "Municiones", "Glock"];
-
-        function parseDateToTime(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0]; 
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
-            }
-            return 0;
-        }
-
-        function getMonthFromDate(dStr) {
-            if(!dStr) return 0;
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return parseInt(p[1], 10);
-            } else if (datePart.includes('-')) {
-                let p = datePart.split('-');
-                return parseInt(p[1], 10);
-            }
-            return 0;
-        }
-
-        function getIsoTime(isoStr) {
-            if(!isoStr) return 0;
-            let p = isoStr.split('-');
-            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
-        }
-
-        function dateToIsoString(dStr) {
-            let datePart = String(dStr).split(' ')[0];
-            if (datePart.includes('/')) {
-                let p = datePart.split('/');
-                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-            } else if (datePart.includes('-')) {
-                return datePart; 
-            }
-            return "";
-        }
-
-        function handleNum(val) {
-            if (!val) return 0;
-            let str = String(val).replace(/\./g, ''); 
-            if (str.includes(',')) str = str.split(',')[0]; 
-            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
-        }
-
-        function actualizarBannerEstado(tipo, mensaje) {
-            let banner = document.getElementById('status-banner');
-            if (banner) {
-                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
-                banner.innerHTML = mensaje;
-            }
-        }
-
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            let nameUpper = nombreOdoo.toUpperCase();
-            for (let k in diccionarioMetas) {
-                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) return diccionarioMetas[k];
-            }
-            return 0;
-        }
-
-        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
-            if(!diccionarioVM) return 0;
-            let query = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = nombreOdoo.toUpperCase();
-            let marcaUpper = marca.toUpperCase();
-            for (let k in diccionarioVM) {
-                let parts = k.split('|||');
-                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
-            }
-            return 0;
-        }
-
-        function construirDropdownMesesDinámico(mesActualLive) {
-            let select = document.getElementById('select-mes');
-            if (!select) return;
-            let html = `<option value="">-- Año Completo (YTD) --</option>`;
-            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
-            for (let m = 1; m <= 12; m++) {
-                if (m < mesActualLive) {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                } else if (m === mesActualLive) {
-                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
-                } else {
-                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
-                }
-            }
-            select.innerHTML = html;
-        }
-
-        function iniciarSincronizacion() {
-            document.getElementById('loader').style.display = 'flex';
-            descargarDatosCruzadosBI();
-        }
-
-        // ✅ FILTRO BLINDADO CONTRA LENTITUD: Crea opciones fijas de a medio día. Evita el recalculo infinito por tecla.
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
+            
+            // Si maxDias vino corrupto o en NaN, le forzamos un valor seguro para no colgar la visualización
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 22;
+            
             let html = "";
             for (let d = 0.5; d <= maxDias; d += 0.5) {
                 let selected = (d === simulacionDiasTrans) ? "selected" : "";
@@ -612,28 +509,7 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
-                filasConfigPlanas.forEach(row => {
-                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
-                        let mIdx = getMonthFromDate(row[1]);
-                        if(mIdx > 0 && mIdx <= 12) {
-                            filtrosActivos.mesActualLive = mIdx;
-                            filtrosActivos.mes = String(mIdx);
-                        }
-                    }
-                    if(row[0] === "Días Hábiles del Mes:" && row[1]) {
-                        METAS_JUNIO_LIVE.diasMes = parseFloat(String(row[1]).replace(',', '.'));
-                    }
-                    if(row[0] === "Días Hábiles Transcurridos:" && row[1]) {
-                        METAS_JUNIO_LIVE.diasTranscurridos = parseFloat(String(row[1]).replace(',', '.'));
-                    }
-                });
-                
-                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
-                poblarDropdownDiasTranscurridos(METAS_JUNIO_LIVE.diasMes);
-
-                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
-
+                // ✅ ARREGLO MÁGICO CLAVE: Usamos el procesador regex limpio para las metas y días. Adiós comas del split tradicional.
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
@@ -653,10 +529,13 @@
             }
         }
 
-        // ✅ RECALCULO INSTANTÁNEO SÓLO CUANDO CAMBIA EL DROPDOWN (VELOCIDAD MÁXIMA)
         function recalcularSimulacionDias() {
             let selectTrans = document.getElementById('lbl-dias-trans').value;
-            simulacionDiasTrans = parseFloat(selectTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
+            simulacionDiasTrans = parseFloat(selectTrans);
+            
+            if (isNaN(simulacionDiasTrans) || simulacionDiasTrans <= 0) {
+                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos || 15;
+            }
             filtrarYRenderizarTodo(); 
         }
 
@@ -665,9 +544,32 @@
             METAS_JUNIO_LIVE.vendedoresTotales = {};
             METAS_JUNIO_LIVE.vendedorMarca = {};
 
+            // Valores de emergencia por si la celda de Sheets viene rota o en blanco
+            let dMesFinal = 22;
+            let dTransFinal = 15;
+
             try {
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return;
+                    
+                    let col0 = String(row[0]).trim();
+                    
+                    if (col0.includes("Fecha Actual (Corte):") && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if(mIdx > 0 && mIdx <= 12) {
+                            filtrosActivos.mesActualLive = mIdx;
+                            filtrosActivos.mes = String(mIdx);
+                        }
+                    }
+                    if (col0.includes("Días Hábiles del Mes:") && row[1]) {
+                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
+                        if (!isNaN(parsed) && parsed > 0) dMesFinal = parsed;
+                    }
+                    if (col0.includes("Días Hábiles Transcurridos:") && row[1]) {
+                        let parsed = parseFloat(String(row[1]).replace(',', '.'));
+                        if (!isNaN(parsed) && parsed > 0) dTransFinal = parsed;
+                    }
+
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
                     if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
                         METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
@@ -676,6 +578,13 @@
                         METAS_JUNIO_LIVE.vendedoresTotales[row[8]] = handleNum(row[9]);
                     }
                 });
+
+                METAS_JUNIO_LIVE.diasMes = dMesFinal;
+                METAS_JUNIO_LIVE.diasTranscurridos = dTransFinal;
+                simulacionDiasTrans = dTransFinal;
+
+                poblarDropdownDiasTranscurridos(dMesFinal);
+                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -830,7 +739,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
@@ -855,7 +764,7 @@
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
-            let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
+            let brutoEco = { TUPI: 0, PORTER: 0, Extr: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let dataFichasVend = {};
 
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
@@ -930,8 +839,12 @@
         }
 
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
-            let dMes = dMesActivo;
-            let dTr = dTrActivo; 
+            let dMes = parseFloat(dMesActivo);
+            let dTr = parseFloat(dTrActivo); 
+
+            // Blindaje definitivo anti-NaN por si acaso
+            if (isNaN(dMes) || dMes <= 0) dMes = 22;
+            if (isNaN(dTr) || dTr <= 0) dTr = 15;
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
@@ -960,20 +873,24 @@
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
-                document.getElementById('lbl-dias-trans').innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
-                document.getElementById('lbl-dias-trans').disabled = true;
-            } else {
-                document.getElementById('lbl-dias-trans').disabled = false;
+            let selectTransHTML = document.getElementById('lbl-dias-trans');
+            if (selectTransHTML) {
+                if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
+                    selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
+                    selectTransHTML.disabled = true;
+                } else {
+                    selectTransHTML.disabled = false;
+                    selectTransHTML.value = dTr;
+                }
             }
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
-            let esperadoGlobal = Math.round(((METAS_ACTIVAS.global || 0) / dMes) * dTr);
+            let esperadoGlobal = Math.round((objetivoFiltrado / dMes) * dTr);
             let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
-            let pctGlobalMes = METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(0) + "%" : "0%";
+            let pctGlobalMes = objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(0) + "%" : "0%";
             let proyGlobal = Math.round(dTr > 0 ? (data.neta / dTr) * dMes : 0);
             
             document.getElementById('grid-objetivos-base').innerHTML = `
@@ -982,7 +899,7 @@
                     <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
                     <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
                     <td class="text-right num-positivo">${pctGlobalHoy}</td>
-                    <td class="text-right">₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${objetivoFiltrado.toLocaleString('es-PY')}</td>
                     <td class="text-right">${pctGlobalMes}</td>
                     <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
                 </tr>
