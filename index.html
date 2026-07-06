@@ -33,6 +33,7 @@
         .main-content { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
         .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
@@ -48,6 +49,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
+        /* Clases estéticas para el menú desplegable de simulación */
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -111,7 +114,7 @@
             body { flex-direction: column; overflow-y: auto; font-size: 12px; }
             .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px; overflow-x: auto; white-space: nowrap; align-items: center; position: sticky; top: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
             .sidebar-logo, .sidebar h2 { display: none; }
-            .menu-item { display: inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 11px; }
+            .menu-item { inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 11px; }
             .main-content { padding: 10px; overflow-x: hidden; }
             .filter-panel { flex-direction: column; padding: 10px; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; }
@@ -182,8 +185,8 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right: 10px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -432,8 +435,10 @@
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
+        
+        // ✅ Variable global para guardar la simulación
+        let simulacionDiasTrans = null;
 
-        // ✅ REPOSITORIO HISTÓRICO RESTAURADO COMPLETAMENTE AL 100%
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
@@ -469,7 +474,7 @@
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
 
         const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Armas", "Municiones", "Glock"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
@@ -570,6 +575,26 @@
             select.innerHTML = html;
         }
 
+        // ✅ NUEVA FUNCIÓN AUTOMÁTICA: Crea las opciones de a medio día para simular transcurridos sin trabarse
+        function poblarDropdownDiasTranscurridos(maxDias) {
+            let selectTrans = document.getElementById('lbl-dias-trans');
+            if (!selectTrans) return;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
+            let html = "";
+            for (let d = 0.5; d <= maxDias; d += 0.5) {
+                let selected = (d === simulacionDiasTrans) ? "selected" : "";
+                html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
+            }
+            selectTrans.innerHTML = html;
+        }
+
+        // ✅ NUEVA FUNCIÓN: Se ejecuta al cambiar el dropdown
+        function recalcularSimulacionDias() {
+            let selectTrans = document.getElementById('lbl-dias-trans').value;
+            simulacionDiasTrans = parseFloat(selectTrans);
+            filtrarYRenderizarTodo();
+        }
+
         function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
             descargarDatosCruzadosBI();
@@ -595,19 +620,7 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
-                filasConfigPlanas.forEach(row => {
-                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
-                        let mIdx = getMonthFromDate(row[1]);
-                        if(mIdx > 0 && mIdx <= 12) {
-                            filtrosActivos.mesActualLive = mIdx;
-                            filtrosActivos.mes = String(mIdx);
-                        }
-                    }
-                });
-
-                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
-
+                // Parseo inteligente con expresiones regulares para no romper celdas con comas decimales
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
@@ -634,12 +647,21 @@
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return;
-                    if (row[0] === "Días Hábiles del Mes:") {
+                    if(!row || row.length === 0 || !row[0]) return; // Cambiado quirúrgicamente a return seguro
+                    
+                    let col0 = String(row[0]).trim();
+                    if (col0 === "Fecha Actual (Corte):" && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if(mIdx > 0 && mIdx <= 12) {
+                            filtrosActivos.mesActualLive = mIdx;
+                            filtrosActivos.mes = String(mIdx);
+                        }
+                    }
+                    if (col0 === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasMes = val;
                     }
-                    if (row[0] === "Días Hábiles Transcurridos:") {
+                    if (col0 === "Días Hábiles Transcurridos:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasTranscurridos = val;
                     }
@@ -652,6 +674,12 @@
                         METAS_JUNIO_LIVE.vendedoresTotales[row[8]] = handleNum(row[9]);
                     }
                 });
+
+                // Inicialización única de simulación
+                if (simulacionDiasTrans === null) {
+                    simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+                }
+                poblarDropdownDiasTranscurridos(31); // Rango completo de simulación
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -708,7 +736,6 @@
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
-                // CAMBIO AL INDICE 14 (MARCA ORIGINAL) PARA NO LEER "ARMAS" A SECAS EN TODAS LAS MARCAS
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
@@ -795,6 +822,9 @@
             document.getElementById('select-canal').value = "";
             document.getElementById('select-fecha').value = "";
             document.getElementById('select-marca').value = "";
+            
+            simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            
             filtrarYRenderizarTodo();
         }
 
@@ -806,7 +836,7 @@
                 let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
-                    let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
+                    let mData = (m === liveMonth) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
                     if(!mData) continue;
                     
                     metasYTD.global += (mData.global || 0);
@@ -835,6 +865,13 @@
 
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
             let filtroTime = 0;
+            
+            // Inyección quirúrgica del valor simulado
+            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
+                if (simulacionDiasTrans !== null) {
+                    diasTranscurridosActivos = simulacionDiasTrans;
+                }
+            }
             
             if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
@@ -925,7 +962,18 @@
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
-            document.getElementById('lbl-dias-trans').innerText = dTr.toFixed(1).replace('.', ',');
+            
+            // ✅ CORRECCIÓN QUIRÚRGICA: Ajustamos el valor del select en lugar de romper el elemento con innerText
+            let selectTransHTML = document.getElementById('lbl-dias-trans');
+            if (selectTransHTML) {
+                if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
+                    selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
+                    selectTransHTML.disabled = true;
+                } else {
+                    selectTransHTML.disabled = false;
+                    selectTransHTML.value = dTr;
+                }
+            }
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
@@ -1045,7 +1093,6 @@
                     let val = vData.marcas[m] || 0;
                     let mAsig = getMetaVendedorMarca(v, m, METAS_ACTIVAS.vendedorMarca);
                     
-                    // ✅ LÓGICA DE FILA VERDE Y CHECKMARK
                     let rowClass = "";
                     let checkMark = "";
                     if (mAsig > 0) {
