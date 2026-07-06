@@ -16,11 +16,9 @@
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
-            /* Color para fila de meta lograda */
             --row-success-bg: #e6fffa;
         }
 
-        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
@@ -48,8 +46,7 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* ✅ Estilos para el select simulador de transcurridos */
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 11px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; }
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 12px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -69,7 +66,6 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -96,11 +92,10 @@
         .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; width: 100%; }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; }
 
-        .loading-screen { fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
+        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* MODO CELULAR Y TABLET RESPONSIVO */
         @media (max-width: 1200px) {
             .fichas-grid { grid-template-columns: repeat(2, 1fr); }
             .grid-1-2 { grid-template-columns: 1fr; }
@@ -585,7 +580,7 @@
             descargarDatosCruzadosBI();
         }
 
-        // ✅ NUEVA FUNCIÓN DINÁMICA: Crea las opciones del dropdown basándose en los días del mes
+        // ✅ FILTRO BLINDADO CONTRA LENTITUD: Crea opciones fijas de a medio día. Evita el recalculo infinito por tecla.
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -658,7 +653,7 @@
             }
         }
 
-        // ✅ NUEVA LÓGICA DROPDOWN: Evita recalcular por cada tecla y acelera el dashboard x100
+        // ✅ RECALCULO INSTANTÁNEO SÓLO CUANDO CAMBIA EL DROPDOWN (VELOCIDAD MÁXIMA)
         function recalcularSimulacionDias() {
             let selectTrans = document.getElementById('lbl-dias-trans').value;
             simulacionDiasTrans = parseFloat(selectTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
@@ -965,7 +960,6 @@
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // Si no estamos en el mes actual, desactiva el dropdown de simulación para evitar errores históricos
             if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                 document.getElementById('lbl-dias-trans').innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
                 document.getElementById('lbl-dias-trans').disabled = true;
