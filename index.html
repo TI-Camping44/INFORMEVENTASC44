@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,7 @@
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
         .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        .filter-group select, .filter-group input[type="date"], .filter-group input[type="number"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
+        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
         .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
         .btn-clear-filters:hover { background-color: #e2e8f0; }
@@ -48,8 +48,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* ✅ Input sin bordes para la simulación */
-        .editable-days { width: 50px; border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); text-align: right; outline: none; border-bottom: 1px dashed var(--teal-accent); }
+        /* ✅ Estilos para el select simulador de transcurridos */
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 11px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -96,7 +96,7 @@
         .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; width: 100%; }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; }
 
-        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
+        .loading-screen { fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -185,11 +185,13 @@
                 <table class="time-box-table">
                     <tr>
                         <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
-                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td>
+                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 11px; padding-right:15px;">--</td>
                     </tr>
                     <tr>
                         <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
-                        <td><input type="number" step="0.5" id="lbl-dias-trans" class="editable-days" onchange="recalcularSimulacionDias()"></td>
+                        <td>
+                            <select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select>
+                        </td>
                     </tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
@@ -440,7 +442,6 @@
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
         
-        // Variables globales para simulación de días sin alterar la base principal
         let simulacionDiasTrans = 0;
 
         const HISTORICO_METAS = {
@@ -584,6 +585,18 @@
             descargarDatosCruzadosBI();
         }
 
+        // ✅ NUEVA FUNCIÓN DINÁMICA: Crea las opciones del dropdown basándose en los días del mes
+        function poblarDropdownDiasTranscurridos(maxDias) {
+            let selectTrans = document.getElementById('lbl-dias-trans');
+            if (!selectTrans) return;
+            let html = "";
+            for (let d = 0.5; d <= maxDias; d += 0.5) {
+                let selected = (d === simulacionDiasTrans) ? "selected" : "";
+                html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
+            }
+            selectTrans.innerHTML = html;
+        }
+
         async function descargarDatosCruzadosBI() {
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
@@ -622,6 +635,7 @@
                 });
                 
                 simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+                poblarDropdownDiasTranscurridos(METAS_JUNIO_LIVE.diasMes);
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
@@ -644,10 +658,10 @@
             }
         }
 
-        // ✅ NUEVA FUNCIÓN: Al escribir en la casilla de Días Transcurridos
+        // ✅ NUEVA LÓGICA DROPDOWN: Evita recalcular por cada tecla y acelera el dashboard x100
         function recalcularSimulacionDias() {
-            let inputTrans = document.getElementById('lbl-dias-trans').value;
-            simulacionDiasTrans = parseFloat(inputTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
+            let selectTrans = document.getElementById('lbl-dias-trans').value;
+            simulacionDiasTrans = parseFloat(selectTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
             filtrarYRenderizarTodo(); 
         }
 
@@ -811,6 +825,7 @@
             document.getElementById('select-marca').value = "";
             
             simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            poblarDropdownDiasTranscurridos(METAS_JUNIO_LIVE.diasMes);
             
             filtrarYRenderizarTodo();
         }
@@ -820,7 +835,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
@@ -854,9 +869,9 @@
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
-            // ✅ USAMOS LOS VALORES DEL INPUT SOLO PARA TRANSCURRIDOS
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
                 diasTranscurridosActivos = simulacionDiasTrans;
+                poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
             if (filtrosActivos.fecha) {
@@ -948,9 +963,15 @@
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
             
-            // ✅ DÍAS HÁBILES FIJOS COMO TEXTO Y TRANSCURRIDOS COMO INPUT
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
-            document.getElementById('lbl-dias-trans').value = dTr;
+            
+            // Si no estamos en el mes actual, desactiva el dropdown de simulación para evitar errores históricos
+            if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
+                document.getElementById('lbl-dias-trans').innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
+                document.getElementById('lbl-dias-trans').disabled = true;
+            } else {
+                document.getElementById('lbl-dias-trans').disabled = false;
+            }
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
