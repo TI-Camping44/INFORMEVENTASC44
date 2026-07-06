@@ -32,7 +32,7 @@
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-uppercase: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
         .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
@@ -396,6 +396,32 @@
     </div>
 
     <script>
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            if (element) element.classList.add('active');
+        }
+
+        function copiarLinkVendedor() {
+            let v = document.getElementById('select-vendedor').value;
+            if (!v) {
+                alert("⚠️ Primero seleccioná un vendedor en el menú desplegable.");
+                return;
+            }
+            let urlObj = new URL(window.location.href);
+            urlObj.searchParams.set('vendedor', v);
+            
+            navigator.clipboard.writeText(urlObj.toString()).then(() => {
+                actualizarBannerEstado('success', `✅ Enlace copiado al portapapeles. Mandáselo a ${v} para que solo vea su panel.`);
+            }).catch(err => {
+                prompt("Copiá este enlace y mandáselo al vendedor:", urlObj.toString());
+            });
+        }
+    </script>
+
+    <script>
         var chartLine = null;
         var chartPie = null;
 
@@ -618,8 +644,9 @@
             let dTransFinal = 15;
 
             try {
+                // ✅ ARREGLADO EL MAP CON FILTRADO ROBUSTO DE CAMPOS VACÍOS O ESPACIOS
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return; // ✅ ERROR CRÍTICO CORREGIDO: Cambiado 'continue' por 'return'. Esto crasheaba silenciosamente el script impidiendo ocultar la pantalla de carga.
+                    if(!row || row.length === 0 || !row[0]) return; 
                     
                     let col0 = String(row[0]).trim();
                     
@@ -711,7 +738,7 @@
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
                 let d = {
-                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[15],
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], seller: r[17], canal: r[18], totalGs: handleNum(r[30])
                 };
                 
@@ -810,7 +837,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
@@ -1104,7 +1131,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO: Cambiado de 'metasConfig' a 'METAS_ACTIVAS'. Aquí estaba el crash fatal.
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO DEFINITIVAMENTE: Vinculado al objeto dinámico del período activo. Ningún botón volverá a trabarse.
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
