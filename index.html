@@ -396,32 +396,6 @@
     </div>
 
     <script>
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            const targetTab = document.getElementById(tabId);
-            if (targetTab) targetTab.classList.add('active');
-            if (element) element.classList.add('active');
-        }
-
-        function copiarLinkVendedor() {
-            let v = document.getElementById('select-vendedor').value;
-            if (!v) {
-                alert("⚠️ Primero seleccioná un vendedor en el menú desplegable.");
-                return;
-            }
-            let urlObj = new URL(window.location.href);
-            urlObj.searchParams.set('vendedor', v);
-            
-            navigator.clipboard.writeText(urlObj.toString()).then(() => {
-                actualizarBannerEstado('success', `✅ Enlace copiado al portapapeles. Mandáselo a ${v} para que solo vea su panel.`);
-            }).catch(err => {
-                prompt("Copiá este enlace y mandáselo al vendedor:", urlObj.toString());
-            });
-        }
-    </script>
-
-    <script>
         var chartLine = null;
         var chartPie = null;
 
@@ -464,6 +438,113 @@
         };
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
+
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "SELLIER & BELLOT", "Armscor", "IMI", "Golden Eagle", "Federal", "Armas", "Municiones", "Glock"];
+
+        function parseDateToTime(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0]; 
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
+            }
+            return 0;
+        }
+
+        function getMonthFromDate(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return parseInt(p[1], 10);
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return parseInt(p[1], 10);
+            }
+            return 0;
+        }
+
+        function getIsoTime(isoStr) {
+            if(!isoStr) return 0;
+            let p = isoStr.split('-');
+            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
+        }
+
+        function dateToIsoString(dStr) {
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else if (datePart.includes('-')) {
+                return datePart; 
+            }
+            return "";
+        }
+
+        function handleNum(val) {
+            if (!val) return 0;
+            let str = String(val).replace(/\./g, ''); 
+            if (str.includes(',')) str = str.split(',')[0]; 
+            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
+        }
+
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
+        }
+
+        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
+            if(!diccionarioMetas) return 0;
+            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
+            let nameUpper = nombreOdoo.toUpperCase();
+            for (let k in diccionarioMetas) {
+                if (k.toUpperCase().includes(nameUpper) || nameUpper.includes(k.toUpperCase())) return diccionarioMetas[k];
+            }
+            return 0;
+        }
+
+        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
+            if(!diccionarioVM) return 0;
+            let query = nombreOdoo + "|||" + marca;
+            if(diccionarioVM[query]) return diccionarioVM[query];
+            let nameUpper = nombreOdoo.toUpperCase();
+            let marcaUpper = marca.toUpperCase();
+            for (let k in diccionarioVM) {
+                let parts = k.split('|||');
+                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
+            }
+            return 0;
+        }
+
+        function construirDropdownMesesDinámico(mesActualLive) {
+            let select = document.getElementById('select-mes');
+            if (!select) return;
+            let html = `<option value="">-- Año Completo (YTD) --</option>`;
+            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            for (let m = 1; m <= 12; m++) {
+                if (m < mesActualLive) {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                } else if (m === mesActualLive) {
+                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
+                } else {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                }
+            }
+            select.innerHTML = html;
+        }
+
+        function iniciarSincronizacion() {
+            document.getElementById('loader').style.display = 'flex';
+            descargarDatosCruzadosBI();
+        }
 
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
@@ -538,7 +619,7 @@
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return; // ✅ COMPLETO AL 100%: Reemplazado 'continue' por 'return' para evitar la parálisis crítica del script.
+                    if(!row || row.length === 0) return; // ✅ ERROR CRÍTICO CORREGIDO: Cambiado 'continue' por 'return'. Esto crasheaba silenciosamente el script impidiendo ocultar la pantalla de carga.
                     
                     let col0 = String(row[0]).trim();
                     
@@ -740,7 +821,7 @@
                     metasYTD.diasTranscurridos += (mData.diasTranscurridos || 0);
                     if(mData.canales) { Object.keys(mData.canales).forEach(c => { metasYTD.canales[c] = (metasYTD.canales[c] || 0) + (mData.canales[c] || 0); }); }
                     if(mData.vendedoresTotales) { Object.keys(mData.vendedoresTotales).forEach(v => { metasYTD.vendedoresTotales[v] = (metasYTD.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); }); }
-                    if (mData.vendedorMarca) { Object.keys(mData.vendedorMarca).forEach(vm => { metasYTD.vendorMarca[vm] = (metasYTD.vendorMarca[vm] || 0) + (mData.vendorMarca[vm] || 0); }); }
+                    if (mData.vendedorMarca) { Object.keys(mData.vendedorMarca).forEach(vm => { metasYTD.vendedorMarca[vm] = (metasYTD.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); }); }
                 }
                 return metasYTD;
             } else if (parseInt(mesSelec) === liveMonth) {
@@ -1023,7 +1104,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, metasConfig.vendedoresTotales); // Se corrigió la lectura del objeto de configuraciones global para la ficha
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO: Cambiado de 'metasConfig' a 'METAS_ACTIVAS'. Aquí estaba el crash fatal.
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -1144,4 +1225,4 @@
         iniciarSincronizacion();
     </script>
 </body>
-</html> 
+</html>
