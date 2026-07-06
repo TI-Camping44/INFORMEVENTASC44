@@ -48,7 +48,7 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* ✅ Se ajustó el input para que no tenga bordes feos al editar los días */
+        /* ✅ Input sin bordes para la simulación */
         .editable-days { width: 50px; border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); text-align: right; outline: none; border-bottom: 1px dashed var(--teal-accent); }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -185,7 +185,7 @@
                 <table class="time-box-table">
                     <tr>
                         <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
-                        <td><input type="number" step="0.5" id="lbl-dias-totales" class="editable-days" onchange="recalcularSimulacionDias()"></td>
+                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td>
                     </tr>
                     <tr>
                         <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
@@ -441,7 +441,6 @@
         let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
         
         // Variables globales para simulación de días sin alterar la base principal
-        let simulacionDiasMes = 0;
         let simulacionDiasTrans = 0;
 
         const HISTORICO_METAS = {
@@ -614,7 +613,6 @@
                             filtrosActivos.mes = String(mIdx);
                         }
                     }
-                    // ✅ CAPTURA DE DIAS HABILES DESDE GOOGLE SHEETS
                     if(row[0] === "Días Hábiles del Mes:" && row[1]) {
                         METAS_JUNIO_LIVE.diasMes = parseFloat(String(row[1]).replace(',', '.'));
                     }
@@ -623,8 +621,6 @@
                     }
                 });
                 
-                // Actualiza variables de simulación la primera vez
-                simulacionDiasMes = METAS_JUNIO_LIVE.diasMes;
                 simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
@@ -648,15 +644,11 @@
             }
         }
 
-        // ✅ NUEVA FUNCIÓN: Se ejecuta al cambiar los números en el input
+        // ✅ NUEVA FUNCIÓN: Al escribir en la casilla de Días Transcurridos
         function recalcularSimulacionDias() {
-            let inputMes = document.getElementById('lbl-dias-totales').value;
             let inputTrans = document.getElementById('lbl-dias-trans').value;
-            
-            simulacionDiasMes = parseFloat(inputMes) || METAS_JUNIO_LIVE.diasMes;
             simulacionDiasTrans = parseFloat(inputTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
-            
-            filtrarYRenderizarTodo(); // Redibuja con los nuevos días
+            filtrarYRenderizarTodo(); 
         }
 
         function procesarMetasConfigActuales(filas) {
@@ -818,8 +810,6 @@
             document.getElementById('select-fecha').value = "";
             document.getElementById('select-marca').value = "";
             
-            // Reinicia los días a los valores reales de Odoo al limpiar
-            simulacionDiasMes = METAS_JUNIO_LIVE.diasMes;
             simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
             
             filtrarYRenderizarTodo();
@@ -864,26 +854,16 @@
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
-            // ✅ USAMOS LOS VALORES DEL INPUT EN CASO DE SIMULACIÓN PARA EL MES ACTUAL
+            // ✅ USAMOS LOS VALORES DEL INPUT SOLO PARA TRANSCURRIDOS
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
                 diasTranscurridosActivos = simulacionDiasTrans;
-                diasTotalesActivos = simulacionDiasMes;
-                
-                // Actualiza visualmente los inputs
-                document.getElementById('lbl-dias-totales').value = simulacionDiasMes;
-                document.getElementById('lbl-dias-trans').value = simulacionDiasTrans;
-            } else {
-                document.getElementById('lbl-dias-totales').value = diasTotalesActivos;
-                document.getElementById('lbl-dias-trans').value = diasTranscurridosActivos;
             }
             
             if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
                 diasTranscurridosActivos = 1; 
-                document.getElementById('lbl-dias-trans').value = 1;
             } else if (filtrosActivos.mes !== "" && filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
-                document.getElementById('lbl-dias-trans').value = METAS_ACTIVAS.diasMes;
             }
 
             lineasDeDatosGlobales.forEach(r => {
@@ -967,6 +947,10 @@
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
+            
+            // ✅ DÍAS HÁBILES FIJOS COMO TEXTO Y TRANSCURRIDOS COMO INPUT
+            document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
+            document.getElementById('lbl-dias-trans').value = dTr;
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
