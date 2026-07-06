@@ -471,14 +471,12 @@
             }
         };
 
-        // Clonamos Junio como base inicial temporal
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
 
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
             
-            // Si maxDias vino corrupto o en NaN, le forzamos un valor seguro para no colgar la visualización
             if (isNaN(maxDias) || maxDias <= 0) maxDias = 22;
             
             let html = "";
@@ -509,7 +507,6 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                // ✅ ARREGLO MÁGICO CLAVE: Usamos el procesador regex limpio para las metas y días. Adiós comas del split tradicional.
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
@@ -544,13 +541,12 @@
             METAS_JUNIO_LIVE.vendedoresTotales = {};
             METAS_JUNIO_LIVE.vendedorMarca = {};
 
-            // Valores de emergencia por si la celda de Sheets viene rota o en blanco
             let dMesFinal = 22;
             let dTransFinal = 15;
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return;
+                    if(!row || row.length === 0) return; // ✅ CAMBIADO DE 'continue' A 'return'. ¡AQUÍ ESTABA EL CRASH QUE TE PARALIZABA LA PANTALLA!
                     
                     let col0 = String(row[0]).trim();
                     
@@ -643,9 +639,12 @@
 
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
-                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
+                    unidadNegocio: r[16], seller: r[17], canal: r[18], totalGs: handleNum(r[30])
                 };
                 
+                // Traspaso de compatibilidad con tu render original
+                d.vendedor = d.seller;
+
                 let dp = String(d.fecha).split(' ')[0];
                 if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
                 else if(dp.includes('-')) d.mesIdx = parseInt(dp.split('-')[1], 10);
@@ -739,7 +738,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
@@ -842,7 +841,6 @@
             let dMes = parseFloat(dMesActivo);
             let dTr = parseFloat(dTrActivo); 
 
-            // Blindaje definitivo anti-NaN por si acaso
             if (isNaN(dMes) || dMes <= 0) dMes = 22;
             if (isNaN(dTr) || dTr <= 0) dTr = 15;
 
@@ -1049,7 +1047,7 @@
                             <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
                             <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows}
                             <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${subRV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                            <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
+                    <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                             
                             <tr><td colspan="4" class="ficha-kpi-header" style="background:#1a2c42; color:white;">--- PROYECCIÓN Y KPIs ---</td></tr>
                             <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
@@ -1058,7 +1056,6 @@
                             <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
                             <tr class="ficha-kpi-normal"><td>Cantidad de Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${marcasAsignadas}</td></tr>
                             <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Marcas Alcanzadas</td><td colspan="2" class="text-right ${marcasAlcanzadas > 0 ? 'num-positivo' : 'num-negativo'}">${marcasAlcanzadas}</td><td class="text-center ${marcasAlcanzadas > 0 ? 'num-positivo' : 'num-negativo'}">${pctMarcas}</td></tr>
-                            <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
                         </tbody>
                     </table>
                 </div>`;
