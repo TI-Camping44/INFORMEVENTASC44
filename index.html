@@ -35,7 +35,7 @@
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
         .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
+        .filter-group select, .filter-group input[type="date"], .filter-group input[type="number"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
         .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
         .btn-clear-filters:hover { background-color: #e2e8f0; }
@@ -48,6 +48,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
+        /* ✅ Se ajustó el input para que no tenga bordes feos al editar los días */
+        .editable-days { width: 50px; border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); text-align: right; outline: none; border-bottom: 1px dashed var(--teal-accent); }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -75,7 +77,6 @@
         .ficha-table th { background: #f8fafc; padding: 4px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; }
         .ficha-table td { padding: 3px 6px; border-bottom: 1px dashed #e2e8f0; } 
         
-        /* 🔥 NUEVA CLASE PARA FILA PINTADA DE VERDE SI CUMPLIÓ META */
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         
         .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
@@ -182,8 +183,14 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td id="lbl-dias-trans" class="text-right" style="font-weight:bold; font-size: 13px;">--</td></tr>
+                    <tr>
+                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
+                        <td><input type="number" step="0.5" id="lbl-dias-totales" class="editable-days" onchange="recalcularSimulacionDias()"></td>
+                    </tr>
+                    <tr>
+                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
+                        <td><input type="number" step="0.5" id="lbl-dias-trans" class="editable-days" onchange="recalcularSimulacionDias()"></td>
+                    </tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -432,8 +439,11 @@
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
+        
+        // Variables globales para simulación de días sin alterar la base principal
+        let simulacionDiasMes = 0;
+        let simulacionDiasTrans = 0;
 
-        // ✅ REPOSITORIO HISTÓRICO RESTAURADO COMPLETAMENTE AL 100%
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
@@ -604,7 +614,18 @@
                             filtrosActivos.mes = String(mIdx);
                         }
                     }
+                    // ✅ CAPTURA DE DIAS HABILES DESDE GOOGLE SHEETS
+                    if(row[0] === "Días Hábiles del Mes:" && row[1]) {
+                        METAS_JUNIO_LIVE.diasMes = parseFloat(String(row[1]).replace(',', '.'));
+                    }
+                    if(row[0] === "Días Hábiles Transcurridos:" && row[1]) {
+                        METAS_JUNIO_LIVE.diasTranscurridos = parseFloat(String(row[1]).replace(',', '.'));
+                    }
                 });
+                
+                // Actualiza variables de simulación la primera vez
+                simulacionDiasMes = METAS_JUNIO_LIVE.diasMes;
+                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
@@ -627,6 +648,17 @@
             }
         }
 
+        // ✅ NUEVA FUNCIÓN: Se ejecuta al cambiar los números en el input
+        function recalcularSimulacionDias() {
+            let inputMes = document.getElementById('lbl-dias-totales').value;
+            let inputTrans = document.getElementById('lbl-dias-trans').value;
+            
+            simulacionDiasMes = parseFloat(inputMes) || METAS_JUNIO_LIVE.diasMes;
+            simulacionDiasTrans = parseFloat(inputTrans) || METAS_JUNIO_LIVE.diasTranscurridos;
+            
+            filtrarYRenderizarTodo(); // Redibuja con los nuevos días
+        }
+
         function procesarMetasConfigActuales(filas) {
             METAS_JUNIO_LIVE.canales = {};
             METAS_JUNIO_LIVE.vendedoresTotales = {};
@@ -635,16 +667,7 @@
             try {
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return;
-                    if (row[0] === "Días Hábiles del Mes:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasMes = val;
-                    }
-                    if (row[0] === "Días Hábiles Transcurridos:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasTranscurridos = val;
-                    }
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
-
                     if (["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
                         METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
                     }
@@ -708,7 +731,6 @@
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
 
-                // CAMBIO AL INDICE 14 (MARCA ORIGINAL) PARA NO LEER "ARMAS" A SECAS EN TODAS LAS MARCAS
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
@@ -795,6 +817,11 @@
             document.getElementById('select-canal').value = "";
             document.getElementById('select-fecha').value = "";
             document.getElementById('select-marca').value = "";
+            
+            // Reinicia los días a los valores reales de Odoo al limpiar
+            simulacionDiasMes = METAS_JUNIO_LIVE.diasMes;
+            simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            
             filtrarYRenderizarTodo();
         }
 
@@ -834,13 +861,29 @@
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
 
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
+            let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
+            
+            // ✅ USAMOS LOS VALORES DEL INPUT EN CASO DE SIMULACIÓN PARA EL MES ACTUAL
+            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
+                diasTranscurridosActivos = simulacionDiasTrans;
+                diasTotalesActivos = simulacionDiasMes;
+                
+                // Actualiza visualmente los inputs
+                document.getElementById('lbl-dias-totales').value = simulacionDiasMes;
+                document.getElementById('lbl-dias-trans').value = simulacionDiasTrans;
+            } else {
+                document.getElementById('lbl-dias-totales').value = diasTotalesActivos;
+                document.getElementById('lbl-dias-trans').value = diasTranscurridosActivos;
+            }
             
             if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
                 diasTranscurridosActivos = 1; 
+                document.getElementById('lbl-dias-trans').value = 1;
             } else if (filtrosActivos.mes !== "" && filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
+                document.getElementById('lbl-dias-trans').value = METAS_ACTIVAS.diasMes;
             }
 
             lineasDeDatosGlobales.forEach(r => {
@@ -893,12 +936,12 @@
                 }
             });
 
-            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos);
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
         }
 
-        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo) {
-            let dMes = METAS_ACTIVAS.diasMes || 22;
-            let dTr = dTrActivo || 19.5; 
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
+            let dMes = dMesActivo;
+            let dTr = dTrActivo; 
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
@@ -924,8 +967,6 @@
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
-            document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
-            document.getElementById('lbl-dias-trans').innerText = dTr.toFixed(1).replace('.', ',');
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
@@ -1045,7 +1086,6 @@
                     let val = vData.marcas[m] || 0;
                     let mAsig = getMetaVendedorMarca(v, m, METAS_ACTIVAS.vendedorMarca);
                     
-                    // ✅ LÓGICA DE FILA VERDE Y CHECKMARK
                     let rowClass = "";
                     let checkMark = "";
                     if (mAsig > 0) {
