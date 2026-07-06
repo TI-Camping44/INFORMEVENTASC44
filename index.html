@@ -16,13 +16,15 @@
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
+            /* Color para fila de meta lograda */
             --row-success-bg: #e6fffa;
         }
 
+        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
-        .sidebar-logo { width: 90%; max-width: 150px; margin: 0 open auto auto; display: block; background-color: white; border-radius: 8px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
+        .sidebar-logo { width: 90%; max-width: 150px; margin: 0 auto 20px auto; display: block; background-color: white; border-radius: 8px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 10px; margin-bottom: 20px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
         .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
@@ -46,11 +48,15 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 12px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 11px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
 
-        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
-        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
+        .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
+        .banner-error { background-color: var(--red-banner-bg); color: var(--red-banner-text); border-color: var(--red-banner-border); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; overflow-x: auto; display: block; -webkit-overflow-scrolling: touch; }
         .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -10px -10px 10px -10px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; position: sticky; left: 0; }
@@ -62,6 +68,7 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
+        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -88,6 +95,11 @@
         .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; width: 100%; }
         .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; }
 
+        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
+        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* MODO CELULAR Y TABLET RESPONSIVO */
         @media (max-width: 1200px) {
             .fichas-grid { grid-template-columns: repeat(2, 1fr); }
             .grid-1-2 { grid-template-columns: 1fr; }
@@ -460,16 +472,21 @@
             "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
+            },
+            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
+                   canales: { "Salon": 590000000, "Online": 320000000, "E-commerce": 120000000, "Mayoristas": 1380000000, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1380000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000 }
             }
         };
 
-        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
+        // Clonamos Julio como base activa por defecto
+        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
 
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
             
-            if (isNaN(maxDias) || maxDias <= 0) maxDias = 22;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 25;
             
             let html = "";
             for (let d = 0.5; d <= maxDias; d += 0.5) {
@@ -523,7 +540,7 @@
             simulacionDiasTrans = parseFloat(selectTrans);
             
             if (isNaN(simulacionDiasTrans) || simulacionDiasTrans <= 0) {
-                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos || 15;
+                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos || 4.5;
             }
             filtrarYRenderizarTodo(); 
         }
@@ -533,8 +550,8 @@
             METAS_JUNIO_LIVE.vendedoresTotales = {};
             METAS_JUNIO_LIVE.vendedorMarca = {};
 
-            let dMesFinal = 22;
-            let dTransFinal = 15;
+            let dMesFinal = 25;
+            let dTransFinal = 4.5;
 
             try {
                 filas.forEach((row, idx) => {
@@ -729,7 +746,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendorMarca: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (key === String(liveMonth)) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
@@ -773,8 +790,8 @@
                 poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
-            if (isNaN(diasTotalesActivos) || diasTotalesActivos <= 0) diasTotalesActivos = 22;
-            if (isNaN(diasTranscurridosActivos) || diasTranscurridosActivos <= 0) diasTranscurridosActivos = 15;
+            if (isNaN(diasTotalesActivos) || diasTotalesActivos <= 0) diasTotalesActivos = 25;
+            if (isNaN(diasTranscurridosActivos) || diasTranscurridosActivos <= 0) diasTranscurridosActivos = 4.5;
             
             if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
@@ -840,8 +857,8 @@
             let dMes = parseFloat(dMesActivo);
             let dTr = parseFloat(dTrActivo); 
 
-            if (isNaN(dMes) || dMes <= 0) dMes = 22;
-            if (isNaN(dTr) || dTr <= 0) dTr = 15;
+            if (isNaN(dMes) || dMes <= 0) dMes = 25;
+            if (isNaN(dTr) || dTr <= 0) dTr = 4.5;
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
@@ -865,8 +882,8 @@
 
             document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles");
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
-            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
@@ -952,7 +969,7 @@
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
-                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
+                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO CON METAS_ACTIVAS: Vinculado al diccionario dinámico correcto. Las pestañas y botones se descongelan por completo.
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
@@ -1023,7 +1040,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ CORREGIDO DEFINITIVAMENTE CON METAS_ACTIVAS: Ninguna función colapsará el renderizado.
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -1087,10 +1104,10 @@
 
             let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
-            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { if (ncPorFechaMes[vd.fechaStr]) { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${ncPorFechaMes[vd.fechaStr].toLocaleString('es-PY')}</td></tr>`; } }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vGlobalArmas.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             if (window.chartLine) { window.chartLine.destroy(); }
