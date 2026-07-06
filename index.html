@@ -41,7 +41,6 @@
         .btn-clear-filters:hover { background-color: #e2e8f0; }
 
         .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .sheet-title-main { flex-grow: 1; }
         .sheet-title-main h2 { margin: 0; font-size: 15px; font-weight: 800; color: var(--navy-main); letter-spacing: 0.5px; }
         .sheet-title-main h3 { margin: 3px 0 0 0; font-size: 12px; font-weight: 700; color: var(--teal-accent); }
@@ -49,8 +48,8 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown estético para simulación */
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 12px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
+        /* Dropdown estético para la simulación */
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 55px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
@@ -78,7 +77,7 @@
         .ficha-table th { background: #f8fafc; padding: 4px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; }
         .ficha-table td { padding: 3px 6px; border-bottom: 1px dashed #e2e8f0; } 
         
-        /* 🔥 CLASE PARA FILA PINTADA DE VERDE SI CUMPLIÓ META */
+        /* 🔥 Meta Lograda Fila Color */
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         
         .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
@@ -434,50 +433,171 @@
 
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
+        let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
         
-        // Variable de simulación reincorporada
+        // ✅ Variable de simulación reincorporada limpiamente
         let simulacionDiasTrans = null;
 
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
             },
             "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
             },
             "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
                    canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 685000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 685000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 145260057 }
             },
             "4": { name: "Abril", diasMes: 22.0, diasTranscurridos: 22.0, global: 2455000000, 
                    canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 270000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 270000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
             },
             "5": { name: "Mayo", diasMes: 20.5, diasTranscurridos: 20.5, global: 2300000000, 
                    canales: { "Salon": 395000000, "Online": 685000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
             },
             "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
-            },
-            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
-                   canales: { "Salon": 590000000, "Online": 320000000, "E-commerce": 120000000, "Mayoristas": 1380000000, "Directorio": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1380000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000 }
             }
         };
 
-        // Clonación inicial segura de Julio
-        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
+        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["6"]));
 
-        // ✅ FUNCIÓN DE BINDING CORRECTO: Evita pisotear variables o corromper el dropdown
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
+
+        function parseDateToTime(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0]; 
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
+            }
+            return 0;
+        }
+
+        function getMonthFromDate(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return parseInt(p[1], 10);
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return parseInt(p[1], 10);
+            }
+            return 0;
+        }
+
+        function getIsoTime(isoStr) {
+            if(!isoStr) return 0;
+            let p = isoStr.split('-');
+            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
+        }
+
+        function dateToIsoString(dStr) {
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else if (datePart.includes('-')) {
+                return datePart; 
+            }
+            return "";
+        }
+
+        function handleNum(val) {
+            if (!val) return 0;
+            let str = String(val).replace(/\./g, ''); 
+            if (str.includes(',')) str = str.split(',')[0]; 
+            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
+        }
+
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
+        }
+
+        // ✅ REGLA MATEMÁTICA ANTI-CRASH: Evita que nombres de personas reales coincidan con claves genéricas como "SALON"
+        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
+            if(!diccionarioMetas) return 0;
+            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
+            
+            let nameUpper = nombreOdoo.toUpperCase().trim();
+            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+
+            if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
+                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
+            }
+
+            for (let k in diccionarioMetas) {
+                let kUpper = k.toUpperCase().trim();
+                
+                // Si la celda del Excel es genérica, NO dejamos que pise a una persona real
+                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
+                    if (nameUpper === kUpper) return diccionarioMetas[k];
+                    continue; 
+                }
+                
+                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+                if (cleanK === cleanNameOdoo || nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                    return diccionarioMetas[k];
+                }
+            }
+            return 0;
+        }
+
+        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
+            if(!diccionarioVM) return 0;
+            let query = nombreOdoo + "|||" + marca;
+            if(diccionarioVM[query]) return diccionarioVM[query];
+            let nameUpper = nombreOdoo.toUpperCase();
+            let marcaUpper = marca.toUpperCase();
+            for (let k in diccionarioVM) {
+                let parts = k.split('|||');
+                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
+            }
+            return 0;
+        }
+
+        function construirDropdownMesesDinámico(mesActualLive) {
+            let select = document.getElementById('select-mes');
+            if (!select) return;
+            let html = `<option value="">-- Año Completo (YTD) --</option>`;
+            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            for (let m = 1; m <= 12; m++) {
+                if (m < mesActualLive) {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                } else if (m === mesActualLive) {
+                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
+                } else {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                }
+            }
+            select.innerHTML = html;
+        }
+
+        // Dropdown con valores seguros de a medio día
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
-            if (isNaN(maxDias) || maxDias <= 0) maxDias = 25;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
             let html = "";
             let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
             for (let d = 0.5; d <= maxDias; d += 0.5) {
@@ -550,55 +670,21 @@
             }
         }
 
-        // ✅ NUEVA REGLA MATEMÁTICA ANTI-CRASH: Evita falsas asociaciones genéricas con "SALON" u "ONLINE"
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            
-            let nameUpper = nombreOdoo.toUpperCase().trim();
-            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-
-            if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
-                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
-            }
-
-            for (let k in diccionarioMetas) {
-                let kUpper = k.toUpperCase().trim();
-                
-                // Si la fila del Excel es genérica, NO permitimos que sobreescriba la ficha de una persona real
-                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
-                    if (nameUpper === kUpper) return diccionarioMetas[k];
-                    continue; 
-                }
-                
-                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo || nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
-                    return diccionarioMetas[k];
-                }
-            }
-            return 0;
-        }
-
         function procesarMetasConfigActuales(filas) {
             METAS_JUNIO_LIVE.canales = {};
             METAS_JUNIO_LIVE.vendedoresTotales = {};
             METAS_JUNIO_LIVE.vendedorMarca = {};
 
-            let dMesFinal = 25;
-            let dTransFinal = 4.5;
-
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0 || !row[0]) return; 
-                    
-                    let col0 = String(row[0]).trim();
-                    if (col0 === "Días Hábiles del Mes:") {
+                    if(!row || row.length === 0 || !row[0]) return;
+                    if (row[0] === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dMesFinal = val;
+                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasMes = val;
                     }
-                    if (col0 === "Días Hábiles Transcurridos:") {
+                    if (row[0] === "Días Hábiles Transcurridos:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dTransFinal = val;
+                        if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasTranscurridos = val;
                     }
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
 
@@ -610,11 +696,8 @@
                     }
                 });
 
-                METAS_JUNIO_LIVE.diasMes = dMesFinal;
-                METAS_JUNIO_LIVE.diasTranscurridos = dTransFinal;
-
                 if (simulacionDiasTrans === null) {
-                    simulacionDiasTrans = dTransFinal;
+                    simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
                 }
                 poblarDropdownDiasTranscurridos(31);
 
@@ -751,9 +834,8 @@
             filtrosActivos.fecha = document.getElementById('select-fecha').value; 
             filtrosActivos.marca = document.getElementById('select-marca').value;
             
-            // Si cambian de mes y vuelven al actual, forzamos que tome el valor real de Odoo en vez de corromperse
-            if (filtrosActivos.mes !== oldMes && filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
-                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            if (filtrosActivos.mes !== oldMes) {
+                simulacionDiasTrans = null; // Reseteo dinámico seguro para no arrastrar valores viejos
             }
             filtrarYRenderizarTodo();
         }
@@ -901,11 +983,11 @@
 
             document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles");
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
-            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // ✅ BIEN CONFIGURADO EL SELECT DE LOS DÍAS SIN ROMPER EL VALOR AL CAMBIAR DE MES
+            // ✅ CORRECCIÓN QUIRÚRGICA DEL DROPDOWN: Se pobla dinámicamente y se desactiva solo en meses históricos
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive) && filtrosActivos.mes !== "") {
@@ -927,9 +1009,9 @@
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
-            let esperadoGlobal = Math.round(((METAS_ACTIVAS.global || 0) / dMes) * dTr);
+            let esperadoGlobal = Math.round((objetivoFiltrado / dMes) * dTr);
             let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
-            let pctGlobalMes = METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(0) + "%" : "0%";
+            let pctGlobalMes = objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(0) + "%" : "0%";
             let proyGlobal = Math.round(dTr > 0 ? (data.neta / dTr) * dMes : 0);
             
             document.getElementById('grid-objetivos-base').innerHTML = `
@@ -938,7 +1020,7 @@
                     <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
                     <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
                     <td class="text-right num-positivo">${pctGlobalHoy}</td>
-                    <td class="text-right">₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${objetivoFiltrado.toLocaleString('es-PY')}</td>
                     <td class="text-right">${pctGlobalMes}</td>
                     <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
                 </tr>
@@ -1134,7 +1216,9 @@
             
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = r; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
+            
+            // ✅ CORRECCIÓN DEFINITIVA DE TYPO: hR reincorporada correctamente
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             if (window.chartLine) { window.chartLine.destroy(); }
             if (window.chartPie) { window.chartPie.destroy(); }
