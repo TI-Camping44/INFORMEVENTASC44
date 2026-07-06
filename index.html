@@ -33,9 +33,7 @@
         .main-content { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
         .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
@@ -49,7 +47,7 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Clases estéticas para el menú desplegable de simulación */
+        /* Dropdown estético para la simulación */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -114,7 +112,7 @@
             body { flex-direction: column; overflow-y: auto; font-size: 12px; }
             .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px; overflow-x: auto; white-space: nowrap; align-items: center; position: sticky; top: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
             .sidebar-logo, .sidebar h2 { display: none; }
-            .menu-item { inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 11px; }
+            .menu-item { display: inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 11px; }
             .main-content { padding: 10px; overflow-x: hidden; }
             .filter-panel { flex-direction: column; padding: 10px; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; }
@@ -185,7 +183,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right: 10px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td></tr>
                     <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
@@ -436,7 +434,7 @@
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "6", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 6 };
         
-        // ✅ Variable global para guardar la simulación
+        // ✅ Variable global de simulación reincorporada limpiamente
         let simulacionDiasTrans = null;
 
         const HISTORICO_METAS = {
@@ -575,20 +573,20 @@
             select.innerHTML = html;
         }
 
-        // ✅ NUEVA FUNCIÓN AUTOMÁTICA: Crea las opciones de a medio día para simular transcurridos sin trabarse
+        // ✅ DROPDOWN GENERADO CON SEGURIDAD (Cada 0.5 días hasta 31)
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
             if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
             let html = "";
+            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
             for (let d = 0.5; d <= maxDias; d += 0.5) {
-                let selected = (d === simulacionDiasTrans) ? "selected" : "";
+                let selected = (Math.abs(d - currentVal) < 0.1) ? "selected" : "";
                 html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
             }
             selectTrans.innerHTML = html;
         }
 
-        // ✅ NUEVA FUNCIÓN: Se ejecuta al cambiar el dropdown
         function recalcularSimulacionDias() {
             let selectTrans = document.getElementById('lbl-dias-trans').value;
             simulacionDiasTrans = parseFloat(selectTrans);
@@ -620,9 +618,22 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                // Parseo inteligente con expresiones regulares para no romper celdas con comas decimales
+                // Lector blindado regex para ignorar problemas de comas decimales
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
+
+                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
+                filasConfigPlanas.forEach(row => {
+                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if(mIdx > 0 && mIdx <= 12) {
+                            filtrosActivos.mesActualLive = mIdx;
+                            filtrosActivos.mes = String(mIdx);
+                        }
+                    }
+                });
+
+                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
 
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 procesarVentasData(filasDataFormateadas);
@@ -647,21 +658,12 @@
 
             try {
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0 || !row[0]) return; // Cambiado quirúrgicamente a return seguro
-                    
-                    let col0 = String(row[0]).trim();
-                    if (col0 === "Fecha Actual (Corte):" && row[1]) {
-                        let mIdx = getMonthFromDate(row[1]);
-                        if(mIdx > 0 && mIdx <= 12) {
-                            filtrosActivos.mesActualLive = mIdx;
-                            filtrosActivos.mes = String(mIdx);
-                        }
-                    }
-                    if (col0 === "Días Hábiles del Mes:") {
+                    if(!row || row.length === 0 || !row[0]) return; // Protegido quirúrgicamente
+                    if (row[0] === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasMes = val;
                     }
-                    if (col0 === "Días Hábiles Transcurridos:") {
+                    if (row[0] === "Días Hábiles Transcurridos:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) METAS_JUNIO_LIVE.diasTranscurridos = val;
                     }
@@ -675,11 +677,10 @@
                     }
                 });
 
-                // Inicialización única de simulación
                 if (simulacionDiasTrans === null) {
                     simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
                 }
-                poblarDropdownDiasTranscurridos(31); // Rango completo de simulación
+                poblarDropdownDiasTranscurridos(31);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -807,11 +808,16 @@
         }
 
         function aplicarFiltrosDropdown() {
+            let oldMes = filtrosActivos.mes;
             filtrosActivos.mes = document.getElementById('select-mes').value;
             filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
             filtrosActivos.canal = document.getElementById('select-canal').value;
             filtrosActivos.fecha = document.getElementById('select-fecha').value; 
             filtrosActivos.marca = document.getElementById('select-marca').value;
+            
+            if (filtrosActivos.mes !== oldMes && filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
+                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            }
             filtrarYRenderizarTodo();
         }
 
@@ -866,7 +872,7 @@
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
             let filtroTime = 0;
             
-            // Inyección quirúrgica del valor simulado
+            // Inyección limpia del valor simulado sin pisotear variables globales
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
                 if (simulacionDiasTrans !== null) {
                     diasTranscurridosActivos = simulacionDiasTrans;
@@ -959,11 +965,11 @@
 
             document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles");
             document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
-            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(1) : 0}%`;
+            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // ✅ CORRECCIÓN QUIRÚRGICA: Ajustamos el valor del select en lugar de romper el elemento con innerText
+            // ✅ CIRUGÍA PLÁSTICA AL SELECT TRANSCURRIDOS: Setea el valor limpio sin pisotear el HTML
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
@@ -979,9 +985,9 @@
             document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
-            let esperadoGlobal = Math.round(((METAS_ACTIVAS.global || 0) / dMes) * dTr);
+            let esperadoGlobal = Math.round((objetivoFiltrado / dMes) * dTr);
             let pctGlobalHoy = esperadoGlobal > 0 ? ((data.neta / esperadoGlobal) * 100).toFixed(0) + "%" : "0%";
-            let pctGlobalMes = METAS_ACTIVAS.global > 0 ? ((data.neta / METAS_ACTIVAS.global) * 100).toFixed(0) + "%" : "0%";
+            let pctGlobalMes = objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(0) + "%" : "0%";
             let proyGlobal = Math.round(dTr > 0 ? (data.neta / dTr) * dMes : 0);
             
             document.getElementById('grid-objetivos-base').innerHTML = `
@@ -990,7 +996,7 @@
                     <td class="text-right">₲ ${data.neta.toLocaleString('es-PY')}</td>
                     <td class="text-right">₲ ${esperadoGlobal.toLocaleString('es-PY')}</td>
                     <td class="text-right num-positivo">${pctGlobalHoy}</td>
-                    <td class="text-right">₲ ${(METAS_ACTIVAS.global || 0).toLocaleString('es-PY')}</td>
+                    <td class="text-right">₲ ${objetivoFiltrado.toLocaleString('es-PY')}</td>
                     <td class="text-right">${pctGlobalMes}</td>
                     <td class="text-right">₲ ${proyGlobal.toLocaleString('es-PY')}</td>
                 </tr>
@@ -1046,7 +1052,7 @@
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
-                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
+                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ RESCATADO DE TU CÓDIGO ORIGINAL CON METAS_ACTIVAS
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
@@ -1117,7 +1123,7 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales);
+                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); // ✅ RESCATADO DE TU CÓDIGO ORIGINAL CON METAS_ACTIVAS
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
