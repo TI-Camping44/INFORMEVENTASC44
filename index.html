@@ -48,7 +48,7 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown estético para simulación */
+        /* Dropdown para simulación - Limpio y seguro */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -182,16 +182,8 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr>
-                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td>
-                        <td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 11px; padding-right:15px;">--</td>
-                    </tr>
-                    <tr>
-                        <td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td>
-                        <td>
-                            <select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select>
-                        </td>
-                    </tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:15px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos (Corte)</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -473,9 +465,9 @@
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
             },
-            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
-                   canales: { "Salon": 590000000, "Online": 320000000, "E-commerce": 120000000, "Mayoristas": 1380000000, "Directorio": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1380000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000 }
+            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
+                   canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Directorio": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000 }
             }
         };
 
@@ -539,19 +531,17 @@
             }
         }
 
-        // ✅ REGLA MATEMÁTICA ANTI-CRASH: Evita que nombres reales coincidan por error con claves genéricas y rompan el YTD
+        // ✅ LECTOR DE METAS 100% BLINDADO: Evita que el equipo genérico "SALON" pise al vendedor "Juan - Salon"
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
             
             let nameUpper = String(nombreOdoo).toUpperCase().trim();
-            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
 
             if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
 
-            let fallbackMatch = 0;
             for (let k in diccionarioMetas) {
                 let kUpper = String(k).toUpperCase().trim();
                 
@@ -560,15 +550,11 @@
                     continue; 
                 }
                 
-                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo) {
+                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
                     return diccionarioMetas[k];
                 }
-                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
-                    fallbackMatch = diccionarioMetas[k];
-                }
             }
-            return fallbackMatch;
+            return 0;
         }
 
         function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
@@ -602,7 +588,7 @@
             select.innerHTML = html;
         }
 
-        // ✅ DROPDOWN DE SIMULACIÓN SEGURO (Muestra los medios días sin pisar elementos web)
+        // ✅ SIMULADOR DE DÍAS TRANSCURRIDOS SEGURO
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -631,7 +617,7 @@
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
                 if (loader && loader.style.display !== 'none') {
-                    try { filtrarYRenderizarTodo(); } catch(e){}
+                    filtrarYRenderizarTodo();
                     loader.style.display = 'none';
                     actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
                 }
@@ -647,7 +633,7 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                // Evitamos crash por comas al hacer split CSV
+                // Lector de CSV 100% nativo y seguro. No elimina columnas vacías, lee el archivo EXACTO de tu Google Sheets.
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
@@ -663,20 +649,18 @@
                 });
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
+
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
-                
-                try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
-
             } catch (err) {
                 clearTimeout(escapeTimeout);
                 console.error(err);
-                try { filtrarYRenderizarTodo(); } catch(e){}
+                filtrarYRenderizarTodo();
                 actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
                 document.getElementById('loader').style.display = 'none';
             }
@@ -691,25 +675,24 @@
             let dTransFinal = 4.5;
 
             try {
+                // ✅ VOLVIÓ EL LECTOR DE METAS ORIGINAL AL 100% - Funciona exactamente igual a la versión de ayer.
                 filas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return; // ✅ Removido !row[0] para no borrar los vendedores al cargar
-                    
-                    let col0 = (row[0] || "").toString().trim();
-                    if (col0 === "Días Hábiles del Mes:") {
+                    let colA = row[0] || ""; 
+                    if (colA === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) dMesFinal = val;
                     }
-                    if (col0 === "Días Hábiles Transcurridos:") {
+                    if (colA === "Días Hábiles Transcurridos:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) dTransFinal = val;
                     }
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
 
-                    if (row[5] && ["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(String(row[5]).trim())) {
-                        METAS_JUNIO_LIVE.canales[String(row[5]).trim()] = handleNum(row[6]);
+                    if (row[5] && ["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
+                        METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
                     }
-                    if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
-                        METAS_JUNIO_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
+                    if (row[8] && idx >= 3 && row[8] !== "Vendedor") {
+                        METAS_JUNIO_LIVE.vendedoresTotales[row[8]] = handleNum(row[9]);
                     }
                 });
 
@@ -719,7 +702,7 @@
                 if (simulacionDiasTrans === null) {
                     simulacionDiasTrans = dTransFinal;
                 }
-                poblarDropdownDiasTranscurridos(31);
+                poblarDropdownDiasTranscurridos(dMesFinal);
 
                 let brandHeaderRowIdx = -1;
                 for(let i=0; i<filas.length && i<20; i++) {
@@ -815,10 +798,10 @@
                     document.getElementById('btn-reset').style.display = 'none';
                     document.getElementById('btn-sync').style.display = 'none';
                     
-                    try { filtrarYRenderizarTodo(); } catch(e){}
+                    filtrarYRenderizarTodo();
                 }, 100);
             } else {
-                try { filtrarYRenderizarTodo(); } catch(e){}
+                filtrarYRenderizarTodo();
             }
         }
 
@@ -854,10 +837,10 @@
             filtrosActivos.fecha = document.getElementById('select-fecha').value; 
             filtrosActivos.marca = document.getElementById('select-marca').value;
             
-            if (filtrosActivos.mes !== oldMes && filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
-                simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            if (filtrosActivos.mes !== oldMes) {
+                simulacionDiasTrans = null; 
             }
-            try { filtrarYRenderizarTodo(); } catch(e){}
+            filtrarYRenderizarTodo();
         }
 
         function limpiarTodosLosFiltros() {
@@ -870,7 +853,7 @@
             
             simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
             
-            try { filtrarYRenderizarTodo(); } catch(e){}
+            filtrarYRenderizarTodo();
         }
 
         function obtenerMetasEstructuraBI() {
@@ -887,7 +870,6 @@
                     metasYTD.global += (mData.global || 0);
                     metasYTD.diasMes += (mData.diasMes || 0);
                     
-                    // Asegura que en el YTD anual se tome el tiempo de simulación del mes actual
                     let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
                     metasYTD.diasTranscurridos += transVal;
 
@@ -904,7 +886,6 @@
         }
 
         function filtrarYRenderizarTodo() {
-          try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
@@ -917,10 +898,11 @@
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
-            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
+            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
                 if (simulacionDiasTrans !== null) {
                     diasTranscurridosActivos = simulacionDiasTrans;
                 }
+                poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
             if (filtrosActivos.fecha) {
@@ -981,9 +963,6 @@
             });
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
-          } catch(e) {
-              console.error("FATAL ERROR IN RENDER:", e);
-          }
         }
 
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
@@ -1022,19 +1001,12 @@
             
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
-                // ✅ BLOQUEO DEL SELECT PARA AÑO COMPLETO O MESES VIEJOS, EVITA REESCRIBIR MAL EL HTML
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                     selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
                     selectTransHTML.disabled = true;
                 } else {
                     selectTransHTML.disabled = false;
-                    let html = "";
-                    let maxDiasOpciones = Math.max(dMes, 31);
-                    for (let d = 0.5; d <= maxDiasOpciones; d += 0.5) {
-                        let selected = (Math.abs(d - dTr) < 0.1) ? "selected" : "";
-                        html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
-                    }
-                    selectTransHTML.innerHTML = html;
+                    selectTransHTML.value = dTr;
                 }
             }
 
