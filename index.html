@@ -20,7 +20,6 @@
             --row-success-bg: #e6fffa;
         }
 
-        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
@@ -48,7 +47,6 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown para simulación - Limpio y seguro */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -69,7 +67,6 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -182,8 +179,8 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:15px;">--</td></tr>
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos (Corte)</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
@@ -438,13 +435,11 @@
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
             },
             "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
             },
             "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
                    canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Directorio": 0 },
@@ -465,13 +460,30 @@
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
             },
-            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
+            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
                    canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000 }
             }
         };
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
+
+        // ✅ LECTOR DE CSV BLINDADO NATIVO (Ignora comas dentro de comillas sin colgar el navegador)
+        function csvToArray(text) {
+            let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
+            for (let l of text) {
+                if ('"' === l) {
+                    if (s && l === p) row[i] += l;
+                    s = !s;
+                } else if (',' === l && s) l = row[++i] = '';
+                else if ('\n' === l && s) {
+                    if ('\r' === p) row[i] = row[i].slice(0, -1);
+                    row = ret[++r] = [l = '']; i = 0;
+                } else row[i] += l;
+                p = l;
+            }
+            return ret.map(r => r.map(c => String(c).trim()));
+        }
 
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
@@ -531,30 +543,36 @@
             }
         }
 
-        // ✅ LECTOR DE METAS 100% BLINDADO: Evita que el equipo genérico "SALON" pise al vendedor "Juan - Salon"
+        // ✅ FILTRO ANTI-CRASH: Evita que nombres de personas reales coincidan por error con claves genéricas como "SALON"
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
             
             let nameUpper = String(nombreOdoo).toUpperCase().trim();
+            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
 
             if (nameUpper === "SALON" || nameUpper === "ONLINE" || nameUpper === "E-COMMERCE" || nameUpper === "MAYORISTAS") {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
 
+            let fallbackMatch = 0;
             for (let k in diccionarioMetas) {
                 let kUpper = String(k).toUpperCase().trim();
                 
+                // Si la celda de la meta es de un equipo genérico, la ignoramos para que no pise a la persona
                 if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
-                    if (nameUpper === kUpper) return diccionarioMetas[k];
                     continue; 
                 }
                 
-                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
+                if (cleanK === cleanNameOdoo) {
                     return diccionarioMetas[k];
                 }
+                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
+                    fallbackMatch = diccionarioMetas[k];
+                }
             }
-            return 0;
+            return fallbackMatch;
         }
 
         function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
@@ -588,7 +606,7 @@
             select.innerHTML = html;
         }
 
-        // ✅ SIMULADOR DE DÍAS TRANSCURRIDOS SEGURO
+        // ✅ SIMULADOR DE DÍAS: Seguro y sin sobreescribir el innerText del elemento principal
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -617,7 +635,7 @@
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
                 if (loader && loader.style.display !== 'none') {
-                    filtrarYRenderizarTodo();
+                    try { filtrarYRenderizarTodo(); } catch(e){}
                     loader.style.display = 'none';
                     actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
                 }
@@ -633,13 +651,13 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                // Lector de CSV 100% nativo y seguro. No elimina columnas vacías, lee el archivo EXACTO de tu Google Sheets.
-                let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
-                let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
+                // Lector blindado CSV para evitar que el navegador se congele si hay una comilla suelta
+                let filasConfigFormateadas = csvToArray(txtConfig);
+                let filasDataFormateadas = csvToArray(txtData);
 
-                let filasConfigPlanas = txtConfig.split('\n').map(l => l.split(','));
-                filasConfigPlanas.forEach(row => {
-                    if(row[0] === "Fecha Actual (Corte):" && row[1]) {
+                filasConfigFormateadas.forEach(row => {
+                    let col0 = String(row[0] || "").trim();
+                    if(col0.includes("Fecha Actual (Corte):") && row[1]) {
                         let mIdx = getMonthFromDate(row[1]);
                         if(mIdx > 0 && mIdx <= 12) {
                             filtrosActivos.mesActualLive = mIdx;
@@ -649,18 +667,20 @@
                 });
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
-
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
+                
+                try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
+
             } catch (err) {
                 clearTimeout(escapeTimeout);
                 console.error(err);
-                filtrarYRenderizarTodo();
+                try { filtrarYRenderizarTodo(); } catch(e){}
                 actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
                 document.getElementById('loader').style.display = 'none';
             }
@@ -675,24 +695,27 @@
             let dTransFinal = 4.5;
 
             try {
-                // ✅ VOLVIÓ EL LECTOR DE METAS ORIGINAL AL 100% - Funciona exactamente igual a la versión de ayer.
+                // ✅ SE ELIMINÓ EL FILTRO ESTRICTO SOBRE ROW[0] PARA QUE LEA TUS VENDEDORES AUNQUE LA COLUMNA A ESTÉ VACÍA
                 filas.forEach((row, idx) => {
-                    let colA = row[0] || ""; 
-                    if (colA === "Días Hábiles del Mes:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dMesFinal = val;
+                    if(!row || row.length === 0) return;
+                    
+                    let col0 = String(row[0] || "").trim();
+                    if (col0.includes("Días Hábiles del Mes:")) {
+                        let val = parseFloat(String(row[1] || "").replace(',', '.'));
+                        if (!isNaN(val) && val > 0) dMesFinal = val;
                     }
-                    if (colA === "Días Hábiles Transcurridos:") {
-                        let val = parseFloat(String(row[1]).replace(',', '.'));
-                        if (val > 0 && val <= 31) dTransFinal = val;
+                    if (col0.includes("Días Hábiles Transcurridos:")) {
+                        let val = parseFloat(String(row[1] || "").replace(',', '.'));
+                        if (!isNaN(val) && val > 0) dTransFinal = val;
                     }
+                    
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
 
-                    if (row[5] && ["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(row[5])) {
-                        METAS_JUNIO_LIVE.canales[row[5]] = handleNum(row[6]);
+                    if (row[5] && ["Salon", "Online", "E-commerce", "Mayoristas", "Directorio"].includes(String(row[5]).trim())) {
+                        METAS_JUNIO_LIVE.canales[String(row[5]).trim()] = handleNum(row[6]);
                     }
-                    if (row[8] && idx >= 3 && row[8] !== "Vendedor") {
-                        METAS_JUNIO_LIVE.vendedoresTotales[row[8]] = handleNum(row[9]);
+                    if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
+                        METAS_JUNIO_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
                     }
                 });
 
@@ -708,7 +731,7 @@
                 for(let i=0; i<filas.length && i<20; i++) {
                     if(filas[i]) {
                         for(let c=0; c<filas[i].length; c++) {
-                            let cellText = (filas[i][c] || "").toString().toUpperCase().trim();
+                            let cellText = String(filas[i][c] || "").toUpperCase().trim();
                             if(cellText === "MARCA" || cellText === "MARCAS") {
                                 brandHeaderRowIdx = i;
                                 break;
@@ -721,22 +744,20 @@
                 if (brandHeaderRowIdx > 0) {
                     let headerRow = filas[brandHeaderRowIdx];
                     for (let col = 0; col < headerRow.length; col++) {
-                        let cellHead = (headerRow[col] || "").toString().toUpperCase().trim();
+                        let cellHead = String(headerRow[col] || "").toUpperCase().trim();
                         if (cellHead === "MARCA" || cellHead === "MARCAS") {
                             let currentVend = "";
-                            
                             for (let rUp = brandHeaderRowIdx - 1; rUp >= 0; rUp--) {
-                                let possibleName = (filas[rUp][col] || "").toString().trim();
+                                let possibleName = String(filas[rUp][col] || "").trim();
                                 if (possibleName && !possibleName.startsWith("---") && !possibleName.toUpperCase().includes("METAS INDIVIDUALES")) {
                                     currentVend = possibleName;
                                     break;
                                 }
                             }
-                            
                             if (currentVend) {
                                 for (let r = brandHeaderRowIdx + 1; r < filas.length; r++) {
                                     if(!filas[r]) continue;
-                                    let marc = (filas[r][col] || "").toString().trim();
+                                    let marc = String(filas[r][col] || "").trim();
                                     let metaVal = filas[r][col+1];
                                     if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
                                         METAS_JUNIO_LIVE.vendedorMarca[currentVend + "|||" + marc] = handleNum(metaVal);
@@ -757,7 +778,7 @@
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
-                if (!r || r.length < 31 || r[1] === "" || r[6] === "") continue;
+                if (!r || r.length < 31 || String(r[1]).trim() === "" || String(r[6]).trim() === "") continue;
 
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
@@ -798,10 +819,10 @@
                     document.getElementById('btn-reset').style.display = 'none';
                     document.getElementById('btn-sync').style.display = 'none';
                     
-                    filtrarYRenderizarTodo();
+                    try { filtrarYRenderizarTodo(); } catch(e){}
                 }, 100);
             } else {
-                filtrarYRenderizarTodo();
+                try { filtrarYRenderizarTodo(); } catch(e){}
             }
         }
 
@@ -823,7 +844,7 @@
             if(selM) {
                 let optM = `<option value="">-- Todas las Marcas --</option>`;
                 Array.from(marcas).sort().forEach(m => {
-                    if(m && !m.includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
+                    if(m && !String(m).includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
                 });
                 selM.innerHTML = optM;
             }
@@ -840,7 +861,7 @@
             if (filtrosActivos.mes !== oldMes) {
                 simulacionDiasTrans = null; 
             }
-            filtrarYRenderizarTodo();
+            try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
         function limpiarTodosLosFiltros() {
@@ -852,8 +873,7 @@
             document.getElementById('select-marca').value = "";
             
             simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
-            
-            filtrarYRenderizarTodo();
+            try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
         function obtenerMetasEstructuraBI() {
@@ -886,6 +906,7 @@
         }
 
         function filtrarYRenderizarTodo() {
+          try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
@@ -898,7 +919,7 @@
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
-            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive)) {
+            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
                 if (simulacionDiasTrans !== null) {
                     diasTranscurridosActivos = simulacionDiasTrans;
                 }
@@ -963,6 +984,9 @@
             });
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
+          } catch(e) {
+              console.error("FATAL ERROR IN RENDER:", e);
+          }
         }
 
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
@@ -1006,7 +1030,13 @@
                     selectTransHTML.disabled = true;
                 } else {
                     selectTransHTML.disabled = false;
-                    selectTransHTML.value = dTr;
+                    let html = "";
+                    let maxDiasOpciones = Math.max(dMes, 31);
+                    for (let d = 0.5; d <= maxDiasOpciones; d += 0.5) {
+                        let selected = (Math.abs(d - dTr) < 0.1) ? "selected" : "";
+                        html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
+                    }
+                    selectTransHTML.innerHTML = html;
                 }
             }
 
@@ -1107,9 +1137,9 @@
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
                 if (METAS_ACTIVAS.vendedorMarca) {
-                    let vNameUpper = v.toUpperCase();
+                    let vNameUpper = String(v).toUpperCase();
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        let parts = k.split('|||');
+                        let parts = String(k).split('|||');
                         if (parts.length === 2 && (parts[0].toUpperCase().includes(vNameUpper) || vNameUpper.includes(parts[0].toUpperCase()))) {
                             if (METAS_ACTIVAS.vendedorMarca[k] > 0) {
                                 marcasUnicas.add(parts[1]); 
@@ -1142,9 +1172,9 @@
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                     let row = `<tr class="${rowClass}"><td>${m}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let mUpper = m.toUpperCase();
-                    let isMainBrand = LISTA_MARCAS.some(lm => lm.toUpperCase() === mUpper);
-                    let isWeapon = LISTA_ARMAS.some(la => la.toUpperCase() === mUpper);
+                    let mUpper = String(m).toUpperCase();
+                    let isMainBrand = LISTA_MARCAS.some(lm => String(lm).toUpperCase() === mUpper);
+                    let isWeapon = LISTA_ARMAS.some(la => String(la).toUpperCase() === mUpper);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1190,7 +1220,7 @@
                 </div>`;
 
                 let canalReal = vData.canal || "";
-                let n = v.toUpperCase();
+                let n = String(v).toUpperCase();
                 
                 if (canalReal === "E-commerce" || n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) {
                     hFichasEcom += fichaHtml;
