@@ -16,9 +16,11 @@
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
+            /* Color para fila de meta lograda */
             --row-success-bg: #e6fffa;
         }
 
+        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
@@ -46,6 +48,7 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
+        /* Dropdown de Simulación con estilo limpio */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -66,6 +69,7 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
+        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -459,13 +463,16 @@
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
             },
-            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 4.5,
+            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
                    canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Directorio": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000 }
             }
         };
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
+
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
@@ -525,7 +532,7 @@
             }
         }
 
-        // ✅ FILTRO BLINDADO ANTI "SALON" GENÉRICO EN EL YTD ANUAL
+        // Filtro anti-error "SALON"
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
@@ -540,20 +547,11 @@
             let fallbackMatch = 0;
             for (let k in diccionarioMetas) {
                 let kUpper = String(k).toUpperCase().trim();
-                
-                // Si la clave del diccionario es una de estas genéricas, NUNCA se la asignamos a una persona
-                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) {
-                    if (nameUpper === kUpper) return diccionarioMetas[k];
-                    continue; 
-                }
+                if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) continue; 
                 
                 let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo) {
-                    return diccionarioMetas[k];
-                }
-                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) {
-                    fallbackMatch = diccionarioMetas[k];
-                }
+                if (cleanK === cleanNameOdoo) return diccionarioMetas[k];
+                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) fallbackMatch = diccionarioMetas[k];
             }
             return fallbackMatch;
         }
@@ -576,7 +574,6 @@
             if (!select) return;
             let html = `<option value="">-- Año Completo (YTD) --</option>`;
             const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
             for (let m = 1; m <= 12; m++) {
                 if (m < mesActualLive) {
                     html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
@@ -589,7 +586,6 @@
             select.innerHTML = html;
         }
 
-        // ✅ DROPDOWN DINÁMICO DE SIMULACIÓN (Días de a mitades)
         function poblarDropdownDiasTranscurridos(maxDias) {
             let selectTrans = document.getElementById('lbl-dias-trans');
             if (!selectTrans) return;
@@ -605,8 +601,10 @@
 
         function recalcularSimulacionDias() {
             let selectTrans = document.getElementById('lbl-dias-trans');
-            simulacionDiasTrans = parseFloat(selectTrans.value);
-            filtrarYRenderizarTodo();
+            if (selectTrans) {
+                simulacionDiasTrans = parseFloat(selectTrans.value);
+                filtrarYRenderizarTodo();
+            }
         }
 
         function iniciarSincronizacion() {
@@ -634,7 +632,6 @@
                 const txtConfig = await resConfig.text();
                 const txtData = await resData.text();
 
-                // Lector blindado con regex original que jamás falla
                 let filasConfigFormateadas = txtConfig.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
                 let filasDataFormateadas = txtData.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/"/g, '').trim() : ""));
 
@@ -678,7 +675,6 @@
             let dTransFinal = 4.5;
 
             try {
-                // ✅ VUELVE A LEER SIN EL FILTRO COLUMNA A QUE ROMPIÓ LOS VENDEDORES
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return; 
                     
@@ -907,6 +903,7 @@
                 if (simulacionDiasTrans !== null) {
                     diasTranscurridosActivos = simulacionDiasTrans;
                 }
+                poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
             if (filtrosActivos.fecha) {
@@ -1006,7 +1003,6 @@
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
-            // ✅ BLOQUEO DEL SELECT PARA AÑO COMPLETO EVITA ERRORES VISUALES
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
                 if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
@@ -1237,14 +1233,15 @@
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            // ✅ DESTRUCCIÓN DE GRÁFICOS ULTRA-SEGURA PARA QUE NUNCA SE QUEDEN EN BLANCO
+            // ✅ GRÁFICOS BLINDADOS: Se borra el canvas entero para forzar a Chart.js a dibujar desde cero y que no quede en blanco
             try {
+                if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
                 let containerLine = document.getElementById('container-lineChart');
                 if(containerLine) {
                     containerLine.innerHTML = '<canvas id="lineChart"></canvas>';
                     let elLine = document.getElementById('lineChart');
                     if (elLine && arrDiasGrafico.length > 0) {
-                        window.chartLine = new Chart(elLine, {
+                        window.chartLine = new Chart(elLine.getContext('2d'), {
                             type: 'line', 
                             data: { 
                                 labels: arrDiasGrafico, 
@@ -1270,12 +1267,13 @@
             } catch(e) { console.error("Error al renderizar curva", e); }
 
             try {
+                if (window.chartPie) { window.chartPie.destroy(); window.chartPie = null; }
                 let containerPie = document.getElementById('container-pieChart');
                 if(containerPie) {
                     containerPie.innerHTML = '<canvas id="pieChart"></canvas>';
                     let elPie = document.getElementById('pieChart');
                     if (elPie && arrCanalesLabels.length > 0) {
-                        window.chartPie = new Chart(elPie, {
+                        window.chartPie = new Chart(elPie.getContext('2d'), {
                             type: 'doughnut', 
                             data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096'] }] },
                             options: { 
