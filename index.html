@@ -16,42 +16,40 @@
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
-            /* Color para fila de meta lograda */
             --row-success-bg: #e6fffa;
         }
 
-        /* AJUSTE DE ZOOM: Todo más compacto para que entre al 100% de pantalla */
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 12px; }
+        /* AJUSTE NATIVO "TIPO 80% ZOOM": Letras más chicas y compactas */
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 11px; overflow: hidden; }
 
-        .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
-        .sidebar-logo { width: 90%; max-width: 150px; margin: 0 auto 20px auto; display: block; background-color: white; border-radius: 8px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
-        .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 10px; margin-bottom: 20px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-        .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
+        .sidebar { width: 190px; background-color: var(--navy-main); color: white; padding: 12px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; }
+        .sidebar-logo { width: 90%; max-width: 120px; margin: 0 auto 15px auto; display: block; background-color: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
+        .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+        .menu-item { padding: 8px 10px; margin-bottom: 4px; background-color: transparent; border-radius: 4px; font-weight: bold; font-size: 10.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
         .menu-item.active { background-color: var(--teal-accent); color: white; }
 
-        .main-content { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; }
 
-        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 140px; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
+        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .filter-group { display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 130px; }
+        .filter-group label { font-size: 9px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 5px 8px; font-size: 10.5px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.2s; }
         .filter-panel select:disabled, .filter-panel input:disabled { background-color: #e2e8f0; color: #a0aec0; cursor: not-allowed; }
-        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
+        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 10.5px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
         .btn-clear-filters:hover { background-color: #e2e8f0; }
 
-        .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .sheet-title-main { flex-grow: 1; }
-        .sheet-title-main h2 { margin: 0; font-size: 15px; font-weight: 800; color: var(--navy-main); letter-spacing: 0.5px; }
-        .sheet-title-main h3 { margin: 3px 0 0 0; font-size: 12px; font-weight: 700; color: var(--teal-accent); }
-        .btn-sync { background-color: var(--teal-accent); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease; }
+        .sheet-title-main h2 { margin: 0; font-size: 14px; font-weight: 800; color: var(--navy-main); letter-spacing: 0.5px; }
+        .sheet-title-main h3 { margin: 2px 0 0 0; font-size: 11px; font-weight: 700; color: var(--teal-accent); }
+        .btn-sync { background-color: var(--teal-accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease; }
         
-        .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
-        .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown para simulación de transcurridos */
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
+        .time-box-table { border-collapse: collapse; font-size: 10px; background: white; }
+        .time-box-table td { padding: 3px 6px; border: 1px solid var(--gray-border); }
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 11px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 4px; text-align: right; font-family: inherit; width: 55px; }
 
-        #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
+        #status-banner { display: block; padding: 6px; border-radius: 4px; margin-bottom: 12px; font-weight: bold; font-size: 10px; text-align: center; border: 1px solid transparent; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border-color: var(--green-banner-border); }
         .banner-error { background-color: var(--red-banner-bg); color: var(--red-banner-text); border-color: var(--red-banner-border); }
 
@@ -59,30 +57,29 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; overflow-x: auto; display: block; -webkit-overflow-scrolling: touch; }
-        .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -10px -10px 10px -10px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; position: sticky; left: 0; }
+        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; overflow-x: auto; display: block; -webkit-overflow-scrolling: touch; }
+        .excel-title { font-size: 10px; font-weight: bold; background: var(--navy-main); color: white; padding: 6px 10px; margin: -8px -8px 8px -8px; border-top-left-radius: 5px; border-top-right-radius: 5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; position: sticky; left: 0; }
         
-        table.excel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 600px; }
-        table.excel-table th { background: var(--gray-bg); color: var(--text-dark); font-weight: bold; padding: 5px 8px; border: 1px solid var(--gray-border); text-align: left; white-space: nowrap; }
-        table.excel-table td { padding: 5px 8px; border: 1px solid var(--gray-border); white-space: nowrap; }
+        table.excel-table { width: 100%; border-collapse: collapse; font-size: 10px; min-width: 600px; }
+        table.excel-table th { background: var(--gray-bg); color: var(--text-dark); font-weight: bold; padding: 4px 6px; border: 1px solid var(--gray-border); text-align: left; white-space: nowrap; }
+        table.excel-table td { padding: 4px 6px; border: 1px solid var(--gray-border); white-space: nowrap; }
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; }
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* FICHAS DE VENDEDORES */
-        .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
-        .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
-        .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
-        .ficha-table { width: 100%; border-collapse: collapse; min-width: 250px; }
-        .ficha-table th { background: #f8fafc; padding: 4px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; }
-        .ficha-table td { padding: 3px 6px; border-bottom: 1px dashed #e2e8f0; } 
+        .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; margin-top: 8px; }
+        .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 9.5px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
+        .ficha-header { background: var(--navy-main); color: white; padding: 6px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 10px; position: sticky; left: 0; }
+        .ficha-table { width: 100%; border-collapse: collapse; min-width: 200px; }
+        .ficha-table th { background: #f8fafc; padding: 3px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); white-space: nowrap; font-size: 9.5px;}
+        .ficha-table td { padding: 2px 4px; border-bottom: 1px dashed #e2e8f0; } 
         
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         
-        .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
+        .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 3px 5px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
         .ficha-subtotal { background: #edf2f7; font-weight: bold; border-top: 1px solid var(--gray-border); }
-        .ficha-total-final { background: #e2e8f0; font-weight: bold; font-size: 11px; }
-        .ficha-kpi-header { background: var(--navy-main); color: white; text-align: center; padding: 6px; font-weight: bold; }
+        .ficha-total-final { background: #e2e8f0; font-weight: bold; font-size: 10px; }
+        .ficha-kpi-header { background: var(--navy-main); color: white; text-align: center; padding: 4px; font-weight: bold; }
         .ficha-kpi-row { background: #fff5f5; }
         .ficha-kpi-normal { background: #f8fafc; }
 
@@ -91,10 +88,10 @@
         .num-negativo { color: var(--red-alert) !important; font-weight: bold; }
         .num-positivo { color: var(--green-success) !important; font-weight: bold; }
         
-        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px; width: 100%; }
-        .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; overflow: hidden; }
-        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; width: 100%; }
-        .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; }
+        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 15px; width: 100%; }
+        .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; overflow: hidden; }
+        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; width: 100%; }
+        .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; }
 
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
@@ -108,10 +105,10 @@
         }
 
         @media (max-width: 768px) {
-            body { flex-direction: column; overflow-y: auto; font-size: 12px; }
+            body { flex-direction: column; overflow-y: auto; font-size: 11px; }
             .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px; overflow-x: auto; white-space: nowrap; align-items: center; position: sticky; top: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
             .sidebar-logo, .sidebar h2 { display: none; }
-            .menu-item { display: inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 11px; }
+            .menu-item { display: inline-flex; margin-bottom: 0; margin-right: 10px; flex-shrink: 0; padding: 6px 10px; font-size: 10px; }
             .main-content { padding: 10px; overflow-x: hidden; }
             .filter-panel { flex-direction: column; padding: 10px; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; }
@@ -182,7 +179,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:10px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 12px; padding-right:8px;">--</td></tr>
                     <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
@@ -210,14 +207,14 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 CURVA DE CRECIMIENTO: ACUMULADO REAL VS ACUMULADO ESPERADO</span>
-                    <div style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
+                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📅 CURVA DE CRECIMIENTO: ACUMULADO REAL VS ACUMULADO ESPERADO</span>
+                    <div style="height: 220px; width: 100%; position: relative;" id="container-lineChart">
                         <canvas id="lineChart"></canvas>
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 PARTICIPACIÓN DEL CANAL</span>
-                    <div style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
+                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:5px;">📊 PARTICIPACIÓN DEL CANAL</span>
+                    <div style="height: 220px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
@@ -236,10 +233,10 @@
 
                 <div class="excel-container">
                     <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
-                    <table class="excel-table" style="margin-bottom: 20px;">
-                        <tr><td style="padding: 8px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 13px;">₲ 0</td></tr>
-                        <tr><td style="padding: 8px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 13px;">₲ 0</td></tr>
-                        <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 8px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 14px;">₲ 0</td></tr>
+                    <table class="excel-table" style="margin-bottom: 15px;">
+                        <tr><td style="padding: 6px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 12px;">₲ 0</td></tr>
+                        <tr><td style="padding: 6px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 12px;">₲ 0</td></tr>
+                        <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 6px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 13px;">₲ 0</td></tr>
                     </table>
                     <table class="excel-table">
                         <thead>
@@ -276,10 +273,10 @@
                     <tbody id="grid-vendedores-consumidor"></tbody>
                 </table>
                 
-                <h3 style="margin-top:25px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
+                <h3 style="margin-top:20px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 12px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
 
-                <h3 style="margin-top:25px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO ONLINE</h3>
+                <h3 style="margin-top:20px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 12px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO ONLINE</h3>
                 <div class="fichas-grid" id="grid-fichas-online"></div>
             </div>
         </div>
@@ -287,7 +284,7 @@
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
-                <table class="excel-table" style="margin-bottom: 25px;">
+                <table class="excel-table" style="margin-bottom: 20px;">
                     <thead>
                         <tr style="background:var(--navy-main); color:white;">
                             <th>Cliente / Distribuidor</th>
@@ -334,7 +331,7 @@
                     </thead>
                     <tbody id="grid-vendedores-mayoristas"></tbody>
                 </table>
-                <h3 style="margin-top:25px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 13px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
+                <h3 style="margin-top:20px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 12px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
                 <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
             </div>
         </div>
@@ -344,21 +341,21 @@
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
                 <div class="three-column-grid">
                     <div class="excel-container">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:6px; background:var(--gray-bg); margin-bottom:5px;">Por Canal de Distribución</span>
+                        <span style="font-weight:bold; font-size:10px; display:block; padding:4px; background:var(--gray-bg); margin-bottom:4px;">Por Canal de Distribución</span>
                         <table class="excel-table">
                             <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-canal"></tbody>
                         </table>
                     </div>
                     <div class="excel-container">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:6px; background:var(--gray-bg); margin-bottom:5px;">Top 5 Clientes Afectados</span>
+                        <span style="font-weight:bold; font-size:10px; display:block; padding:4px; background:var(--gray-bg); margin-bottom:4px;">Top 5 Clientes Afectados</span>
                         <table class="excel-table">
                             <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-cliente"></tbody>
                         </table>
                     </div>
                     <div class="excel-container">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:6px; background:var(--gray-bg); margin-bottom:5px;">Cronología Completa</span>
+                        <span style="font-weight:bold; font-size:10px; display:block; padding:4px; background:var(--gray-bg); margin-bottom:4px;">Cronología Completa</span>
                         <table class="excel-table">
                             <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
                             <tbody id="nc-por-fecha"></tbody>
@@ -505,7 +502,6 @@
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
 
-        // LECTOR DE CSV BLINDADO NATIVO (Ignora comas dentro de comillas y saltos de línea locos)
         function parseCSV(text) {
             let ret = [['']], i = 0, j = 0, s = true;
             for (let k = 0; k < text.length; k++) {
@@ -1343,5 +1339,3 @@
 
         iniciarSincronizacion();
     </script>
-</body>
-</html>
