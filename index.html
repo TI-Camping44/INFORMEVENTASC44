@@ -48,7 +48,6 @@
         
         .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
         .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        /* Dropdown de Simulación con estilo limpio */
         .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; border-bottom: 1px dashed var(--teal-accent); padding: 0 5px; text-align: right; font-family: inherit; width: 60px; }
 
         #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid transparent; }
@@ -69,7 +68,6 @@
         table.excel-table tr.total-segmento td { background-color: var(--gray-bg) !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         .bg-zero { background-color: var(--bg-zero) !important; }
 
-        /* FICHAS DE VENDEDORES (3 POR FILA EN PC - MÁS COMPACTAS) */
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid var(--gray-border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 10px; border-radius: 4px; overflow: hidden; width: 100%; display: block; }
         .ficha-header { background: var(--navy-main); color: white; padding: 8px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 11px; position: sticky; left: 0; }
@@ -438,11 +436,13 @@
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
             },
             "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
                    canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Directorio": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 }
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
             },
             "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
                    canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Directorio": 0 },
@@ -461,7 +461,40 @@
             },
             "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
                    canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Directorio": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 }
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 },
+                   // ✅ RESCATE DEL CSV DE JUNIO QUE SUBISTE: Data pura extraída del archivo
+                   vendedorMarca: { 
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||ASG": 34268400,
+                        "Oscar David Maldonado Yudis - Salon|||ASG": 10886900,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||ASG": 5083900,
+                        "Oscar Daniel Zárate Villamayor - Online|||ASG": 2545000,
+                        "Hugo Javier González Arce - Online|||ASG": 1520500,
+
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 171216713,
+                        "Oscar David Maldonado Yudis - Salon|||TSS": 25719000,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||TSS": 3602000,
+                        "Oscar Daniel Zárate Villamayor - Online|||TSS": 569000,
+                        "Hugo Javier González Arce - Online|||TSS": 1198000,
+
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Crosman": 27112615,
+                        "Oscar David Maldonado Yudis - Salon|||Crosman": 6259000,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Crosman": 6259000,
+
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 139591636,
+                        "Oscar David Maldonado Yudis - Salon|||Umarex": 71368875,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Umarex": 46193875,
+                        "Oscar Daniel Zárate Villamayor - Online|||Umarex": 8357500,
+                        "Hugo Javier González Arce - Online|||Umarex": 9599875,
+
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 162118046,
+                        "Oscar David Maldonado Yudis - Salon|||Doberman": 12768900,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Doberman": 6376000,
+                        "Oscar Daniel Zárate Villamayor - Online|||Doberman": 3412000,
+                        "Hugo Javier González Arce - Online|||Doberman": 2290000,
+                        
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Konus": 21767250,
+                        "Oscar David Maldonado Yudis - Salon|||Konus": 1173250
+                   }
             },
             "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
                    canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Directorio": 0 },
@@ -470,9 +503,6 @@
         };
 
         let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
-
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
         function parseDateToTime(dStr) {
             if(!dStr) return 0;
@@ -532,7 +562,6 @@
             }
         }
 
-        // Filtro anti-error "SALON"
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
@@ -548,7 +577,6 @@
             for (let k in diccionarioMetas) {
                 let kUpper = String(k).toUpperCase().trim();
                 if (kUpper === "SALON" || kUpper === "ONLINE" || kUpper === "E-COMMERCE" || kUpper === "MAYORISTAS" || kUpper.includes("VARIOS")) continue; 
-                
                 let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|DIRECTORIO)\s*$/g, "").trim();
                 if (cleanK === cleanNameOdoo) return diccionarioMetas[k];
                 if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) fallbackMatch = diccionarioMetas[k];
@@ -574,6 +602,7 @@
             if (!select) return;
             let html = `<option value="">-- Año Completo (YTD) --</option>`;
             const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
             for (let m = 1; m <= 12; m++) {
                 if (m < mesActualLive) {
                     html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
@@ -903,7 +932,6 @@
                 if (simulacionDiasTrans !== null) {
                     diasTranscurridosActivos = simulacionDiasTrans;
                 }
-                poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
             if (filtrosActivos.fecha) {
@@ -1233,7 +1261,6 @@
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
-            // ✅ GRÁFICOS BLINDADOS: Se borra el canvas entero para forzar a Chart.js a dibujar desde cero y que no quede en blanco
             try {
                 if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
                 let containerLine = document.getElementById('container-lineChart');
