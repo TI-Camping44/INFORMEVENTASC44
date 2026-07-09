@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
-    <!-- Librerías para Gráficos y PDF Nativo Profesional -->
+    <!-- Gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Exportación PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Exportación EXCEL Real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* REGLA DE ORO RESPONSIVA */
         * { box-sizing: border-box; }
@@ -98,6 +101,7 @@
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
+        .text-left { text-align: left; }
         .num-negativo { color: var(--red-alert) !important; font-weight: bold; }
         .num-positivo { color: var(--green-success) !important; font-weight: bold; }
         
@@ -111,13 +115,13 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           OPTIMIZACIÓN EXTREMA PARA CELULARES
+           OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
-            
             .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .sidebar-logo, .sidebar h2 { display: none; }
+            .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
+            .sidebar h2 { display: none; }
             .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
             
             .main-content { padding: 10px; width: 100%; overflow: visible; }
@@ -132,19 +136,16 @@
             .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
             
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
-            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; }
+            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
             table.excel-table { min-width: 700px; }
         }
-        
-        /* Bloqueamos la impresión nativa fea */
-        @media print { body { display: none; } }
     </style>
 </head>
 <body>
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Sincronizando Base de Datos YTD e Historial...</div>
+        <div id="loader-text">Sincronizando Base de Datos YTD e Historial de GitHub...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -476,7 +477,10 @@
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
                     <span style="font-size: 13px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
-                    <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF (A4 Vertical)</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4)</button>
+                        <button class="btn-sync" style="background:#38a169; font-size:11px; padding:8px 12px;" onclick="exportarBonosExcel()">📊 Exportar a EXCEL</button>
+                    </div>
                 </div>
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
                     <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
@@ -486,8 +490,8 @@
                         <thead>
                             <tr style="background:#f7fafc;">
                                 <th class="text-left">Vendedor</th>
-                                <th class="col-oculta-pdf">Canal Base</th>
-                                <th class="col-oculta-pdf">Escala Detectada</th>
+                                <th>Canal Base</th>
+                                <th>Escala Detectada</th>
                                 <th class="text-right">Meta del Mes (₲)</th>
                                 <th class="text-right">Venta Real (₲)</th>
                                 <th class="text-center">% Logrado</th>
@@ -586,6 +590,47 @@
         }
 
         // =========================================================================
+        // 🔥 EXPORTACIÓN EXCEL REAL (XLSX)
+        // =========================================================================
+        function exportarBonosExcel() {
+            let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+            let table = document.getElementById("tabla-exportar-bonos");
+            let rows = table.querySelectorAll("tbody tr");
+            
+            let data = [];
+            // Cabeceras de Excel
+            data.push(['VENDEDOR', 'CANAL BASE', 'ESCALA', 'META GRAL (Gs)', 'VENTA REAL (Gs)', '% LOGRO', 'ESTADO META', 'MARCAS ACTIVAS', 'BONO A PAGAR (Gs)']);
+            
+            rows.forEach(row => {
+                let cols = row.querySelectorAll("td");
+                if(cols.length > 0) {
+                    let estado = cols[6].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO ALCANZO";
+                    let marcas = cols[7].innerText.replace("activas", "").trim();
+                    let bono = cols[8].innerText.replace(/₲/g, '').trim();
+                    let meta = cols[3].innerText.replace(/₲/g, '').trim();
+                    let venta = cols[4].innerText.replace(/₲/g, '').trim();
+                    
+                    data.push([
+                        cols[0].innerText,
+                        cols[1].innerText,
+                        cols[2].innerText,
+                        meta,
+                        venta,
+                        cols[5].innerText,
+                        estado,
+                        marcas,
+                        bono
+                    ]);
+                }
+            });
+            
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Liquidacion_Bonos");
+            XLSX.writeFile(wb, `Liquidacion_Bonos_${currentMonthTxt.replace(/\s+/g, '_')}.xlsx`);
+        }
+
+        // =========================================================================
         // 🔥 GENERADOR PROFESIONAL DE PDF (JSPDF + AUTOTABLE)
         // =========================================================================
         function exportarBonosPDF() {
@@ -611,9 +656,8 @@
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "normal");
                 doc.text("REGLA EXCLUYENTE: Para calificar a la escala de bonos de marcas, el colaborador debe", 14, 34);
-                doc.text("superar el 100% de la Meta General de Ventas. Si no se alcanza, el sistema liquida ₲ 0.", 14, 38);
+                doc.text("superar el 100% de la Meta General de Ventas. Si no se alcanza, el sistema liquida Gs. 0.", 14, 38);
 
-                // Extracción de datos de la tabla HTML (Omitimos columnas 1 y 2 que son "Canal" y "Escala")
                 let table = document.getElementById("tabla-exportar-bonos");
                 let rows = table.querySelectorAll("tbody tr");
                 let bodyData = [];
@@ -624,29 +668,34 @@
                         let estadoTexto = cols[6].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO";
                         let marcasClean = cols[7].innerText.replace("activas", "").trim();
                         
+                        // EL SECRETO: Quitamos el "₲" y lo cambiamos por "Gs." para que la librería no se rompa
+                        let metaLimpia = cols[3].innerText.replace(/₲/g, 'Gs.');
+                        let ventaLimpia = cols[4].innerText.replace(/₲/g, 'Gs.');
+                        let bonoLimpio = cols[8].innerText.replace(/₲/g, 'Gs.');
+                        
                         let rowData = [
                             cols[0].innerText, // Vendedor
-                            cols[3].innerText, // Meta Gral
-                            cols[4].innerText, // Venta Real
+                            metaLimpia,        // Meta Gral
+                            ventaLimpia,       // Venta Real
                             cols[5].innerText, // % Logro
                             estadoTexto,       // ¿Alcanzó?
                             marcasClean,       // Marcas
-                            cols[8].innerText  // Bono Final
+                            bonoLimpio         // Bono Final
                         ];
                         bodyData.push(rowData);
                     }
                 });
 
-                // AutoTable hace el trabajo sucio de dibujarla perfecta
+                // AutoTable dibuja la tabla de forma perfecta
                 doc.autoTable({
                     startY: 45,
-                    head: [['VENDEDOR', 'META GRAL (Gs)', 'VENTA REAL (Gs)', '% LOGRO', 'ESTADO', 'MARCAS', 'BONO A PAGAR']],
+                    head: [['VENDEDOR', 'META GRAL', 'VENTA REAL', '% LOGRO', 'ESTADO', 'MARCAS', 'BONO A PAGAR']],
                     body: bodyData,
                     theme: 'grid',
                     headStyles: { fillColor: [26, 44, 66], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
-                    bodyStyles: { fontSize: 7, valign: 'middle' },
+                    bodyStyles: { fontSize: 7, valign: 'middle', cellPadding: 3 },
                     columnStyles: {
-                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 45 },
+                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 50 },
                         1: { halign: 'right' },
                         2: { halign: 'right', fontStyle: 'bold' },
                         3: { halign: 'center' },
@@ -671,7 +720,7 @@
                 doc.save(`Liquidacion_Bonos_${currentMonthTxt.replace(/\s+/g, '_')}.pdf`);
 
             } catch(e) {
-                alert("Error generando el PDF. ¿Cargó correctamente el archivo JavaScript de jsPDF?");
+                alert("Error generando el PDF. Asegúrate de estar conectado a Internet.");
                 console.error(e);
             }
         }
@@ -702,14 +751,14 @@
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
-        // HISTÓRICO GLOBAL SE LLENARÁ DESDE GITHUB
+        // HISTÓRICO GLOBAL
         let HISTORICO_METAS = {};
 
         // Variable global para Google Sheets Actual
         let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {}, ventasGlobales: 0, ventasPorCanal: {}, ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} };
 
         // =========================================================================
-        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, mayúsculas puras)
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, sin sufijos)
         // =========================================================================
         function normalizarTexto(texto) {
             if (!texto) return "";
@@ -718,7 +767,7 @@
 
         // =========================================================================
         // 🔥 ALGORITMO DE FUSIÓN (ODOO vs GITHUB CSV)
-        // Encuentra "GIOVANNI JARA" dentro de "GIOVANNI EMANUEL JARA APREA"
+        // Permite encontrar "Giovanni Jara" dentro de "Giovanni Emanuel Jara Aprea"
         // =========================================================================
         function sonElMismoVendedor(nombreOdoo, nombreCSV) {
             if (!nombreOdoo || !nombreCSV) return false;
@@ -727,11 +776,10 @@
             
             if (a === b) return true;
 
-            // Dividir en palabras ignorando conectores cortos
             let wordsA = a.split(/\s+/).filter(w => w.length > 2);
             let wordsB = b.split(/\s+/).filter(w => w.length > 2);
 
-            // Si todas las palabras del CSV están contenidas en el nombre de Odoo
+            // Si el nombre corto del CSV está contenido completamente en el nombre largo de Odoo
             if (wordsA.length > 0 && wordsA.every(w => b.includes(w))) return true;
             if (wordsB.length > 0 && wordsB.every(w => a.includes(w))) return true;
             
@@ -884,27 +932,20 @@
         async function cargarHistoricoDesdeGithub() {
             document.getElementById('loader-text').innerText = "Procesando Historial desde GitHub...";
             const urls = [
-                { url: "ENERO2026.csv", startMonth: 1 },
-                { url: "FEBRERO2026.csv", startMonth: 2 },
-                { url: "MARZO Y ABRIL 2026.csv", startMonth: 3 },
-                { url: "MAYO Y JUNIO 2026.csv", startMonth: 5 }
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv", startMonth: 1 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv", startMonth: 2 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv", startMonth: 3 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv", startMonth: 5 }
             ];
             
             for (let file of urls) {
                 try {
-                    // Intenta ruta relativa primero, y raw.github como fallback absoluto
                     let fullUrl = file.url + "?cb=" + new Date().getTime();
                     let res = await fetch(fullUrl).catch(() => null);
                     
-                    if (!res || !res.ok) {
-                        fullUrl = "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/" + file.url + "?cb=" + new Date().getTime();
-                        res = await fetch(fullUrl).catch(() => null);
-                    }
-                    if (!res || !res.ok) continue;
-                    
+                    if (!res || !res.ok) { continue; }
                     let text = await res.text();
                     
-                    // Divide el archivo por si hay más de 1 mes adentro
                     let blocks = text.split(/--- TABLA 1/i);
                     let monthIdx = file.startMonth;
                     
@@ -923,7 +964,7 @@
                         
                         let currentTable = 1;
                         let lines = blockText.split('\n');
-                        let shortToLongName = {}; // Mapa para vincular el nombre corto de la Tabla 3 con el largo de la Tabla 1
+                        let shortToLongName = {}; 
                         
                         for(let line of lines) {
                             let l = line.trim();
@@ -932,10 +973,9 @@
                             
                             let parts = l.split(',');
                             
-                            // TABLA 1: Guardamos Ventas Históricas y Metas
                             if(currentTable === 1 && parts.length >= 5) {
                                 let canalRaw = parts[0] ? parts[0].trim() : "";
-                                let longName = parts[1] ? parts[1].trim() : ""; // Usamos la Columna 1 (Nombre Completo en algunos CSV) o la 2
+                                let longName = parts[1] ? parts[1].trim() : ""; 
                                 if (longName === 'Cod' || longName === '') longName = parts[2] ? parts[2].trim() : "";
                                 let shortName = parts[2] ? parts[2].trim() : "";
                                 
@@ -967,7 +1007,6 @@
                                 }
                             }
                             
-                            // TABLA 3: Guardamos Metas y Ventas de Marcas
                             if(currentTable === 3 && parts.length >= 6) {
                                 let shortName = parts[1] ? parts[1].trim() : "";
                                 let longName = shortToLongName[shortName] || shortName; 
@@ -1147,7 +1186,6 @@
             let canalesSet = new Set();
             let marcasSet = new Set();
 
-            // Agregar vendedores del historial para que aparezcan en el filtro
             Object.keys(HISTORICO_METAS).forEach(m => {
                 Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
             });
@@ -1210,7 +1248,9 @@
 
             if(selV) {
                 let optV = `<option value="">-- Todos los Vendedores --</option>`;
-                Array.from(vendedores).sort().forEach(v => { if(v && !v.includes("Vta. On Line") && !v.includes("Consum. Final") && !v.includes("Total On-Line")) optV += `<option value="${v}">${v}</option>`; });
+                Array.from(vendedores).sort().forEach(v => { 
+                    if(v && !v.includes("Vta. On Line") && !v.includes("Consum. Final") && !v.includes("Total On-Line")) optV += `<option value="${v}">${v}</option>`; 
+                });
                 selV.innerHTML = optV;
             }
             if(selC) {
@@ -1558,7 +1598,6 @@
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
                         
-                        // Busca la meta correcta
                         let obj = 0;
                         let odooLimpio = normalizarTexto(v).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
@@ -1636,7 +1675,6 @@
                 Array.from(marcasUnicas).sort().forEach(m => {
                     let val = vData.marcas[m] || 0;
                     
-                    // Buscar meta especifica para esa marca
                     let mAsig = 0;
                     let marcaUpper = normalizarTexto(m);
                     for (let k in METAS_ACTIVAS.vendedorMarca) {
@@ -1676,7 +1714,6 @@
 
                 let net = vData.bruto + vData.nc;
                 
-                // Buscar meta general del vendedor
                 let obj = 0;
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
                     let csvKeyLimpio = normalizarTexto(k);
@@ -1697,11 +1734,12 @@
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // TABLA BONOS
+                // LÓGICA DE BONOS (REGLAS EXCLUYENTES)
                 // ==========================================
                 let nUpper = normalizarTexto(v);
                 
-                let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
+                // EXTERMINAR FANTASMAS: Adiós "Total On-Line", "Consum. Final", etc.
+                let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || nUpper.includes("CONSUM") || nUpper.includes("TOTAL ON") || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
                     let escalaRol = "Vendedor Salón / Online";
@@ -1753,7 +1791,6 @@
                     `;
                 }
 
-                // CONSTRUCCIÓN FICHA VENDEDOR
                 let fichaHtml = `
                 <div class="ficha-vendedor">
                     <div class="ficha-header">▶ ${v}</div>
@@ -1822,7 +1859,6 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
