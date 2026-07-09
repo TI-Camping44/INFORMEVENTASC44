@@ -6,7 +6,7 @@
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <!-- Gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Exportación PDF -->
+    <!-- Exportación PDF Profesional -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <!-- Exportación EXCEL Real -->
@@ -601,7 +601,6 @@
             let rows = table.querySelectorAll("tbody tr");
             
             let data = [];
-            // Cabeceras de Excel
             data.push(['VENDEDOR', 'CANAL BASE', 'ESCALA', 'META GRAL (Gs)', 'VENTA REAL (Gs)', '% LOGRO', 'ESTADO META', 'MARCAS ACTIVAS', 'BONO A PAGAR (Gs)']);
             
             rows.forEach(row => {
@@ -613,17 +612,7 @@
                     let meta = cols[3].innerText.replace(/₲/g, '').trim();
                     let venta = cols[4].innerText.replace(/₲/g, '').trim();
                     
-                    data.push([
-                        cols[0].innerText,
-                        cols[1].innerText,
-                        cols[2].innerText,
-                        meta,
-                        venta,
-                        cols[5].innerText,
-                        estado,
-                        marcas,
-                        bono
-                    ]);
+                    data.push([ cols[0].innerText, cols[1].innerText, cols[2].innerText, meta, venta, cols[5].innerText, estado, marcas, bono ]);
                 }
             });
             
@@ -638,23 +627,22 @@
         // =========================================================================
         function exportarBonosPDF() {
             try {
-                // Instanciamos el PDF en A4, Portrait (Vertical)
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
+                const doc = new jsPDF('p', 'mm', 'a4'); // A4 Vertical
                 
                 let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
                 
-                // Diseño de Cabecera
+                // Cabecera
                 doc.setTextColor(26, 44, 66);
                 doc.setFontSize(16);
                 doc.setFont("helvetica", "bold");
-                doc.text("REPORTE OFICIAL DE LIQUIDACIÓN DE BONOS", 14, 20);
+                doc.text("REPORTE OFICIAL DE LIQUIDACION DE BONOS", 14, 20);
                 
                 doc.setTextColor(221, 107, 32); 
                 doc.setFontSize(10);
-                doc.text(`Período Evaluado: ${currentMonthTxt}`, 14, 26);
+                doc.text(`Periodo Evaluado: ${currentMonthTxt}`, 14, 26);
                 
-                // Nota Legal
+                // Regla (Texto sin tildes raras para evitar errores de codificación)
                 doc.setTextColor(123, 52, 30);
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "normal");
@@ -671,25 +659,24 @@
                         let estadoTexto = cols[6].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO";
                         let marcasClean = cols[7].innerText.replace("activas", "").trim();
                         
-                        // EL SECRETO: Quitamos el "₲" y lo cambiamos por "Gs." para que la librería no se rompa
+                        // EL SECRETO: Quitamos el "₲" y ponemos "Gs." para que jsPDF dibuje los números completos
                         let metaLimpia = cols[3].innerText.replace(/₲/g, 'Gs.');
                         let ventaLimpia = cols[4].innerText.replace(/₲/g, 'Gs.');
                         let bonoLimpio = cols[8].innerText.replace(/₲/g, 'Gs.');
                         
                         let rowData = [
-                            cols[0].innerText, // Vendedor
-                            metaLimpia,        // Meta Gral
-                            ventaLimpia,       // Venta Real
-                            cols[5].innerText, // % Logro
-                            estadoTexto,       // ¿Alcanzó?
-                            marcasClean,       // Marcas
-                            bonoLimpio         // Bono Final
+                            cols[0].innerText, 
+                            metaLimpia,        
+                            ventaLimpia,       
+                            cols[5].innerText, 
+                            estadoTexto,       
+                            marcasClean,       
+                            bonoLimpio         
                         ];
                         bodyData.push(rowData);
                     }
                 });
 
-                // AutoTable dibuja la tabla de forma perfecta
                 doc.autoTable({
                     startY: 45,
                     head: [['VENDEDOR', 'META GRAL', 'VENTA REAL', '% LOGRO', 'ESTADO', 'MARCAS', 'BONO A PAGAR']],
@@ -697,29 +684,28 @@
                     theme: 'grid',
                     headStyles: { fillColor: [26, 44, 66], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
                     bodyStyles: { fontSize: 7, valign: 'middle', cellPadding: 3 },
+                    alternateRowStyles: { fillColor: [247, 250, 252] },
                     columnStyles: {
-                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 50 },
+                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 45 },
                         1: { halign: 'right' },
                         2: { halign: 'right', fontStyle: 'bold' },
                         3: { halign: 'center' },
-                        4: { halign: 'center' },
+                        4: { halign: 'center', fontStyle: 'bold' },
                         5: { halign: 'center' },
                         6: { halign: 'right', fontStyle: 'bold', textColor: [34, 84, 61] } // Verde
                     },
                     didParseCell: function(data) {
                         if (data.section === 'body') {
-                            // Pintar de rojo si es "NO" o "0"
                             if (data.column.index === 4 && data.cell.raw === 'NO') {
                                 data.cell.styles.textColor = [197, 48, 48];
                             }
-                            if (data.column.index === 6 && data.cell.raw.includes('0')) {
+                            if (data.column.index === 6 && data.cell.raw.includes(' 0')) {
                                 data.cell.styles.textColor = [197, 48, 48];
                             }
                         }
                     }
                 });
 
-                // Descarga automática
                 doc.save(`Liquidacion_Bonos_${currentMonthTxt.replace(/\s+/g, '_')}.pdf`);
 
             } catch(e) {
@@ -758,16 +744,33 @@
         let HISTORICO_METAS = {};
 
         // Variable global para Google Sheets Actual
-        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {}, ventasGlobales: 0, ventasPorCanal: {}, ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} };
+        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
 
         // =========================================================================
-        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, sin sufijos)
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, mayúsculas puras)
         // =========================================================================
-        function limpiarNombre(n) {
-            if (!n) return "";
-            return n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
-                    .replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "")
-                    .trim();
+        function normalizarTexto(texto) {
+            if (!texto) return "";
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+        }
+
+        // =========================================================================
+        // 🔥 ALGORITMO DE FUSIÓN (ODOO vs GITHUB CSV)
+        // =========================================================================
+        function sonElMismoVendedor(nombreOdoo, nombreCSV) {
+            if (!nombreOdoo || !nombreCSV) return false;
+            let a = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            let b = normalizarTexto(nombreCSV).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            
+            if (a === b) return true;
+
+            let wordsA = a.split(/\s+/).filter(w => w.length > 2);
+            let wordsB = b.split(/\s+/).filter(w => w.length > 2);
+
+            if (wordsA.length > 0 && wordsA.every(w => b.includes(w))) return true;
+            if (wordsB.length > 0 && wordsB.every(w => a.includes(w))) return true;
+            
+            return false;
         }
 
         function parseCSV(text) {
@@ -844,8 +847,8 @@
         }
 
         function obtenerCanalReal(vendedor, canalCSV) {
-            let vUpper = limpiarNombre(vendedor);
-            let cUpper = limpiarNombre(canalCSV);
+            let vUpper = normalizarTexto(vendedor);
+            let cUpper = normalizarTexto(canalCSV);
 
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
@@ -911,23 +914,29 @@
         }
 
         // ========================================================================
-        // 🔥 MOTOR DE EXTRACCIÓN GITHUB (SÓLO EXTRAE METAS)
+        // 🔥 MOTOR DE EXTRACCIÓN GITHUB (SOLO LEE LAS METAS, CERO DUPLICACIÓN)
         // ========================================================================
         async function cargarHistoricoDesdeGithub() {
             document.getElementById('loader-text').innerText = "Extrayendo historial y metas pasadas...";
             const urls = [
-                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv", startMonth: 1 },
-                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv", startMonth: 2 },
-                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv", startMonth: 3 },
-                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv", startMonth: 5 }
+                { url: "ENERO2026.csv", startMonth: 1 },
+                { url: "FEBRERO2026.csv", startMonth: 2 },
+                { url: "MARZO Y ABRIL 2026.csv", startMonth: 3 },
+                { url: "MAYO Y JUNIO 2026.csv", startMonth: 5 }
             ];
             
             for (let file of urls) {
                 try {
-                    let res = await fetch(file.url + "?cb=" + new Date().getTime());
-                    if (!res.ok) continue;
-                    let text = await res.text();
+                    let fullUrl = file.url + "?cb=" + new Date().getTime();
+                    let res = await fetch(fullUrl).catch(() => null);
                     
+                    if (!res || !res.ok) {
+                        fullUrl = "https://ti-camping44.github.io/INFORMEVENTASC44/" + file.url + "?cb=" + new Date().getTime();
+                        res = await fetch(fullUrl).catch(() => null);
+                    }
+                    if (!res || !res.ok) continue;
+                    
+                    let text = await res.text();
                     let blocks = text.split(/--- TABLA 1/i);
                     let monthIdx = file.startMonth;
                     
@@ -953,7 +962,7 @@
                             
                             let parts = l.split(',');
                             
-                            // TABLA 1: Guardar Meta General
+                            // TABLA 1: SOLO METAS GENERALES
                             if(currentTable === 1 && parts.length >= 4) {
                                 let canalRaw = parts[0] ? parts[0].trim() : "";
                                 let longName = parts[1] && parts[1].trim() !== '' ? parts[1].trim() : (parts[2] ? parts[2].trim() : "");
@@ -962,13 +971,13 @@
                                 
                                 if(longName && longName !== 'Cod' && longName !== 'Vendedor') {
                                     shortToLongName[shortName] = longName;
-                                    let vClean = limpiarNombre(longName);
+                                    let vClean = normalizarTexto(longName);
                                     
-                                    // Filtramos los agrupadores basuras
-                                    let esBasura = ["TOTAL ON-LINE", "CONSUM. FINAL", "MAYORISTA 25", "33", "120", "100", "LICITACION", "DIRECTORIO", "MAYORISTA"].some(b => vClean.includes(b));
+                                    // IGNORAR FILAS QUE NO SON PERSONAS REALES
+                                    let esBasura = ["TOTAL ON-LINE", "CONSUM. FINAL", "MAYORISTA 25", "33", "120", "100", "LICITACION", "DIRECTORIO", "MAYORISTA", "TOTAL"].some(b => vClean.includes(b));
                                     
                                     if(!esBasura && meta > 0) {
-                                        obj.vendedoresTotales[vClean] = meta;
+                                        obj.vendedoresTotales[longName] = meta;
                                         obj.global += meta;
                                         let cNorm = obtenerCanalReal(longName, canalRaw);
                                         obj.canales[cNorm] = (obj.canales[cNorm] || 0) + meta;
@@ -976,7 +985,7 @@
                                 }
                             }
                             
-                            // TABLA 3: Guardar Metas de Marca
+                            // TABLA 3: SOLO METAS DE MARCAS
                             if(currentTable === 3 && parts.length >= 5) {
                                 let shortName = parts[1] ? parts[1].trim() : "";
                                 let longName = shortToLongName[shortName] || shortName; 
@@ -984,15 +993,13 @@
                                 let meta = parseInt(parts[4].replace(/\./g, '')) || 0;
                                 
                                 if(longName && longName !== 'Vendedor' && marca && meta > 0) {
-                                    let vClean = limpiarNombre(longName);
-                                    let mClean = limpiarNombre(marca);
-                                    obj.vendedorMarca[vClean + '|||' + mClean] = meta;
+                                    obj.vendedorMarca[longName + '|||' + marca] = meta;
                                 }
                             }
                         }
                         monthIdx++; 
                     }
-                } catch(e) { console.error("Error leyendo de GitHub:", e); }
+                } catch(e) { console.error("Error procesando CSV:", e); }
             }
         }
 
@@ -1013,7 +1020,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Conectando con Google Sheets...";
+                document.getElementById('loader-text').innerText = "Conectando Google Sheets en vivo...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1088,8 +1095,7 @@
                         }
                     }
                     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
-                        let vClean = limpiarNombre(String(row[8]));
-                        METAS_LIVE.vendedoresTotales[vClean] = handleNum(row[9]);
+                        METAS_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
                     }
                 });
 
@@ -1136,9 +1142,7 @@
                                     let marc = (filas[r][col] || "").toString().trim();
                                     let metaVal = filas[r][col+1];
                                     if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
-                                        let vClean = limpiarNombre(currentVend);
-                                        let mClean = limpiarNombre(marc);
-                                        METAS_LIVE.vendedorMarca[vClean + '|||' + mClean] = handleNum(metaVal);
+                                        METAS_LIVE.vendedorMarca[currentVend + "|||" + marc] = handleNum(metaVal);
                                     }
                                 }
                             }
@@ -1317,14 +1321,11 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
-            // EXTRAEMOS LAS VENTAS SÓLO DE GOOGLE SHEETS (100% Precisión Lineal)
+            // EXTRAEMOS LAS VENTAS SÓLO DE GOOGLE SHEETS (100% Precisión, 0 Duplicación)
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
                 
-                let vCleanFactura = limpiarNombre(r.vendedor);
-                let vCleanFiltro = limpiarNombre(filtrosActivos.vendedor);
-                
-                if (filtrosActivos.vendedor && vCleanFactura !== vCleanFiltro) return;
+                if (filtrosActivos.vendedor && !sonElMismoVendedor(r.vendedor, filtrosActivos.vendedor)) return;
                 if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
                 if (filtrosActivos.marca && normalizarTexto(r.marcaFinal) !== normalizarTexto(filtrosActivos.marca)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
@@ -1389,20 +1390,33 @@
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
-                let vClean = limpiarNombre(filtrosActivos.vendedor);
-                let mClean = limpiarNombre(filtrosActivos.marca);
-                objetivoFiltrado = METAS_ACTIVAS.vendedorMarca[vClean + '|||' + mClean] || 0;
+                let mF = 0;
+                let marcaUpper = normalizarTexto(filtrosActivos.marca);
+                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length === 2 && normalizarTexto(parts[1]) === marcaUpper) {
+                        if (sonElMismoVendedor(parts[0], filtrosActivos.vendedor)) {
+                            mF += METAS_ACTIVAS.vendedorMarca[k];
+                        }
+                    }
+                });
+                objetivoFiltrado = mF;
             } else if (filtrosActivos.vendedor) {
-                let vClean = limpiarNombre(filtrosActivos.vendedor);
-                objetivoFiltrado = METAS_ACTIVAS.vendedoresTotales[vClean] || 0;
+                let foundMeta = 0;
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                    if (sonElMismoVendedor(k, filtrosActivos.vendedor)) {
+                        foundMeta = METAS_ACTIVAS.vendedoresTotales[k];
+                    }
+                });
+                objetivoFiltrado = foundMeta;
             } else if (filtrosActivos.canal) {
                 objetivoFiltrado = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[filtrosActivos.canal]) ? METAS_ACTIVAS.canales[filtrosActivos.canal] : 0;
             } else if (filtrosActivos.marca) {
-                let mClean = limpiarNombre(filtrosActivos.marca);
+                let mClean = normalizarTexto(filtrosActivos.marca);
                 let sumM = 0;
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        if(k.endsWith('|||' + mClean)) sumM += METAS_ACTIVAS.vendedorMarca[k];
+                        if(k.toUpperCase().endsWith("|||" + mClean)) sumM += METAS_ACTIVAS.vendedorMarca[k];
                     });
                 }
                 objetivoFiltrado = sumM;
@@ -1511,8 +1525,11 @@
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
-                        let vClean = limpiarNombre(v);
-                        let obj = METAS_ACTIVAS.vendedoresTotales[vClean] || 0;
+                        
+                        let obj = 0;
+                        Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                            if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                        });
 
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
@@ -1553,13 +1570,13 @@
                 let marcasUnicas = new Set();
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
-                let vClean = limpiarNombre(v);
-
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        if (k.startsWith(vClean + '|||')) {
-                            let marcaAsignada = k.split('|||')[1];
-                            marcasUnicas.add(marcaAsignada);
+                        let parts = String(k).split('|||');
+                        if (parts.length === 2) {
+                            if (sonElMismoVendedor(parts[0], v) && METAS_ACTIVAS.vendedorMarca[k] > 0) {
+                                marcasUnicas.add(parts[1]); 
+                            }
                         }
                     });
                 }
@@ -1570,15 +1587,23 @@
                 let marcasAlcanzadas = 0;
 
                 Array.from(marcasUnicas).sort().forEach(m => {
-                    let mClean = limpiarNombre(m);
+                    let mClean = normalizarTexto(m);
                     let val = 0;
                     
-                    // Sumamos las ventas de la marca (en la ficha las marcas pueden tener mayúsculas o minúsculas)
                     Object.keys(vData.marcas).forEach(vm => {
-                        if (limpiarNombre(vm) === mClean) val += vData.marcas[vm];
+                        if (normalizarTexto(vm) === mClean) val += vData.marcas[vm];
                     });
 
-                    let mAsig = METAS_ACTIVAS.vendedorMarca[vClean + '|||' + mClean] || 0;
+                    let mAsig = 0;
+                    for (let k in METAS_ACTIVAS.vendedorMarca) {
+                        let parts = String(k).split('|||');
+                        if (parts.length === 2 && normalizarTexto(parts[1]) === mClean) {
+                            if (sonElMismoVendedor(parts[0], v)) {
+                                mAsig = METAS_ACTIVAS.vendedorMarca[k];
+                                break;
+                            }
+                        }
+                    }
                     
                     let rowClass = "";
                     let checkMark = "";
@@ -1592,13 +1617,12 @@
                     }
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
-                    // Para mostrar el nombre bonito de la marca, usamos el primero que encuentre
-                    let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || m;
+                    let displayBrand = Object.keys(vData.marcas).find(x => normalizarTexto(x) === mClean) || m;
                     
                     let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let isMainBrand = LISTA_MARCAS.some(lm => limpiarNombre(lm) === mClean);
-                    let isWeapon = LISTA_ARMAS.some(la => limpiarNombre(la) === mClean);
+                    let isMainBrand = LISTA_MARCAS.some(lm => normalizarTexto(lm) === mClean);
+                    let isWeapon = LISTA_ARMAS.some(la => normalizarTexto(la) === mClean);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1606,7 +1630,12 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = METAS_ACTIVAS.vendedoresTotales[vClean] || 0;
+                
+                let obj = 0;
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                    if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                });
+
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
@@ -1618,26 +1647,24 @@
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // LÓGICA DE BONOS (REGLAS EXCLUYENTES)
+                // TABLA BONOS Y COMISIONES (SIN FANTASMAS)
                 // ==========================================
-                let ocultarDeBonos = false;
-                // Exterminar agrupadores de la vista de bonos
-                let isBasura = ["TOTAL", "CONSUM.", "MAYORISTA 25", "33", "120", "100", "LICITACION", "MAYORISTA", "SIN VENDEDOR", "ONLINE"].some(b => vClean.includes(b));
-                if (isBasura || (obj === 0 && net === 0)) {
-                    ocultarDeBonos = true;
-                }
-
-                if (!ocultarDeBonos) {
+                let nUpper = normalizarTexto(v);
+                
+                let isBasura = ["TOTAL", "CONSUM.", "MAYORISTA 25", "33", "120", "100", "LICITACION", "MAYORISTA", "SIN VENDEDOR", "ONLINE"].some(b => nUpper.includes(b));
+                let isEmpty = (obj === 0 && net === 0);
+                
+                if (!isBasura && !isEmpty) {
                     let escalaRol = "Vendedor Salón / Online";
                     let premios = [350000, 700000, 1400000]; 
 
-                    if (vClean.includes("GERENTE") || vClean.includes("GERENCIA")) {
+                    if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
                         escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
-                    } else if (vClean.includes("SUPERVISOR")) {
+                    } else if (nUpper.includes("SUPERVISOR")) {
                         escalaRol = "Supervisor Online/Mayorista"; premios = [450000, 900000, 1800000];
-                    } else if (vClean.includes("JEFE")) {
+                    } else if (nUpper.includes("JEFE")) {
                         escalaRol = "Jefe Consumidor Final"; premios = [800000, 1600000, 3000000];
-                    } else if (vData.canal === "Mayoristas" || vClean.includes("MAYORISTA")) {
+                    } else if (vData.canal === "Mayoristas" || nUpper.includes("MAYORISTA")) {
                         escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
                     }
 
@@ -1707,13 +1734,21 @@
 
                 let canalReal = vData.canal || "";
                 
-                if (canalReal === "E-commerce") { hFichasEcom += fichaHtml; } 
-                else if (canalReal === "Mayoristas") { hFichasMayo += fichaHtml; } 
-                else if (canalReal === "Venta Externa") { hFichasExt += fichaHtml; } 
-                else if (canalReal === "Directorio") { hFichasDir += fichaHtml; } 
-                else if (canalReal === "Reparaciones") { hFichasRep += fichaHtml; } 
-                else if (canalReal === "Online") { hFichasOnline += fichaHtml; } 
-                else { hFichasSalon += fichaHtml; }
+                if (canalReal === "E-commerce" || nUpper.includes("E-COMMERCE") || nUpper.includes("ECOMMERCE")) {
+                    hFichasEcom += fichaHtml;
+                } else if (canalReal === "Mayoristas" || nUpper.includes("MAYORISTAS")) {
+                    hFichasMayo += fichaHtml;
+                } else if (canalReal === "Venta Externa" || nUpper.includes("VENTA EXTERNA") || nUpper.includes("EXTERNA")) {
+                    hFichasExt += fichaHtml;
+                } else if (canalReal === "Directorio" || nUpper.includes("DIRECTORIO")) {
+                    hFichasDir += fichaHtml;
+                } else if (canalReal === "Reparaciones" || nUpper.includes("REPARACIONES") || nUpper.includes("TALLER")) {
+                    hFichasRep += fichaHtml;
+                } else if (canalReal === "Online" || nUpper.includes("ONLINE")) {
+                    hFichasOnline += fichaHtml;
+                } else {
+                    hFichasSalon += fichaHtml;
+                }
             });
             
             document.getElementById('grid-fichas-salon').innerHTML = hFichasSalon;
@@ -1737,7 +1772,6 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
