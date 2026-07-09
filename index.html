@@ -103,13 +103,12 @@
            ========================================================= */
         @media print {
             @page {
-                size: landscape; /* Fuerza orientación horizontal */
-                margin: 8mm; /* Márgenes pequeños para aprovechar espacio */
+                size: A4 landscape; /* Fuerza orientación horizontal */
+                margin: 6mm; /* Margen mínimo */
             }
             body { 
                 background-color: white !important; 
-                font-size: 8.5pt !important; 
-                zoom: 70%; /* Reduce la escala general para que la tabla ancha encaje */
+                font-size: 8pt !important; 
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -126,27 +125,34 @@
                 border: none !important; 
                 box-shadow: none !important; 
                 width: 100% !important; 
-                margin: 0 !important; 
+                margin: 0 0 15px 0 !important; 
                 padding: 0 !important;
                 overflow: visible !important;
             }
-            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 10px 0 !important; }
+            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 8px 0 !important; font-size: 9pt !important; }
             
-            /* FUERZA A LA TABLA A ENCAJAR */
+            /* REDUCCIÓN FÍSICA DE LA TABLA (Para que no se corte) */
             table.excel-table { 
                 width: 100% !important; 
-                table-layout: auto !important; /* Permite auto-ajustar las columnas */
+                table-layout: auto !important; 
                 border-collapse: collapse !important; 
             }
-            table.excel-table th, table.excel-table td { 
+            table.excel-table th { 
+                background-color: #edf2f7 !important; 
                 border: 1px solid #cbd5e0 !important; 
-                padding: 4px !important; /* Reduce el relleno interno */
-                font-size: 8.5pt !important; /* Letra más chica */
-                white-space: normal !important; /* Permite que el texto baje a la siguiente línea */
+                padding: 3px 4px !important; 
+                font-size: 7.5pt !important; 
+            }
+            table.excel-table td { 
+                border: 1px solid #cbd5e0 !important; 
+                padding: 3px 4px !important; 
+                font-size: 7.5pt !important; 
+                white-space: normal !important; 
                 word-wrap: break-word !important; 
             }
             table.excel-table tr { page-break-inside: avoid !important; }
             
+            .badge { font-size: 7pt !important; padding: 2px 4px !important; }
             .badge-success { background-color: #c6f6d5 !important; color: #22543d !important; border: 1px solid #9ae6b4 !important;}
             .badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; border: 1px solid #feb2b2 !important;}
             .badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important;}
@@ -220,7 +226,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -290,7 +295,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -321,7 +325,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -347,7 +350,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -373,7 +375,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -410,7 +411,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -436,7 +436,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -462,14 +461,13 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
                     <span style="font-size: 12px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
                     <button class="btn-sync" style="background:#2b7a78; font-size:10px; padding:6px 10px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF</button>
                 </div>
-                <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 12px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
+                <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
                     <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
                 </div>
                 <table class="excel-table">
@@ -491,7 +489,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -521,7 +518,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -848,12 +844,6 @@
             }, 3000);
 
             try {
-                // NOTA SOBRE GITHUB:
-                // Estas URLs apuntan a tu Google Sheets. Si prefieres alojar tus CSV en GitHub,
-                // solo debes reemplazarlas por el enlace RAW de GitHub. Por ejemplo:
-                // const urlConfig = 'https://raw.githubusercontent.com/TU-USUARIO/TU-REPO/main/metas.csv';
-                // const urlData = 'https://raw.githubusercontent.com/TU-USUARIO/TU-REPO/main/ventas.csv';
-
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1436,19 +1426,14 @@
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // LÓGICA DE BONOS (REGLA EXCLUYENTE + ESCALAS)
+                // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
                 // ==========================================
                 let nUpper = String(v).toUpperCase();
-                
-                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y los canales genéricos de la tabla de bonos
-                let ocultarDeBonos = false;
-                if (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0)) {
-                    ocultarDeBonos = true;
-                }
+                let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
                     let escalaRol = "Vendedor Salón / Online";
-                    let premios = [350000, 700000, 1400000]; // 10, 13, 16 marcas
+                    let premios = [350000, 700000, 1400000]; 
 
                     if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
                         escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
@@ -1460,14 +1445,11 @@
                         escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
                     }
 
-                    // Condición 1: ¿Alcanzó Meta General?
                     let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
                     let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
 
                     let montoBonoFinal = 0;
-                    
-                    if (logroMeta) {
-                        // Condición 2: Si llegó a meta, aplicamos la escala por marcas
+                    if (logroMeta && marcasAsignadas > 0) {
                         if (marcasAlcanzadas >= 16) montoBonoFinal = premios[2];
                         else if (marcasAlcanzadas >= 13) montoBonoFinal = premios[1];
                         else if (marcasAlcanzadas >= 10) montoBonoFinal = premios[0];
@@ -1475,10 +1457,9 @@
 
                     let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO (G. 0)</span>`;
                     
-                    // Si no tiene metas de marcas asignadas, mostrar limpio en vez de "0 de 0 activas"
                     let txtMarcas = "";
                     if (marcasAsignadas === 0) {
-                        txtMarcas = `<span style="color:#a0aec0; font-size:10px;">- No Aplica -</span>`;
+                        txtMarcas = `<span style="color:#a0aec0; font-size:10px;">- Sin marcas asignadas -</span>`;
                     } else {
                         txtMarcas = `<span class="badge badge-brand">${marcasAlcanzadas} de ${marcasAsignadas} activas</span>`;
                     }
