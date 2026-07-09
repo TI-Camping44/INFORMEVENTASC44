@@ -30,7 +30,7 @@
         .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: 15px; border-left: 3px solid white; }
         .menu-item.bonos-highlight:hover { background-color: #c05621; }
 
-        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; }
+        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; -webkit-overflow-scrolling: touch; }
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
         .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 130px; }
@@ -56,8 +56,9 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* SEPARACIÓN MEJORADA DE CONTENEDORES */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
-        .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -12px -12px 12px -12px; border-top-left-radius: 6px; border-top-right-radius: 6px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; }
+        .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -12px -12px 12px -12px; border-top-left-radius: 6px; border-top-right-radius: 6px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
         table.excel-table { width: 100%; border-collapse: collapse; font-size: 10px; min-width: 600px; }
         table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 8px 10px; border: 1px solid var(--gray-border); text-align: left; }
@@ -66,6 +67,7 @@
         table.excel-table tr.total-segmento td { background-color: #f7fafc !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         table.excel-table tr:hover { background-color: #f8fafc; }
 
+        /* BADGES MEJORADOS */
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9.5px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
         .badge-pending { background-color: #fed7d7; color: #742a2a; border: 1px solid #feb2b2; }
@@ -73,8 +75,8 @@
 
         .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; margin-top: 10px; }
         .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 9.5px; border-radius: 6px; overflow: hidden; }
-        .ficha-header { background: var(--navy-light); color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 10px; }
-        .ficha-table { width: 100%; border-collapse: collapse; }
+        .ficha-header { background: var(--navy-light); color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 10px; position: sticky; left: 0; }
+        .ficha-table { width: 100%; border-collapse: collapse; min-width: 250px; }
         .ficha-table th { background: #f8fafc; padding: 5px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 9.5px;}
         .ficha-table td { padding: 4px 6px; border-bottom: 1px dashed #e2e8f0; } 
         
@@ -99,16 +101,50 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
+           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
+           ========================================================= */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: hidden; } 
+            
+            /* Sidebar convertida en menú horizontal superior deslizable */
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; position: relative; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+            .sidebar-logo { display: none; }
+            .sidebar h2 { display: none; }
+            .menu-item { flex: 0 0 auto; margin-right: 8px; margin-bottom: 0; font-size: 11.5px; padding: 8px 12px; margin-top: 0 !important;}
+            
+            /* Área principal */
+            .main-content { padding: 12px; overflow-y: auto; overflow-x: hidden; }
+            .filter-panel { flex-direction: column; align-items: stretch; padding: 12px; }
+            .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; }
+            .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; gap: 10px; padding: 12px; }
+            .sheet-header-box > div:last-child { flex-direction: column; gap: 10px; }
+            .time-box-table { width: 100%; }
+            .btn-sync { justify-content: center; width: 100%; }
+            
+            /* Reordenamiento de Grillas a 1 sola columna */
+            .charts-row, .grid-1-2, .three-column-grid, .fichas-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 15px; width: 100%; }
+            
+            /* Contenedores de Tablas (Scroll Horizontal Interno Activado) */
+            .excel-container { width: 100% !important; padding: 10px; box-sizing: border-box; overflow-x: auto; margin-bottom: 20px; }
+            table.excel-table { min-width: 500px; } /* Evita que la tabla se aplaste, activa scroll con el dedo */
+            .ficha-vendedor { width: 100%; box-sizing: border-box; overflow-x: auto; }
+        }
+
+        /* =========================================================
            SÚPER CONFIGURACIÓN DE IMPRESIÓN (PDF PERFECTO)
            ========================================================= */
         @media print {
             @page {
-                size: A4 landscape; /* Fuerza orientación horizontal */
-                margin: 6mm; /* Margen mínimo */
+                size: landscape; /* Fuerza orientación horizontal */
+                margin: 8mm; /* Márgenes pequeños para aprovechar espacio */
             }
             body { 
                 background-color: white !important; 
-                font-size: 8pt !important; 
+                font-size: 8.5pt !important; 
+                zoom: 70%; /* Reduce la escala general para que la tabla ancha encaje */
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -125,34 +161,27 @@
                 border: none !important; 
                 box-shadow: none !important; 
                 width: 100% !important; 
-                margin: 0 0 15px 0 !important; 
+                margin: 0 !important; 
                 padding: 0 !important;
                 overflow: visible !important;
             }
-            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 8px 0 !important; font-size: 9pt !important; }
+            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 10px 0 !important; }
             
-            /* REDUCCIÓN FÍSICA DE LA TABLA (Para que no se corte) */
+            /* FUERZA A LA TABLA A ENCAJAR */
             table.excel-table { 
                 width: 100% !important; 
-                table-layout: auto !important; 
+                table-layout: auto !important; /* Permite auto-ajustar las columnas */
                 border-collapse: collapse !important; 
             }
-            table.excel-table th { 
-                background-color: #edf2f7 !important; 
+            table.excel-table th, table.excel-table td { 
                 border: 1px solid #cbd5e0 !important; 
-                padding: 3px 4px !important; 
-                font-size: 7.5pt !important; 
-            }
-            table.excel-table td { 
-                border: 1px solid #cbd5e0 !important; 
-                padding: 3px 4px !important; 
-                font-size: 7.5pt !important; 
-                white-space: normal !important; 
+                padding: 4px !important; /* Reduce el relleno interno */
+                font-size: 8.5pt !important; /* Letra más chica */
+                white-space: normal !important; /* Permite que el texto baje a la siguiente línea */
                 word-wrap: break-word !important; 
             }
             table.excel-table tr { page-break-inside: avoid !important; }
             
-            .badge { font-size: 7pt !important; padding: 2px 4px !important; }
             .badge-success { background-color: #c6f6d5 !important; color: #22543d !important; border: 1px solid #9ae6b4 !important;}
             .badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; border: 1px solid #feb2b2 !important;}
             .badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important;}
@@ -163,7 +192,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Base de Datos YTD Anual...</div>
+        <div>Sincronizando Base de Datos YTD y GitHub...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -226,6 +255,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -295,6 +325,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -325,6 +356,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -350,6 +382,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -375,6 +408,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -411,6 +445,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -436,6 +471,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -461,6 +497,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -489,6 +526,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -518,6 +556,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -589,66 +628,10 @@
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
-        
         let simulacionDiasTrans = null;
 
+        // Base mínima para que arranque, TODO EL PASADO SE EXTRAE DE GITHUB MÁS ABAJO
         const HISTORICO_METAS = {
-            "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
-                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
-            },
-            "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
-                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
-            },
-            "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
-                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 685000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 145260057 }
-            },
-            "4": { name: "Abril", diasMes: 22.0, diasTranscurridos: 22.0, global: 2455000000, 
-                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 270000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
-            },
-            "5": { name: "Mayo", diasMes: 20.5, diasTranscurridos: 20.5, global: 2300000000, 
-                   canales: { "Salon": 395000000, "Online": 685000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000 },
-                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
-            },
-            "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
-                   canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 },
-                   vendedorMarca: { 
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||ASG": 34268400,
-                        "Oscar David Maldonado Yudis - Salon|||ASG": 10886900,
-                        "Marcelo Evaristo Sánchez Rojas - Online|||ASG": 5083900,
-                        "Oscar Daniel Zárate Villamayor - Online|||ASG": 2545000,
-                        "Hugo Javier González Arce - Online|||ASG": 1520500,
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 171216713,
-                        "Oscar David Maldonado Yudis - Salon|||TSS": 25719000,
-                        "Marcelo Evaristo Sánchez Rojas - Online|||TSS": 3602000,
-                        "Oscar Daniel Zárate Villamayor - Online|||TSS": 569000,
-                        "Hugo Javier González Arce - Online|||TSS": 1198000,
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Crosman": 27112615,
-                        "Oscar David Maldonado Yudis - Salon|||Crosman": 6259000,
-                        "Marcelo Evaristo Sánchez Rojas - Online|||Crosman": 6259000,
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 139591636,
-                        "Oscar David Maldonado Yudis - Salon|||Umarex": 71368875,
-                        "Marcelo Evaristo Sánchez Rojas - Online|||Umarex": 46193875,
-                        "Oscar Daniel Zárate Villamayor - Online|||Umarex": 8357500,
-                        "Hugo Javier González Arce - Online|||Umarex": 9599875,
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 162118046,
-                        "Oscar David Maldonado Yudis - Salon|||Doberman": 12768900,
-                        "Marcelo Evaristo Sánchez Rojas - Online|||Doberman": 6376000,
-                        "Oscar Daniel Zárate Villamayor - Online|||Doberman": 3412000,
-                        "Hugo Javier González Arce - Online|||Doberman": 2290000,
-                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Konus": 21767250,
-                        "Oscar David Maldonado Yudis - Salon|||Konus": 1173250
-                   }
-            },
             "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
                    canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Venta Externa": 50000000, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000, "Diego Alberto López Rojas - Venta Externa": 50000000, "DIEGO NADIV KEMPER ZIMERLIZ - DIRECTORIO": 0, "Jorge Vidal Rodriguez Rojas - Reparaciones": 0 }
@@ -730,11 +713,9 @@
             }
         }
 
-        // NORMALIZADOR INTELIGENTE DE CANALES
         function obtenerCanalReal(vendedor, canalCSV) {
             let vUpper = String(vendedor || "").toUpperCase().trim();
             let cUpper = String(canalCSV || "").toUpperCase().trim();
-
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
             if (vUpper.includes("REPARACIONES") || vUpper.includes("TALLER") || vUpper.includes("SERVICIO")) return "Reparaciones";
@@ -742,7 +723,7 @@
             if (vUpper.includes("E-COMMERCE") || vUpper.includes("ECOMMERCE")) return "E-commerce";
             if (vUpper.includes("ONLINE") || vUpper === "ONLINE") return "Online";
             if (vUpper.includes("SALON") || vUpper.includes("SALÓN") || vUpper === "SALON") return "Salon";
-
+            
             if (cUpper.includes("DIRECTORIO")) return "Directorio";
             if (cUpper.includes("VENTA EXTERNA") || cUpper.includes("EXTERNA")) return "Venta Externa";
             if (cUpper.includes("REPARACIONES") || cUpper.includes("TALLER")) return "Reparaciones";
@@ -750,7 +731,6 @@
             if (cUpper.includes("E-COMMERCE") || cUpper.includes("ECOMMERCE")) return "E-commerce";
             if (cUpper.includes("ONLINE")) return "Online";
             if (cUpper.includes("SALON") || cUpper.includes("SALÓN")) return "Salon";
-
             return canalCSV || "Salon";
         }
 
@@ -828,8 +808,86 @@
             }
         }
 
-        function iniciarSincronizacion() {
+        /* 
+        ========================================================================
+        🔥 MOTOR DE EXTRACCIÓN HISTÓRICA DESDE GITHUB
+        ======================================================================== 
+        */
+        async function conectarHistoricosGitHub() {
+            document.getElementById('status-banner').innerHTML = "⏳ Extrayendo historial de metas desde GitHub...";
+            
+            // Aquí agregas cualquier archivo nuevo que subas a GitHub en el futuro.
+            // Asegurate de que el link siempre sea el "Raw"
+            const urlsGithub = [
+                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv",
+                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv",
+                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv",
+                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv"
+            ];
+            
+            let mesIndex = 1; // Enero
+            
+            for (let url of urlsGithub) {
+                try {
+                    let res = await fetch(url + "?cb=" + new Date().getTime());
+                    if (!res.ok) continue;
+                    let text = await res.text();
+                    
+                    // Separar el archivo por cada vez que encuentra "TABLA 1" (útil por si en 1 archivo hay 2 meses)
+                    let bloques = text.split('--- TABLA 1');
+                    for(let i = 1; i < bloques.length; i++) {
+                        let bloque = bloques[i];
+                        
+                        // Crear el mes en el sistema
+                        if(!HISTORICO_METAS[mesIndex.toString()]) {
+                            HISTORICO_METAS[mesIndex.toString()] = { name: "Mes " + mesIndex, diasMes: 25, diasTranscurridos: 25, global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                        }
+                        let obj = HISTORICO_METAS[mesIndex.toString()];
+                        
+                        let lineas = bloque.split('\n');
+                        let inT1 = true;
+                        let inT3 = false;
+                        
+                        for(let line of lineas) {
+                            let l = line.trim();
+                            if(l.includes('--- TABLA 2')) { inT1 = false; continue; }
+                            if(l.includes('--- TABLA 3')) { inT1 = false; inT3 = true; continue; }
+                            
+                            let p = l.split(',');
+                            
+                            // Extrae la Meta General del vendedor
+                            if(inT1 && p.length >= 4) {
+                                let vend = p[2].trim();
+                                let meta = parseInt(p[3].replace(/\./g, '')) || 0;
+                                // Omite basuras
+                                if(vend !== 'Vendedor' && vend !== '' && meta > 0 && !vend.includes("Consum. Final") && !vend.includes("Vta. On Line")) {
+                                    obj.vendedoresTotales[vend] = meta;
+                                }
+                            }
+                            
+                            // Extrae la Meta de la Marca
+                            if(inT3 && p.length >= 5) {
+                                let vend = p[1].trim();
+                                let marca = p[3].trim();
+                                let meta = parseInt(p[4].replace(/\./g, '')) || 0;
+                                if(vend !== 'Vendedor' && vend !== '' && meta > 0) {
+                                    obj.vendedorMarca[vend + '|||' + marca] = meta;
+                                }
+                            }
+                        }
+                        mesIndex++; // Pasa al siguiente mes
+                    }
+                } catch(e) { console.error("Error leyendo de GitHub:", e); }
+            }
+        }
+
+        async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
+            
+            // PRIMERO: Descargamos las bases históricas limpias de GitHub
+            await conectarHistoricosGitHub();
+            
+            // SEGUNDO: Descargamos los datos en vivo de Google Sheets
             descargarDatosCruzadosBI();
         }
 
@@ -873,7 +931,7 @@
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base de datos conectada correctamente a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base conectada con Google Sheets y GitHub a las: ${horaStr}`);
                 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
@@ -1310,7 +1368,6 @@
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
-            // ENRUTAMIENTO ESTRICTO Y COMPLETO PARA LOS 7 CANALES
             let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hDirV = ""; let hRepV = "";
             let canalesSegmentos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             
@@ -1358,7 +1415,6 @@
             document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
-            // RENDERIZADO DE FICHAS Y TABLA DE BONOS POR CANAL
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let hTablaBonos = "";
 
@@ -1429,6 +1485,8 @@
                 // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
                 // ==========================================
                 let nUpper = String(v).toUpperCase();
+                
+                // 🔥 FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas de la tabla de bonos
                 let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
@@ -1438,9 +1496,9 @@
                     if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
                         escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
                     } else if (nUpper.includes("SUPERVISOR")) {
-                        escalaRol = "Supervisor de Online y Mayorista"; premios = [450000, 900000, 1800000];
+                        escalaRol = "Supervisor Online/Mayorista"; premios = [450000, 900000, 1800000];
                     } else if (nUpper.includes("JEFE")) {
-                        escalaRol = "Jefe de Consumidor Final"; premios = [800000, 1600000, 3000000];
+                        escalaRol = "Jefe Consumidor Final"; premios = [800000, 1600000, 3000000];
                     } else if (nUpper.includes("MAYORISTA")) {
                         escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
                     }
@@ -1457,6 +1515,7 @@
 
                     let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO (G. 0)</span>`;
                     
+                    // 🔥 LIMPIEZA DE "0 DE 0": Si no tiene marcas asignadas, se ve limpio y profesional.
                     let txtMarcas = "";
                     if (marcasAsignadas === 0) {
                         txtMarcas = `<span style="color:#a0aec0; font-size:10px;">- Sin marcas asignadas -</span>`;
