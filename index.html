@@ -63,11 +63,10 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- CONTENEDORES Y TABLAS --- */
-        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; }
-        .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
+        /* --- CONTENEDORES Y TABLAS RESPONSIVAS --- */
+        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
+        .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
-        /* Contenedor responsivo vital para evitar que se rompa la web en celular */
         .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
         table.excel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 650px; }
@@ -110,38 +109,32 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
+           OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
-            
-            /* El menú lateral pasa a ser una cabecera superior y cómoda */
             .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
             .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
             .sidebar h2 { display: none; }
             .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
             
             .main-content { padding: 10px; width: 100%; overflow: visible; }
-            
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
-            
             .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
             
-            /* Las grillas se apilan solas */
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
             .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
             
-            /* Las tablas ahora hacen scroll horizontal con el dedo sin deformar la pantalla */
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; }
             table.excel-table { min-width: 700px; }
         }
 
-        /* Oculta la impresión por defecto porque usaremos un generador impecable */
+        /* Oculta la impresión por defecto del navegador, porque armé un generador A4 impecable */
         @media print { body { display: none; } }
     </style>
 </head>
@@ -490,7 +483,7 @@
                     <table class="excel-table">
                         <thead>
                             <tr style="background:#f7fafc;">
-                                <th>Vendedor</th>
+                                <th class="text-left">Vendedor</th>
                                 <th>Canal Base</th>
                                 <th>Escala Detectada</th>
                                 <th class="text-right">Meta del Mes (₲)</th>
@@ -591,17 +584,12 @@
         }
 
         // =========================================================================
-        // 🔥 NUEVO GENERADOR DE PDF A4 VERTICAL (DISEÑO EDITORIAL PROFESIONAL)
+        // 🔥 GENERADOR DE PDF A4 VERTICAL (DISEÑO EDITORIAL PROFESIONAL)
         // =========================================================================
         function exportarBonosPDF() {
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
             let tbody = document.getElementById('grid-bonos-vendedores').innerHTML;
             
-            // Tratamos de buscar la imagen del logo, si no está, usamos un string vacío
-            let logoEl = document.getElementById('logo-empresa');
-            let logoSrc = logoEl ? logoEl.src : '';
-            
-            // Creación de la ventana de impresión invisible
             let printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
@@ -609,60 +597,24 @@
                 <head>
                     <title>Reporte de Liquidación de Bonos - ${currentMonthTxt}</title>
                     <style>
-                        /* Configuración milimétrica para Hoja A4 Vertical (Portrait) */
+                        /* Configuración para A4 Vertical */
                         @page { size: A4 portrait; margin: 15mm 12mm; }
                         
-                        body { 
-                            font-family: 'Segoe UI', Arial, sans-serif; 
-                            color: #1a2c42; 
-                            -webkit-print-color-adjust: exact !important; 
-                            print-color-adjust: exact !important; 
-                            background: white; 
-                            margin: 0; 
-                        }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2c42; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white; margin: 0; }
                         
                         /* Cabecera Corporativa */
-                        .header { 
-                            display: flex; 
-                            justify-content: space-between; 
-                            align-items: center; 
-                            border-bottom: 3px solid #1a2c42; 
-                            padding-bottom: 15px; 
-                            margin-bottom: 20px; 
-                        }
+                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1a2c42; padding-bottom: 15px; margin-bottom: 20px; }
                         .header-text h1 { margin: 0 0 5px 0; font-size: 16pt; color: #1a2c42; text-transform: uppercase; letter-spacing: 0.5px; }
                         .header-text h2 { margin: 0; font-size: 11pt; color: #dd6b20; font-weight: 600; }
-                        .header img { max-height: 50px; object-fit: contain; }
+                        .header .logo { font-size: 20pt; font-weight: 900; color: #1a2c42; letter-spacing: -1px; }
                         
                         /* Regla de Negocio */
-                        .info-box { 
-                            background-color: #fffaf0; 
-                            border-left: 4px solid #dd6b20; 
-                            padding: 10px 15px; 
-                            margin-bottom: 20px; 
-                            font-size: 9pt; 
-                            color: #7b341e; 
-                            border-radius: 4px; 
-                        }
+                        .info-box { background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 10px 15px; margin-bottom: 20px; font-size: 9pt; color: #7b341e; border-radius: 4px; border: 1px solid #feebc8; }
                         
                         /* Tabla Estilo Factura / Reporte */
                         table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-                        th { 
-                            background-color: #1a2c42 !important; 
-                            color: white !important; 
-                            padding: 10px 6px; 
-                            text-align: center; 
-                            text-transform: uppercase; 
-                            letter-spacing: 0.5px; 
-                            border: 1px solid #1a2c42; 
-                        }
-                        td { 
-                            border-bottom: 1px solid #e2e8f0; 
-                            border-left: 1px solid #e2e8f0; 
-                            border-right: 1px solid #e2e8f0; 
-                            padding: 8px 6px; 
-                            vertical-align: middle; 
-                        }
+                        th { background-color: #1a2c42 !important; color: white !important; padding: 10px 6px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1a2c42; }
+                        td { border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 8px 6px; vertical-align: middle; }
                         tr:nth-child(even) td { background-color: #f8fafc !important; }
                         
                         .text-left { text-align: left; }
@@ -677,30 +629,21 @@
                         span.badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #feb2b2 !important;}
                         span.badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #cbd5e0 !important;}
                         
-                        /* OCULTAR COLUMNAS INNECESARIAS PARA QUE ENTRE EN A4 VERTICAL */
+                        /* OCULTAMOS COLUMNAS QUE NO ENTRAN EN A4 VERTICAL */
                         th:nth-child(2), td:nth-child(2), /* Canal Base */
                         th:nth-child(3), td:nth-child(3)  /* Escala Detectada */
                         { display: none !important; }
                         
-                        .footer { 
-                            margin-top: 30px; 
-                            font-size: 7.5pt; 
-                            color: #a0aec0; 
-                            text-align: center; 
-                            border-top: 1px solid #e2e8f0; 
-                            padding-top: 15px; 
-                            text-transform: uppercase; 
-                            letter-spacing: 0.5px; 
-                        }
+                        .footer { margin-top: 30px; font-size: 7.5pt; color: #a0aec0; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
                     </style>
                 </head>
                 <body>
                     <div class="header">
                         <div class="header-text">
-                            <h1>Reporte Oficial de Liquidación de Bonos</h1>
+                            <h1>Reporte de Liquidación de Bonos</h1>
                             <h2>Período Evaluado: ${currentMonthTxt}</h2>
                         </div>
-                        ${logoSrc ? `<img src="${logoSrc}" alt="Camping 44">` : `<div style="font-size:18pt;font-weight:900;">CAMPING 44</div>`}
+                        <div class="logo">CAMPING 44</div>
                     </div>
                     
                     <div class="info-box">
@@ -732,10 +675,7 @@
                     
                     <script>
                         window.onload = function() { 
-                            setTimeout(function() { 
-                                window.print(); 
-                                window.close(); 
-                            }, 800);
+                            setTimeout(function() { window.print(); window.close(); }, 800);
                         }
                     <\/script>
                 </body>
@@ -768,17 +708,16 @@
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
-        
         let simulacionDiasTrans = null;
 
         // HISTÓRICO GLOBAL
         let HISTORICO_METAS = {};
 
         // Mes actual de Google Sheets
-        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {}, ventasGlobales: 0, ventasPorCanal: {}, ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} };
 
         // =========================================================================
-        // 🔥 NORMALIZADOR UNIVERSAL DE NOMBRES (SIN ACENTOS NI MAYÚSCULAS)
+        // 🔥 NORMALIZADOR DE NOMBRES (SIN ACENTOS NI EXTRAS) PARA EMPAREJAR 100%
         // =========================================================================
         function normalizarTexto(texto) {
             if (!texto) return "";
@@ -882,28 +821,26 @@
         }
 
         // =========================================================================
-        // 🔥 ALGORITMO INTELIGENTE DE MATCHING (ODOO vs GITHUB)
+        // 🔥 BUSCADOR INTELIGENTE: EMPAREJA EL CSV CON ODOO AUNQUE TENGAN ACENTOS
         // =========================================================================
         function buscarMetaPorNombre(nombreOdoo, diccionario) {
-            // Limpiamos los canales del nombre (ej: "- Salon") y le sacamos los acentos
             let odooLimpio = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
             
-            // 1. Buscamos primero el nombre exacto
+            // Busca exacto (ej: "GIOVANNI EMANUEL JARA APREA")
             if (diccionario[nombreOdoo]) return diccionario[nombreOdoo];
             if (diccionario[odooLimpio]) return diccionario[odooLimpio];
             
-            // 2. Búsqueda por palabras (Ej: "MARCELO SANCHEZ" vs "MARCELO EVARISTO SANCHEZ ROJAS")
+            // Si el nombre corto del CSV (ej: "GIOVANNI JARA") está dentro del largo de Odoo
             for (let key in diccionario) {
                 let csvKeyLimpio = normalizarTexto(key);
                 if (csvKeyLimpio === "VENDEDOR" || csvKeyLimpio === "") continue;
                 
-                // Casos genéricos (Varios, Consumidor final, etc)
                 if (csvKeyLimpio.includes("CONSUM") && odooLimpio.includes("CONSUM")) return diccionario[key];
                 
-                // Dividimos en palabras largas
+                // Dividimos el nombre corto "GIOVANNI JARA" en ["GIOVANNI", "JARA"]
                 let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
                 
-                // Si el nombre del CSV tiene palabras, y TODAS están en el nombre de Odoo
+                // Si "GIOVANNI EMANUEL JARA APREA" incluye "GIOVANNI" y "JARA", hace MATCH.
                 if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) {
                     return diccionario[key];
                 }
@@ -990,10 +927,10 @@
         }
 
         // ========================================================================
-        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB (SÚPER ROBUSTA)
+        // 🔥 MOTOR DE EXTRACCIÓN GITHUB (EXTRAE METAS Y VENTAS HISTÓRICAS)
         // ========================================================================
         async function cargarHistoricoDesdeGithub() {
-            document.getElementById('loader-text').innerText = "Extrayendo historial y metas pasadas...";
+            document.getElementById('loader-text').innerText = "Procesando Historial desde GitHub...";
             const urls = [
                 { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv", startMonth: 1 },
                 { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv", startMonth: 2 },
@@ -1007,7 +944,6 @@
                     if (!res.ok) continue;
                     let text = await res.text();
                     
-                    // Expresión regular que detecta "--- TABLA 1" o similar
                     let blocks = text.split(/--- TABLA 1/i);
                     let monthIdx = file.startMonth;
                     
@@ -1017,12 +953,16 @@
                         if(!HISTORICO_METAS[monthIdx.toString()]) {
                             HISTORICO_METAS[monthIdx.toString()] = { 
                                 name: "Mes " + monthIdx, diasMes: 25, diasTranscurridos: 25, 
-                                global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} 
+                                global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {},
+                                isHistoricalDataLoaded: true, ventasGlobales: 0, ventasPorCanal: {}, 
+                                ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} 
                             };
                         }
+                        let obj = HISTORICO_METAS[monthIdx.toString()];
                         
                         let currentTable = 1;
                         let lines = blockText.split('\n');
+                        let shortToLongName = {};
                         
                         for(let line of lines) {
                             let l = line.trim();
@@ -1031,28 +971,61 @@
                             
                             let parts = l.split(',');
                             
-                            // TABLA 1: Canal[0], Cod[1], Vendedor[2], Meta General[3]
-                            if(currentTable === 1 && parts.length >= 4) {
-                                let vend = parts[2] ? parts[2].trim() : "";
+                            // TABLA 1: Guardamos Ventas Históricas y Metas
+                            if(currentTable === 1 && parts.length >= 5) {
+                                let canalRaw = parts[0] ? parts[0].trim() : "";
+                                let longName = parts[1] ? parts[1].trim() : "";
+                                let shortName = parts[2] ? parts[2].trim() : "";
                                 let meta = parseInt(parts[3].replace(/\./g, '')) || 0;
-                                if(vend && vend !== 'Vendedor' && meta > 0) {
-                                    HISTORICO_METAS[monthIdx.toString()].vendedoresTotales[vend] = meta;
+                                let venta = parseInt(parts[4].replace(/\./g, '')) || 0;
+                                
+                                if(longName && longName !== 'Cod') {
+                                    shortToLongName[shortName] = longName;
+                                    let cNormalizado = obtenerCanalReal(longName, canalRaw);
+                                    
+                                    if (meta > 0) obj.vendedoresTotales[longName] = meta;
+                                    
+                                    if (!obj.ventasPorVendedor[longName]) {
+                                        obj.ventasPorVendedor[longName] = { bruto: venta, nc: 0, neta: venta, canal: cNormalizado };
+                                    } else {
+                                        obj.ventasPorVendedor[longName].bruto += venta;
+                                        obj.ventasPorVendedor[longName].neta += venta;
+                                    }
+                                    
+                                    if (!obj.ventasPorCanal[cNormalizado]) {
+                                        obj.ventasPorCanal[cNormalizado] = { bruto: 0, nc: 0, neta: 0 };
+                                    }
+                                    obj.ventasPorCanal[cNormalizado].bruto += venta;
+                                    obj.ventasPorCanal[cNormalizado].neta += venta;
+                                    
+                                    obj.ventasGlobales += venta;
+                                    if(meta > 0) obj.global += meta; 
+                                    obj.canales[cNormalizado] = (obj.canales[cNormalizado] || 0) + meta;
                                 }
                             }
                             
-                            // TABLA 3: Canal[0], Vendedor[1], Categoría[2], Marca[3], Meta[4]
-                            if(currentTable === 3 && parts.length >= 5) {
-                                let vend = parts[1] ? parts[1].trim() : "";
+                            // TABLA 3: Guardamos Metas de Marca y Venta de Marca Histórica
+                            if(currentTable === 3 && parts.length >= 6) {
+                                let shortName = parts[1] ? parts[1].trim() : "";
+                                let longName = shortToLongName[shortName] || shortName; // Usa el nombre de Odoo
                                 let marca = parts[3] ? parts[3].trim() : "";
                                 let meta = parseInt(parts[4].replace(/\./g, '')) || 0;
-                                if(vend && vend !== 'Vendedor' && marca && meta > 0) {
-                                    HISTORICO_METAS[monthIdx.toString()].vendedorMarca[vend + '|||' + marca] = meta;
+                                let venta = parseInt(parts[5].replace(/\./g, '')) || 0;
+                                
+                                if(longName && longName !== 'Vendedor' && marca) {
+                                    if(meta > 0) obj.vendedorMarca[longName + '|||' + marca] = meta;
+                                    
+                                    if (!obj.ventasMarcaPorVendedor[longName]) {
+                                        obj.ventasMarcaPorVendedor[longName] = {};
+                                    }
+                                    obj.ventasMarcaPorVendedor[longName][marca] = venta;
+                                    obj.ventasMarcasGlobal[marca] = (obj.ventasMarcasGlobal[marca] || 0) + venta;
                                 }
                             }
                         }
                         monthIdx++; 
                     }
-                } catch(e) { console.error("Error leyendo de GitHub:", e); }
+                } catch(e) { console.error("Error leyendo GitHub:", e); }
             }
         }
 
@@ -1073,7 +1046,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Conectando con Google Sheets en vivo...";
+                document.getElementById('loader-text').innerText = "Conectando Google Sheets en vivo...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1103,7 +1076,7 @@
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. GitHub y Google Sheets actualizados a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD (GitHub + Live) a las: ${horaStr}`);
                 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
@@ -1320,7 +1293,7 @@
             let liveMonth = filtrosActivos.mesActualLive;
             
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {}, ventasGlobales: 0, ventasPorCanal: {}, ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} };
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
                     let mData = (m === liveMonth) ? METAS_LIVE : HISTORICO_METAS[key];
@@ -1328,6 +1301,7 @@
                     
                     metasYTD.global += (mData.global || 0);
                     metasYTD.diasMes += (mData.diasMes || 0);
+                    metasYTD.ventasGlobales += (mData.ventasGlobales || 0);
                     
                     let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
                     metasYTD.diasTranscurridos += transVal;
@@ -1352,16 +1326,12 @@
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let dataFichasVend = {};
 
-            if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
-
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
             
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
-                if (simulacionDiasTrans !== null) {
-                    diasTranscurridosActivos = simulacionDiasTrans;
-                }
+                if (simulacionDiasTrans !== null) { diasTranscurridosActivos = simulacionDiasTrans; }
                 poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
@@ -1372,57 +1342,94 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
-            lineasDeDatosGlobales.forEach(r => {
-                if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
-                if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
-                if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
-                if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
-                if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
+            // Si es un mes histórico ya cargado, extraemos los datos desde el objeto y omitimos el CSV vivo
+            let esHistorico = (filtrosActivos.mes !== "" && parseInt(filtrosActivos.mes) !== filtrosActivos.mesActualLive);
 
-                let esNC = (r.documento === "Nota de Crédito");
-                let m = r.totalGs;
+            if (esHistorico && METAS_ACTIVAS.isHistoricalDataLoaded && !filtrosActivos.fecha) {
+                data.neta = METAS_ACTIVAS.ventasGlobales || 0;
+                data.bruta = METAS_ACTIVAS.ventasGlobales || 0;
 
-                if (esNC) {
-                    data.nc += m;
-                    acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
-                    acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
-                    if(!acumCanales[r.canal]) acumCanales[r.canal] = { bruto: 0, nc: 0, neta: 0 };
-                    acumCanales[r.canal].nc += m;
-                } else {
-                    data.bruta += m;
-                    if(!acumCanales[r.canal]) acumCanales[r.canal] = { bruto: 0, nc: 0, neta: 0 };
-                    acumCanales[r.canal].bruto += m;
-                }
-                data.neta += m;
-
-                if(r.canal && r.vendedor) {
-                    if(!acumVendPorCanal[r.canal]) acumVendPorCanal[r.canal] = {};
-                    if(!acumVendPorCanal[r.canal][r.vendedor]) acumVendPorCanal[r.canal][r.vendedor] = { bruto: 0, nc: 0 };
-                    if(esNC) acumVendPorCanal[r.canal][r.vendedor].nc += m;
-                    else acumVendPorCanal[r.canal][r.vendedor].bruto += m;
+                if (METAS_ACTIVAS.ventasPorCanal) {
+                    Object.keys(METAS_ACTIVAS.ventasPorCanal).forEach(c => {
+                        acumCanales[c] = { bruto: METAS_ACTIVAS.ventasPorCanal[c].bruto || 0, nc: METAS_ACTIVAS.ventasPorCanal[c].nc || 0, neta: METAS_ACTIVAS.ventasPorCanal[c].neta || 0 };
+                    });
                 }
 
-                if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
-                if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
+                if (METAS_ACTIVAS.ventasPorVendedor) {
+                    Object.keys(METAS_ACTIVAS.ventasPorVendedor).forEach(v => {
+                        let vInfo = METAS_ACTIVAS.ventasPorVendedor[v];
+                        if (filtrosActivos.vendedor && v !== filtrosActivos.vendedor) return;
+                        if (filtrosActivos.canal && vInfo.canal !== filtrosActivos.canal) return;
 
-                if (r.canal === "E-commerce") {
-                    if (String(r.cliente).toUpperCase().includes("TUPI")) {
-                        if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
-                    } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
-                        if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m; 
+                        if(!acumVendPorCanal[vInfo.canal]) acumVendPorCanal[vInfo.canal] = {};
+                        acumVendPorCanal[vInfo.canal][v] = { bruto: vInfo.bruto, nc: vInfo.nc };
+
+                        dataFichasVend[v] = { canal: vInfo.canal, marcas: METAS_ACTIVAS.ventasMarcaPorVendedor[v] || {}, nc: vInfo.nc, bruto: vInfo.bruto };
+                    });
+                }
+
+                if (METAS_ACTIVAS.ventasMarcasGlobal) {
+                    Object.keys(METAS_ACTIVAS.ventasMarcasGlobal).forEach(m => {
+                        if (filtrosActivos.marca && m !== filtrosActivos.marca) return;
+                        acumMarcas[m] = METAS_ACTIVAS.ventasMarcasGlobal[m];
+                    });
+                }
+            } else {
+                // Cálculo Vivo para el Mes Actual
+                if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
+                
+                lineasDeDatosGlobales.forEach(r => {
+                    if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
+                    if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
+                    if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
+                    if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
+                    if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
+
+                    let esNC = (r.documento === "Nota de Crédito");
+                    let m = r.totalGs;
+
+                    if (esNC) {
+                        data.nc += m;
+                        acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
+                        acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
+                        if(!acumCanales[r.canal]) acumCanales[r.canal] = { bruto: 0, nc: 0, neta: 0 };
+                        acumCanales[r.canal].nc += m;
                     } else {
-                        if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
+                        data.bruta += m;
+                        if(!acumCanales[r.canal]) acumCanales[r.canal] = { bruto: 0, nc: 0, neta: 0 };
+                        acumCanales[r.canal].bruto += m;
                     }
-                }
+                    data.neta += m;
 
-                if(r.vendedor) {
-                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
-                    if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
-                    if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
-                        dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
+                    if(r.canal && r.vendedor) {
+                        if(!acumVendPorCanal[r.canal]) acumVendPorCanal[r.canal] = {};
+                        if(!acumVendPorCanal[r.canal][r.vendedor]) acumVendPorCanal[r.canal][r.vendedor] = { bruto: 0, nc: 0 };
+                        if(esNC) acumVendPorCanal[r.canal][r.vendedor].nc += m;
+                        else acumVendPorCanal[r.canal][r.vendedor].bruto += m;
                     }
-                }
-            });
+
+                    if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
+                    if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
+
+                    if (r.canal === "E-commerce") {
+                        if (String(r.cliente).toUpperCase().includes("TUPI")) {
+                            if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
+                        } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
+                            if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m; 
+                        } else {
+                            if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
+                        }
+                    }
+
+                    if(r.vendedor) {
+                        if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
+                        if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
+                        if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
+                            dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
+                        }
+                    }
+                });
+            }
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
           } catch(e) {
@@ -1588,7 +1595,7 @@
             document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
-            // RENDERIZADO DE FICHAS Y TABLA DE BONOS POR CANAL
+            // RENDERIZADO DE FICHAS Y TABLA DE BONOS
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let hTablaBonos = "";
 
@@ -1664,11 +1671,11 @@
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
+                // LÓGICA DE BONOS (REGLAS DE ESCALAS EXCLUYENTES)
                 // ==========================================
                 let nUpper = normalizarTexto(v);
                 
-                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas
+                // Filtro para ocultar canales o gente sin metas de la tabla de comisiones
                 let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
@@ -1790,6 +1797,7 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
+            // Corrige valores cero a gris en las listas
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
