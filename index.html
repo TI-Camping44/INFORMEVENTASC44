@@ -56,7 +56,6 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* SEPARACIÓN MEJORADA DE CONTENEDORES */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
         .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -12px -12px 12px -12px; border-top-left-radius: 6px; border-top-right-radius: 6px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; }
         
@@ -67,7 +66,6 @@
         table.excel-table tr.total-segmento td { background-color: #f7fafc !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         table.excel-table tr:hover { background-color: #f8fafc; }
 
-        /* BADGES MEJORADOS */
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9.5px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
         .badge-pending { background-color: #fed7d7; color: #742a2a; border: 1px solid #feb2b2; }
@@ -105,13 +103,13 @@
            ========================================================= */
         @media print {
             @page {
-                size: A4 landscape;
-                margin: 12mm;
+                size: landscape; /* Fuerza orientación horizontal */
+                margin: 8mm; /* Márgenes pequeños para aprovechar espacio */
             }
             body { 
                 background-color: white !important; 
-                font-size: 9pt !important; 
-                zoom: 85%; /* Ajusta el zoom para que quepan las tablas anchas */
+                font-size: 8.5pt !important; 
+                zoom: 70%; /* Reduce la escala general para que la tabla ancha encaje */
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -125,23 +123,33 @@
             .tab-content.active { display: block !important; }
             
             .excel-container { 
-                border: 1px solid #999 !important; 
+                border: none !important; 
                 box-shadow: none !important; 
                 width: 100% !important; 
-                margin-bottom: 20px !important; 
-                page-break-inside: avoid !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                overflow: visible !important;
             }
-            .excel-title { background-color: #1a2c42 !important; color: white !important; }
+            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 10px 0 !important; }
             
-            table.excel-table { width: 100% !important; border-collapse: collapse !important; }
-            table.excel-table th { background-color: #edf2f7 !important; border: 1px solid #cbd5e0 !important; }
-            table.excel-table td { border: 1px solid #cbd5e0 !important; }
+            /* FUERZA A LA TABLA A ENCAJAR */
+            table.excel-table { 
+                width: 100% !important; 
+                table-layout: auto !important; /* Permite auto-ajustar las columnas */
+                border-collapse: collapse !important; 
+            }
+            table.excel-table th, table.excel-table td { 
+                border: 1px solid #cbd5e0 !important; 
+                padding: 4px !important; /* Reduce el relleno interno */
+                font-size: 8.5pt !important; /* Letra más chica */
+                white-space: normal !important; /* Permite que el texto baje a la siguiente línea */
+                word-wrap: break-word !important; 
+            }
             table.excel-table tr { page-break-inside: avoid !important; }
             
             .badge-success { background-color: #c6f6d5 !important; color: #22543d !important; border: 1px solid #9ae6b4 !important;}
             .badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; border: 1px solid #feb2b2 !important;}
             .badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important;}
-            .sheet-header-box { border: 2px solid #1a2c42 !important; }
         }
     </style>
 </head>
@@ -212,6 +220,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -281,6 +290,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -311,6 +321,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -336,6 +347,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -361,6 +373,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -397,6 +410,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -422,6 +436,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -447,6 +462,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -454,16 +470,16 @@
                     <button class="btn-sync" style="background:#2b7a78; font-size:10px; padding:6px 10px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF</button>
                 </div>
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 12px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
-                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>, sin importar la cantidad de marcas activadas.
+                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
                 </div>
                 <table class="excel-table">
                     <thead>
                         <tr style="background:#f7fafc;">
                             <th>Vendedor</th>
                             <th>Canal Base</th>
-                            <th>Escala / Cargo Detectado</th>
+                            <th>Escala Detectada</th>
                             <th class="text-right">Meta del Mes (₲)</th>
-                            <th class="text-right">Venta Real Alcanzada (₲)</th>
+                            <th class="text-right">Venta Real (₲)</th>
                             <th class="text-center">% Logrado</th>
                             <th class="text-center">¿Alcanzó Meta?</th>
                             <th class="text-center">Marcas Activadas</th>
@@ -475,6 +491,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -504,6 +521,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -830,6 +848,12 @@
             }, 3000);
 
             try {
+                // NOTA SOBRE GITHUB:
+                // Estas URLs apuntan a tu Google Sheets. Si prefieres alojar tus CSV en GitHub,
+                // solo debes reemplazarlas por el enlace RAW de GitHub. Por ejemplo:
+                // const urlConfig = 'https://raw.githubusercontent.com/TU-USUARIO/TU-REPO/main/metas.csv';
+                // const urlData = 'https://raw.githubusercontent.com/TU-USUARIO/TU-REPO/main/ventas.csv';
+
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1414,49 +1438,67 @@
                 // ==========================================
                 // LÓGICA DE BONOS (REGLA EXCLUYENTE + ESCALAS)
                 // ==========================================
-                let escalaRol = "Vendedor Salón / Online";
-                let premios = [350000, 700000, 1400000]; // 10, 13, 16 marcas
-
                 let nUpper = String(v).toUpperCase();
-                if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
-                    escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
-                } else if (nUpper.includes("SUPERVISOR")) {
-                    escalaRol = "Supervisor de Online y Mayorista"; premios = [450000, 900000, 1800000];
-                } else if (nUpper.includes("JEFE")) {
-                    escalaRol = "Jefe de Consumidor Final"; premios = [800000, 1600000, 3000000];
-                } else if (nUpper.includes("MAYORISTA")) {
-                    escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
-                }
-
-                // Condición 1: ¿Alcanzó Meta General?
-                let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
-                let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
-
-                let montoBonoFinal = 0;
                 
-                if (logroMeta) {
-                    // Condición 2: Si llegó a meta, aplicamos la escala por marcas
-                    if (marcasAlcanzadas >= 16) montoBonoFinal = premios[2];
-                    else if (marcasAlcanzadas >= 13) montoBonoFinal = premios[1];
-                    else if (marcasAlcanzadas >= 10) montoBonoFinal = premios[0];
+                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y los canales genéricos de la tabla de bonos
+                let ocultarDeBonos = false;
+                if (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0)) {
+                    ocultarDeBonos = true;
                 }
 
-                let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO (G. 0)</span>`;
-                let txtBono = montoBonoFinal > 0 ? `<strong style="color:#22543d; background:#c6f6d5; padding:3px 6px; border-radius:4px;">₲ ${montoBonoFinal.toLocaleString('es-PY')}</strong>` : `<strong style="color:#742a2a;">₲ 0</strong>`;
+                if (!ocultarDeBonos) {
+                    let escalaRol = "Vendedor Salón / Online";
+                    let premios = [350000, 700000, 1400000]; // 10, 13, 16 marcas
 
-                hTablaBonos += `
-                    <tr>
-                        <td><strong>${v}</strong></td>
-                        <td>${vData.canal || "General"}</td>
-                        <td style="color:#2b7a78; font-weight:bold; font-size:9.5px;">${escalaRol}</td>
-                        <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
-                        <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
-                        <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
-                        <td class="text-center">${badgeMeta}</td>
-                        <td class="text-center"><span class="badge badge-brand">${marcasAlcanzadas} de ${marcasAsignadas} activas</span></td>
-                        <td class="text-right">${txtBono}</td>
-                    </tr>
-                `;
+                    if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
+                        escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
+                    } else if (nUpper.includes("SUPERVISOR")) {
+                        escalaRol = "Supervisor de Online y Mayorista"; premios = [450000, 900000, 1800000];
+                    } else if (nUpper.includes("JEFE")) {
+                        escalaRol = "Jefe de Consumidor Final"; premios = [800000, 1600000, 3000000];
+                    } else if (nUpper.includes("MAYORISTA")) {
+                        escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
+                    }
+
+                    // Condición 1: ¿Alcanzó Meta General?
+                    let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
+                    let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
+
+                    let montoBonoFinal = 0;
+                    
+                    if (logroMeta) {
+                        // Condición 2: Si llegó a meta, aplicamos la escala por marcas
+                        if (marcasAlcanzadas >= 16) montoBonoFinal = premios[2];
+                        else if (marcasAlcanzadas >= 13) montoBonoFinal = premios[1];
+                        else if (marcasAlcanzadas >= 10) montoBonoFinal = premios[0];
+                    }
+
+                    let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO (G. 0)</span>`;
+                    
+                    // Si no tiene metas de marcas asignadas, mostrar limpio en vez de "0 de 0 activas"
+                    let txtMarcas = "";
+                    if (marcasAsignadas === 0) {
+                        txtMarcas = `<span style="color:#a0aec0; font-size:10px;">- No Aplica -</span>`;
+                    } else {
+                        txtMarcas = `<span class="badge badge-brand">${marcasAlcanzadas} de ${marcasAsignadas} activas</span>`;
+                    }
+
+                    let txtBono = montoBonoFinal > 0 ? `<strong style="color:#22543d; background:#c6f6d5; padding:4px 8px; border-radius:4px; font-size:11.5px;">₲ ${montoBonoFinal.toLocaleString('es-PY')}</strong>` : `<strong style="color:#742a2a; font-size:11.5px;">₲ 0</strong>`;
+
+                    hTablaBonos += `
+                        <tr>
+                            <td><strong>${v}</strong></td>
+                            <td>${vData.canal || "General"}</td>
+                            <td style="color:#2b7a78; font-weight:bold; font-size:10px;">${escalaRol}</td>
+                            <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
+                            <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
+                            <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11.5px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
+                            <td class="text-center">${badgeMeta}</td>
+                            <td class="text-center">${txtMarcas}</td>
+                            <td class="text-right">${txtBono}</td>
+                        </tr>
+                    `;
+                }
 
                 // CONSTRUCCIÓN FICHA VENDEDOR
                 let fichaHtml = `
@@ -1486,19 +1528,18 @@
                 </div>`;
 
                 let canalReal = vData.canal || "";
-                let n = String(v).toUpperCase();
                 
-                if (canalReal === "E-commerce" || n.includes("E-COMMERCE") || n.includes("ECOMMERCE")) {
+                if (canalReal === "E-commerce" || nUpper.includes("E-COMMERCE") || nUpper.includes("ECOMMERCE")) {
                     hFichasEcom += fichaHtml;
-                } else if (canalReal === "Mayoristas" || n.includes("MAYORISTAS")) {
+                } else if (canalReal === "Mayoristas" || nUpper.includes("MAYORISTAS")) {
                     hFichasMayo += fichaHtml;
-                } else if (canalReal === "Venta Externa" || n.includes("VENTA EXTERNA") || n.includes("EXTERNA")) {
+                } else if (canalReal === "Venta Externa" || nUpper.includes("VENTA EXTERNA") || nUpper.includes("EXTERNA")) {
                     hFichasExt += fichaHtml;
-                } else if (canalReal === "Directorio" || n.includes("DIRECTORIO")) {
+                } else if (canalReal === "Directorio" || nUpper.includes("DIRECTORIO")) {
                     hFichasDir += fichaHtml;
-                } else if (canalReal === "Reparaciones" || n.includes("REPARACIONES") || n.includes("TALLER")) {
+                } else if (canalReal === "Reparaciones" || nUpper.includes("REPARACIONES") || nUpper.includes("TALLER")) {
                     hFichasRep += fichaHtml;
-                } else if (canalReal === "Online" || n.includes("ONLINE")) {
+                } else if (canalReal === "Online" || nUpper.includes("ONLINE")) {
                     hFichasOnline += fichaHtml;
                 } else {
                     hFichasSalon += fichaHtml;
