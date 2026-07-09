@@ -158,6 +158,7 @@
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
         <div class="menu-item" onclick="switchTab('tab-externa', this)">🚗 Venta Externa</div>
+        <div class="menu-item" onclick="switchTab('tab-directorio', this)">👔 Directorio</div>
         <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 E-Commerce</div>
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
         <div class="menu-item" onclick="switchTab('tab-reparaciones', this)">🔧 Reparaciones</div>
@@ -325,6 +326,28 @@
                 </table>
                 <h3 style="margin-top:20px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 12px;">🔍 DESGLOSE DETALLADO POR MARCA - VENTA EXTERNA</h3>
                 <div class="fichas-grid" id="grid-fichas-externa"></div>
+            </div>
+        </div>
+
+        <div id="tab-directorio" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Vendedor / Canal</th>
+                            <th class="text-right">Ventas Netas</th>
+                            <th class="text-right">Devoluciones (NC)</th>
+                            <th class="text-right">Esperado Período</th>
+                            <th class="text-right">% Logrado</th>
+                            <th class="text-right">Objetivo Período</th>
+                            <th class="text-right">% Logrado Mes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grid-vendedores-directorio"></tbody>
+                </table>
+                <h3 style="margin-top:20px; margin-bottom: 5px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 5px; font-size: 12px;">🔍 DESGLOSE DETALLADO POR MARCA - DIRECTORIO</h3>
+                <div class="fichas-grid" id="grid-fichas-directorio"></div>
             </div>
         </div>
 
@@ -502,7 +525,6 @@
         }
 
         function exportarBonosPDF() {
-            // Asegurarse de que estamos en la pestaña de bonos antes de imprimir
             switchTab('tab-bonos', document.querySelector('.menu-item.bonos-highlight'));
             setTimeout(() => {
                 window.print();
@@ -538,32 +560,32 @@
 
         const HISTORICO_METAS = {
             "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
-                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
                    vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
             },
             "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
-                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
                    vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
             },
             "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
-                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 685000000 },
                    vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 145260057 }
             },
             "4": { name: "Abril", diasMes: 22.0, diasTranscurridos: 22.0, global: 2455000000, 
-                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 270000000 },
                    vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
             },
             "5": { name: "Mayo", diasMes: 20.5, diasTranscurridos: 20.5, global: 2300000000, 
-                   canales: { "Salon": 395000000, "Online": 685000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 395000000, "Online": 685000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000 },
                    vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
             },
             "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 19.5,
-                   canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Reparaciones": 0 },
+                   canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
                    vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 },
                    vendedorMarca: { 
                         "Antonio De Jesus Fernandez Benitez - Mayoristas|||ASG": 34268400,
@@ -594,8 +616,8 @@
                    }
             },
             "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
-                   canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Venta Externa": 50000000, "Reparaciones": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000, "Diego Alberto López Rojas - Venta Externa": 50000000, "Jorge Vidal Rodriguez Rojas - Reparaciones": 0 }
+                   canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Venta Externa": 50000000, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000, "Diego Alberto López Rojas - Venta Externa": 50000000, "DIEGO NADIV KEMPER ZIMERLIZ - DIRECTORIO": 0, "Jorge Vidal Rodriguez Rojas - Reparaciones": 0 }
             }
         };
 
@@ -674,6 +696,30 @@
             }
         }
 
+        // NORMALIZADOR INTELIGENTE DE CANALES (Resuelve conflictos cuando Odoo guarda todo como "Salón")
+        function obtenerCanalReal(vendedor, canalCSV) {
+            let vUpper = String(vendedor || "").toUpperCase().trim();
+            let cUpper = String(canalCSV || "").toUpperCase().trim();
+
+            if (vUpper.includes("DIRECTORIO")) return "Directorio";
+            if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
+            if (vUpper.includes("REPARACIONES") || vUpper.includes("TALLER") || vUpper.includes("SERVICIO")) return "Reparaciones";
+            if (vUpper.includes("MAYORISTAS") || vUpper.includes("MAYORISTA")) return "Mayoristas";
+            if (vUpper.includes("E-COMMERCE") || vUpper.includes("ECOMMERCE")) return "E-commerce";
+            if (vUpper.includes("ONLINE") || vUpper === "ONLINE") return "Online";
+            if (vUpper.includes("SALON") || vUpper.includes("SALÓN") || vUpper === "SALON") return "Salon";
+
+            if (cUpper.includes("DIRECTORIO")) return "Directorio";
+            if (cUpper.includes("VENTA EXTERNA") || cUpper.includes("EXTERNA")) return "Venta Externa";
+            if (cUpper.includes("REPARACIONES") || cUpper.includes("TALLER")) return "Reparaciones";
+            if (cUpper.includes("MAYORISTAS") || cUpper.includes("MAYORISTA")) return "Mayoristas";
+            if (cUpper.includes("E-COMMERCE") || cUpper.includes("ECOMMERCE")) return "E-commerce";
+            if (cUpper.includes("ONLINE")) return "Online";
+            if (cUpper.includes("SALON") || cUpper.includes("SALÓN")) return "Salon";
+
+            return canalCSV || "Salon";
+        }
+
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
             if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
@@ -681,14 +727,14 @@
             let nameUpper = String(nombreOdoo).toUpperCase().trim();
             let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
 
-            if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES"].includes(nameUpper)) {
+            if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(nameUpper)) {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
 
             let fallbackMatch = 0;
             for (let k in diccionarioMetas) {
                 let kUpper = String(k).toUpperCase().trim();
-                if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES"].includes(kUpper) || kUpper.includes("VARIOS")) continue; 
+                if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(kUpper) || kUpper.includes("VARIOS")) continue; 
                 let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
                 if (cleanK === cleanNameOdoo) return diccionarioMetas[k];
                 if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) fallbackMatch = diccionarioMetas[k];
@@ -830,8 +876,12 @@
                     }
                     if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
 
-                    if (row[5] && ["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Reparaciones", "Directorio"].includes(String(row[5]).trim())) {
-                        METAS_JUNIO_LIVE.canales[String(row[5]).trim()] = handleNum(row[6]);
+                    if (row[5]) {
+                        let colCanal = String(row[5]).trim();
+                        let colCanalNorm = obtenerCanalReal("", colCanal);
+                        if (["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Directorio", "Reparaciones"].includes(colCanalNorm)) {
+                            METAS_JUNIO_LIVE.canales[colCanalNorm] = handleNum(row[6]);
+                        }
                     }
                     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
                         METAS_JUNIO_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
@@ -901,9 +951,11 @@
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "") continue; 
 
+                // APLICAMOS LA NORMALIZACIÓN INTELIGENTE DEL CANAL DESDE EL INICIO
+                let cNormalizado = obtenerCanalReal(r[17], r[18]);
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14], 
-                    unidadNegocio: r[16], vendedor: r[17], canal: r[18], totalGs: handleNum(r[30])
+                    unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30])
                 };
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -1225,17 +1277,18 @@
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
-            // ACTUALIZACIÓN DE CANALES A 6 EQUIPOS
-            let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hRepV = "";
-            let canalesSegmentos = ["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Reparaciones"];
+            // ENRUTAMIENTO ESTRICTO Y COMPLETO PARA LOS 7 CANALES
+            let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hDirV = ""; let hRepV = "";
+            let canalesSegmentos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             
             canalesSegmentos.forEach(canal => {
                 let headHtml = `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
-                if(canal === "E-commerce") hEcomV += headHtml; 
-                else if(canal === "Mayoristas") hMayV += headHtml; 
-                else if(canal === "Venta Externa") hExtV += headHtml; 
-                else if(canal === "Reparaciones") hRepV += headHtml; 
-                else hCons += headHtml;
+                if (canal === "E-commerce") hEcomV += headHtml; 
+                else if (canal === "Mayoristas") hMayV += headHtml; 
+                else if (canal === "Venta Externa") hExtV += headHtml; 
+                else if (canal === "Directorio") hDirV += headHtml; 
+                else if (canal === "Reparaciones") hRepV += headHtml; 
+                else hCons += headHtml; // Salon y Online van a Consumidor Final
 
                 let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
                 
@@ -1247,19 +1300,21 @@
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
                         let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
-                        if(canal === "E-commerce") hEcomV += rowHtml; 
-                        else if(canal === "Mayoristas") hMayV += rowHtml; 
-                        else if(canal === "Venta Externa") hExtV += rowHtml; 
-                        else if(canal === "Reparaciones") hRepV += rowHtml; 
+                        if (canal === "E-commerce") hEcomV += rowHtml; 
+                        else if (canal === "Mayoristas") hMayV += rowHtml; 
+                        else if (canal === "Venta Externa") hExtV += rowHtml; 
+                        else if (canal === "Directorio") hDirV += rowHtml; 
+                        else if (canal === "Reparaciones") hRepV += rowHtml; 
                         else hCons += rowHtml;
                     });
                 }
 
                 let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
-                if(canal === "E-commerce") hEcomV += totalHtml; 
-                else if(canal === "Mayoristas") hMayV += totalHtml; 
-                else if(canal === "Venta Externa") hExtV += totalHtml; 
-                else if(canal === "Reparaciones") hRepV += totalHtml; 
+                if (canal === "E-commerce") hEcomV += totalHtml; 
+                else if (canal === "Mayoristas") hMayV += totalHtml; 
+                else if (canal === "Venta Externa") hExtV += totalHtml; 
+                else if (canal === "Directorio") hDirV += totalHtml; 
+                else if (canal === "Reparaciones") hRepV += totalHtml; 
                 else hCons += totalHtml;
             });
 
@@ -1267,10 +1322,11 @@
             document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
             document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
             document.getElementById('grid-vendedores-externa').innerHTML = hExtV;
+            document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
-            // RENDERIZADO DE FICHAS Y TABLA DE BONOS
-            let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasRep = "";
+            // RENDERIZADO DE FICHAS Y TABLA DE BONOS POR CANAL
+            let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let hTablaBonos = "";
 
             Object.keys(dataFichasVend).sort().forEach(v => {
@@ -1336,7 +1392,7 @@
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
-                // CONSTRUCCIÓN FILA PARA TABLA DE BONOS
+                // TABLA DE BONOS
                 let pctMesBono = obj > 0 ? ((net/obj)*100).toFixed(1) : 0;
                 let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
                 let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">⏳ PENDIENTE</span>`;
@@ -1392,6 +1448,8 @@
                     hFichasMayo += fichaHtml;
                 } else if (canalReal === "Venta Externa" || n.includes("VENTA EXTERNA") || n.includes("EXTERNA")) {
                     hFichasExt += fichaHtml;
+                } else if (canalReal === "Directorio" || n.includes("DIRECTORIO")) {
+                    hFichasDir += fichaHtml;
                 } else if (canalReal === "Reparaciones" || n.includes("REPARACIONES") || n.includes("TALLER")) {
                     hFichasRep += fichaHtml;
                 } else if (canalReal === "Online" || n.includes("ONLINE")) {
@@ -1406,6 +1464,7 @@
             document.getElementById('grid-fichas-ecommerce').innerHTML = hFichasEcom;
             document.getElementById('grid-fichas-mayoristas').innerHTML = hFichasMayo;
             document.getElementById('grid-fichas-externa').innerHTML = hFichasExt;
+            document.getElementById('grid-fichas-directorio').innerHTML = hFichasDir;
             document.getElementById('grid-fichas-reparaciones').innerHTML = hFichasRep;
             
             document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonos;
@@ -1466,7 +1525,7 @@
                     if (elPie && arrCanalesLabels.length > 0) {
                         window.chartPie = new Chart(elPie.getContext('2d'), {
                             type: 'doughnut', 
-                            data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea'] }] },
+                            data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] },
                             options: { 
                                 responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
                                 onClick: (e, elements) => {
