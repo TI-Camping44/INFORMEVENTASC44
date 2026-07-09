@@ -15,6 +15,7 @@
             --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
+            --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
             --row-success-bg: #e6fffa;
         }
 
@@ -63,8 +64,11 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- CONTENEDORES Y TABLAS --- */
-        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
-        .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
+        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; }
+        .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
+        
+        /* Contenedor responsivo vital para evitar que se rompa la web en celular */
+        .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
         table.excel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 650px; }
         table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 10px 12px; border: 1px solid var(--gray-border); text-align: left; }
@@ -81,7 +85,7 @@
         .fichas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; margin-top: 10px; width: 100%; }
         .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 10.5px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; }
-        .ficha-table { width: 100%; border-collapse: collapse; }
+        .ficha-table { width: 100%; border-collapse: collapse; min-width: 100%; }
         .ficha-table th { background: #f8fafc; padding: 6px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 10.5px;}
         .ficha-table td { padding: 5px 8px; border-bottom: 1px dashed #e2e8f0; } 
         
@@ -106,28 +110,38 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           OPTIMIZACIÓN PARA CELULARES
+           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
            ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
-            .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .sidebar-logo, .sidebar h2 { display: none; }
-            .menu-item { flex: 0 0 auto; margin-right: 8px; margin-bottom: 0; font-size: 12px; padding: 8px 14px; margin-top: 0 !important; white-space: nowrap; }
-            .main-content { padding: 15px; width: 100%; overflow: visible; }
+            
+            /* El menú lateral pasa a ser una cabecera superior y cómoda */
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
+            .sidebar h2 { display: none; }
+            .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
+            
+            .main-content { padding: 10px; width: 100%; overflow: visible; }
+            
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
+            
             .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
+            
+            /* Las grillas se apilan solas */
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
-            .fichas-grid { grid-template-columns: 1fr; } 
+            .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
+            
+            /* Las tablas ahora hacen scroll horizontal con el dedo sin deformar la pantalla */
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; }
-            table.excel-table { min-width: 600px; }
+            table.excel-table { min-width: 700px; }
         }
-        
-        /* Oculta la vista nativa de impresión, usaremos el generador inteligente */
+
+        /* Oculta la impresión por defecto porque usaremos un generador impecable */
         @media print { body { display: none; } }
     </style>
 </head>
@@ -139,7 +153,7 @@
     </div>
 
     <div class="sidebar" id="main-sidebar">
-        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" onerror="this.style.display='none'">
+        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
@@ -202,7 +216,7 @@
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -238,7 +252,7 @@
             <div class="grid-1-2">
                 <div class="excel-container">
                     <div class="excel-title">📅 RESUMEN DE VENTAS POR DÍA</div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive-wrapper">
                         <table class="excel-table">
                             <thead>
                                 <tr><th>Fecha</th><th class="text-right">Venta del Día</th><th class="text-right">Acumulado Período</th></tr>
@@ -250,12 +264,14 @@
 
                 <div class="excel-container">
                     <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
-                    <table class="excel-table" style="margin-bottom: 20px;">
-                        <tr><td style="padding: 10px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 14px;">₲ 0</td></tr>
-                        <tr><td style="padding: 10px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 14px;">₲ 0</td></tr>
-                        <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 10px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 15px;">₲ 0</td></tr>
-                    </table>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive-wrapper" style="margin-bottom: 20px;">
+                        <table class="excel-table">
+                            <tr><td style="padding: 10px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 14px;">₲ 0</td></tr>
+                            <tr><td style="padding: 10px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 14px;">₲ 0</td></tr>
+                            <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 10px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 15px;">₲ 0</td></tr>
+                        </table>
+                    </div>
+                    <div class="table-responsive-wrapper">
                         <table class="excel-table">
                             <thead>
                                 <tr>
@@ -278,7 +294,7 @@
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -311,7 +327,7 @@
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -339,7 +355,7 @@
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -367,7 +383,7 @@
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table" style="margin-bottom: 25px;">
                         <thead>
                             <tr style="background:var(--navy-main); color:white;">
@@ -381,7 +397,7 @@
                     </table>
                 </div>
                 <div class="excel-title">👥 RESUMEN VENDEDORES ASIGNADOS A E-COMMERCE</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -408,7 +424,7 @@
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -436,7 +452,7 @@
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
@@ -470,7 +486,7 @@
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
                     <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
                 </div>
-                <div style="overflow-x:auto;">
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr style="background:#f7fafc;">
@@ -498,7 +514,7 @@
                 <div class="three-column-grid">
                     <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Por Canal de Distribución</span>
-                        <div style="overflow-x:auto;">
+                        <div class="table-responsive-wrapper">
                             <table class="excel-table">
                                 <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-canal"></tbody>
@@ -507,7 +523,7 @@
                     </div>
                     <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Top 5 Clientes Afectados</span>
-                        <div style="overflow-x:auto;">
+                        <div class="table-responsive-wrapper">
                             <table class="excel-table">
                                 <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-cliente"></tbody>
@@ -516,7 +532,7 @@
                     </div>
                     <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Cronología Completa</span>
-                        <div style="overflow-x:auto;">
+                        <div class="table-responsive-wrapper">
                             <table class="excel-table">
                                 <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-fecha"></tbody>
@@ -532,7 +548,7 @@
             <div class="three-column-grid">
                 <div class="excel-container">
                     <div class="excel-title">MARCAS PRINCIPALES</div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive-wrapper">
                         <table class="excel-table">
                             <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th></tr></thead>
                             <tbody id="marcas-lista"></tbody>
@@ -542,7 +558,7 @@
                 </div>
                 <div class="excel-container">
                     <div class="excel-title">ARMAS Y MUNICIONES</div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive-wrapper">
                         <table class="excel-table">
                             <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th></tr></thead>
                             <tbody id="armas-lista"></tbody>
@@ -552,7 +568,7 @@
                 </div>
                 <div class="excel-container">
                     <div class="excel-title">RESTO DE MARCAS</div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive-wrapper">
                         <table class="excel-table">
                             <thead><tr><th>Clasificación</th><th class="text-right">Ventas en GS</th></tr></thead>
                             <tbody id="resto-lista"></tbody>
@@ -575,22 +591,26 @@
         }
 
         // =========================================================================
-        // 🔥 NUEVO GENERADOR DE PDF (A4 VERTICAL - DISEÑO EDITORIAL IMPOLUTO)
+        // 🔥 NUEVO GENERADOR DE PDF A4 VERTICAL (DISEÑO EDITORIAL PROFESIONAL)
         // =========================================================================
         function exportarBonosPDF() {
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
             let tbody = document.getElementById('grid-bonos-vendedores').innerHTML;
             
-            // Abre una ventana totalmente nueva, en blanco, e inyecta la estructura para el PDF
+            // Tratamos de buscar la imagen del logo, si no está, usamos un string vacío
+            let logoEl = document.getElementById('logo-empresa');
+            let logoSrc = logoEl ? logoEl.src : '';
+            
+            // Creación de la ventana de impresión invisible
             let printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Liquidación de Bonos - ${currentMonthTxt}</title>
+                    <title>Reporte de Liquidación de Bonos - ${currentMonthTxt}</title>
                     <style>
                         /* Configuración milimétrica para Hoja A4 Vertical (Portrait) */
-                        @page { size: A4 portrait; margin: 15mm; }
+                        @page { size: A4 portrait; margin: 15mm 12mm; }
                         
                         body { 
                             font-family: 'Segoe UI', Arial, sans-serif; 
@@ -601,61 +621,100 @@
                             margin: 0; 
                         }
                         
-                        /* Cabecera con Estilo Profesional */
-                        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #1a2c42; padding-bottom: 12px; margin-bottom: 20px; }
-                        .header h1 { margin: 0; font-size: 16pt; color: #1a2c42; text-transform: uppercase; letter-spacing: 0.5px; }
-                        .header h2 { margin: 5px 0 0 0; font-size: 11pt; color: #dd6b20; }
-                        .header .logo { font-size: 20pt; font-weight: 900; color: #1a2c42; letter-spacing: -1px; }
+                        /* Cabecera Corporativa */
+                        .header { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            border-bottom: 3px solid #1a2c42; 
+                            padding-bottom: 15px; 
+                            margin-bottom: 20px; 
+                        }
+                        .header-text h1 { margin: 0 0 5px 0; font-size: 16pt; color: #1a2c42; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .header-text h2 { margin: 0; font-size: 11pt; color: #dd6b20; font-weight: 600; }
+                        .header img { max-height: 50px; object-fit: contain; }
                         
-                        /* Cuadro de Información y Reglas */
-                        .info-box { background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px 15px; margin-bottom: 25px; font-size: 9pt; color: #7b341e; border-radius: 4px; border-top: 1px solid #feebc8; border-right: 1px solid #feebc8; border-bottom: 1px solid #feebc8; }
+                        /* Regla de Negocio */
+                        .info-box { 
+                            background-color: #fffaf0; 
+                            border-left: 4px solid #dd6b20; 
+                            padding: 10px 15px; 
+                            margin-bottom: 20px; 
+                            font-size: 9pt; 
+                            color: #7b341e; 
+                            border-radius: 4px; 
+                        }
                         
-                        /* Estilos de la Tabla ajustados para A4 Vertical */
-                        table { width: 100%; border-collapse: collapse; font-size: 8pt; }
-                        th { background-color: #1a2c42 !important; color: white !important; padding: 10px 6px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #2c4a6b; }
-                        td { border-bottom: 1px solid #e2e8f0; padding: 9px 6px; vertical-align: middle; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+                        /* Tabla Estilo Factura / Reporte */
+                        table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+                        th { 
+                            background-color: #1a2c42 !important; 
+                            color: white !important; 
+                            padding: 10px 6px; 
+                            text-align: center; 
+                            text-transform: uppercase; 
+                            letter-spacing: 0.5px; 
+                            border: 1px solid #1a2c42; 
+                        }
+                        td { 
+                            border-bottom: 1px solid #e2e8f0; 
+                            border-left: 1px solid #e2e8f0; 
+                            border-right: 1px solid #e2e8f0; 
+                            padding: 8px 6px; 
+                            vertical-align: middle; 
+                        }
                         tr:nth-child(even) td { background-color: #f8fafc !important; }
                         
+                        .text-left { text-align: left; }
                         .text-right { text-align: right; }
                         .text-center { text-align: center; }
-                        .text-left { text-align: left; }
                         .num-positivo { color: #2b7a78; font-weight: bold; }
                         .num-negativo { color: #c53030; font-weight: bold; }
                         
-                        /* Etiquetas Visuales (Badges) */
+                        /* Badges */
                         strong { font-weight: 800; }
                         span.badge-success { background-color: #c6f6d5 !important; color: #22543d !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #9ae6b4 !important;}
                         span.badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #feb2b2 !important;}
                         span.badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #cbd5e0 !important;}
                         
-                        /* OCULTAMOS COLUMNAS QUE NO ENTRAN EN A4 VERTICAL (Canal y Escala) */
-                        th:nth-child(2), td:nth-child(2),
-                        th:nth-child(3), td:nth-child(3) { display: none !important; }
+                        /* OCULTAR COLUMNAS INNECESARIAS PARA QUE ENTRE EN A4 VERTICAL */
+                        th:nth-child(2), td:nth-child(2), /* Canal Base */
+                        th:nth-child(3), td:nth-child(3)  /* Escala Detectada */
+                        { display: none !important; }
                         
-                        .footer { margin-top: 30px; font-size: 7.5pt; color: #a0aec0; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .footer { 
+                            margin-top: 30px; 
+                            font-size: 7.5pt; 
+                            color: #a0aec0; 
+                            text-align: center; 
+                            border-top: 1px solid #e2e8f0; 
+                            padding-top: 15px; 
+                            text-transform: uppercase; 
+                            letter-spacing: 0.5px; 
+                        }
                     </style>
                 </head>
                 <body>
                     <div class="header">
-                        <div>
+                        <div class="header-text">
                             <h1>Reporte Oficial de Liquidación de Bonos</h1>
                             <h2>Período Evaluado: ${currentMonthTxt}</h2>
                         </div>
-                        <div class="logo">CAMPING 44</div>
+                        ${logoSrc ? `<img src="${logoSrc}" alt="Camping 44">` : `<div style="font-size:18pt;font-weight:900;">CAMPING 44</div>`}
                     </div>
                     
                     <div class="info-box">
-                        <strong>REGLA DE CALIFICACIÓN APLICADA:</strong> Para el cobro de bonos por marcas, es estrictamente obligatorio haber superado el 100% de la Meta General de Ventas. Las liquidaciones marcadas con "₲ 0" corresponden a metas generales no alcanzadas o falta de activación de las marcas mínimas requeridas.
+                        <strong>REGLA DE CALIFICACIÓN:</strong> Para el cobro de bonos por marcas, es estrictamente obligatorio haber superado el 100% de la Meta General de Ventas. Las liquidaciones marcadas con "₲ 0" corresponden a metas no alcanzadas o falta de activación de las marcas mínimas requeridas.
                     </div>
                     
                     <table>
                         <thead>
                             <tr>
                                 <th class="text-left">Vendedor</th>
-                                <th>Canal</th>
+                                <th>Canal Base</th>
                                 <th>Escala</th>
-                                <th class="text-right">Meta (₲)</th>
-                                <th class="text-right">Venta (₲)</th>
+                                <th class="text-right">Meta General (₲)</th>
+                                <th class="text-right">Venta Real (₲)</th>
                                 <th class="text-center">% Logro</th>
                                 <th class="text-center">Estado Meta</th>
                                 <th class="text-center">Marcas Activas</th>
@@ -672,9 +731,11 @@
                     </div>
                     
                     <script>
-                        // Al terminar de cargar la ventana, lanza la impresión y luego se cierra
                         window.onload = function() { 
-                            setTimeout(function() { window.print(); window.close(); }, 800);
+                            setTimeout(function() { 
+                                window.print(); 
+                                window.close(); 
+                            }, 800);
                         }
                     <\/script>
                 </body>
@@ -710,11 +771,19 @@
         
         let simulacionDiasTrans = null;
 
-        // HISTÓRICO GLOBAL (SE VA A LLENAR AUTOMÁTICAMENTE CON GITHUB)
+        // HISTÓRICO GLOBAL
         let HISTORICO_METAS = {};
 
-        // Variable global para almacenar el mes actual del Google Sheet
+        // Mes actual de Google Sheets
         let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+
+        // =========================================================================
+        // 🔥 NORMALIZADOR UNIVERSAL DE NOMBRES (SIN ACENTOS NI MAYÚSCULAS)
+        // =========================================================================
+        function normalizarTexto(texto) {
+            if (!texto) return "";
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+        }
 
         function parseCSV(text) {
             let ret = [['']], i = 0, j = 0, s = true;
@@ -790,8 +859,8 @@
         }
 
         function obtenerCanalReal(vendedor, canalCSV) {
-            let vUpper = String(vendedor || "").toUpperCase().trim();
-            let cUpper = String(canalCSV || "").toUpperCase().trim();
+            let vUpper = normalizarTexto(vendedor);
+            let cUpper = normalizarTexto(canalCSV);
 
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
@@ -799,7 +868,7 @@
             if (vUpper.includes("MAYORISTAS") || vUpper.includes("MAYORISTA")) return "Mayoristas";
             if (vUpper.includes("E-COMMERCE") || vUpper.includes("ECOMMERCE")) return "E-commerce";
             if (vUpper.includes("ONLINE") || vUpper === "ONLINE") return "Online";
-            if (vUpper.includes("SALON") || vUpper.includes("SALÓN") || vUpper === "SALON") return "Salon";
+            if (vUpper.includes("SALON") || vUpper === "SALON") return "Salon";
 
             if (cUpper.includes("DIRECTORIO")) return "Directorio";
             if (cUpper.includes("VENTA EXTERNA") || cUpper.includes("EXTERNA")) return "Venta Externa";
@@ -807,34 +876,35 @@
             if (cUpper.includes("MAYORISTAS") || cUpper.includes("MAYORISTA")) return "Mayoristas";
             if (cUpper.includes("E-COMMERCE") || cUpper.includes("ECOMMERCE")) return "E-commerce";
             if (cUpper.includes("ONLINE")) return "Online";
-            if (cUpper.includes("SALON") || cUpper.includes("SALÓN")) return "Salon";
+            if (cUpper.includes("SALON")) return "Salon";
 
             return canalCSV || "Salon";
         }
 
         // =========================================================================
-        // 🔥 ALGORITMO INTELIGENTE DE COINCIDENCIA DE NOMBRES (CSV vs ODOO)
+        // 🔥 ALGORITMO INTELIGENTE DE MATCHING (ODOO vs GITHUB)
         // =========================================================================
         function buscarMetaPorNombre(nombreOdoo, diccionario) {
-            let odoo = String(nombreOdoo).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            // Limpiamos los canales del nombre (ej: "- Salon") y le sacamos los acentos
+            let odooLimpio = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
             
-            // 1. Si coincide de forma exacta
+            // 1. Buscamos primero el nombre exacto
             if (diccionario[nombreOdoo]) return diccionario[nombreOdoo];
-            if (diccionario[odoo]) return diccionario[odoo];
+            if (diccionario[odooLimpio]) return diccionario[odooLimpio];
             
-            // 2. Si el nombre de Odoo contiene el nombre del CSV (Ej: "Oscar David Maldonado Yudis" contiene "Oscar Maldonado")
+            // 2. Búsqueda por palabras (Ej: "MARCELO SANCHEZ" vs "MARCELO EVARISTO SANCHEZ ROJAS")
             for (let key in diccionario) {
-                let csvKey = String(key).toUpperCase().trim();
-                if (csvKey === "VENDEDOR" || csvKey === "") continue;
+                let csvKeyLimpio = normalizarTexto(key);
+                if (csvKeyLimpio === "VENDEDOR" || csvKeyLimpio === "") continue;
                 
-                // Casos especiales para canales genéricos
-                if (csvKey.includes("CONSUM") && odoo.includes("CONSUM")) return diccionario[key];
+                // Casos genéricos (Varios, Consumidor final, etc)
+                if (csvKeyLimpio.includes("CONSUM") && odooLimpio.includes("CONSUM")) return diccionario[key];
                 
-                // Dividimos el nombre del CSV en palabras ("Oscar", "Maldonado")
-                let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
+                // Dividimos en palabras largas
+                let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
                 
-                // Verificamos si TODAS las palabras del CSV están dentro del nombre completo de Odoo
-                if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) {
+                // Si el nombre del CSV tiene palabras, y TODAS están en el nombre de Odoo
+                if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) {
                     return diccionario[key];
                 }
             }
@@ -843,11 +913,10 @@
 
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
-            let nameUpper = String(nombreOdoo).toUpperCase().trim();
+            let nameUpper = normalizarTexto(nombreOdoo);
             if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(nameUpper)) {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
-            // Usa el nuevo algoritmo inteligente
             return buscarMetaPorNombre(nombreOdoo, diccionarioMetas);
         }
 
@@ -856,19 +925,19 @@
             let queryExact = nombreOdoo + "|||" + marca;
             if(diccionarioVM[queryExact]) return diccionarioVM[queryExact];
             
-            let odoo = String(nombreOdoo).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-            let marcaUpper = String(marca).toUpperCase().trim();
+            let odooLimpio = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            let marcaUpper = normalizarTexto(marca);
             
             for (let k in diccionarioVM) {
                 let parts = String(k).split('|||');
-                if (parts.length === 2 && parts[1].toUpperCase().trim() === marcaUpper) {
-                    let csvKey = parts[0].toUpperCase().trim();
-                    if (csvKey === "VENDEDOR" || csvKey === "") continue;
+                if (parts.length === 2 && normalizarTexto(parts[1]) === marcaUpper) {
+                    let csvKeyLimpio = normalizarTexto(parts[0]);
+                    if (csvKeyLimpio === "VENDEDOR" || csvKeyLimpio === "") continue;
                     
-                    if (csvKey.includes("CONSUM") && odoo.includes("CONSUM")) return diccionarioVM[k];
+                    if (csvKeyLimpio.includes("CONSUM") && odooLimpio.includes("CONSUM")) return diccionarioVM[k];
                     
-                    let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
-                    if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) {
+                    let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
+                    if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) {
                         return diccionarioVM[k];
                     }
                 }
@@ -921,33 +990,33 @@
         }
 
         // ========================================================================
-        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB
+        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB (SÚPER ROBUSTA)
         // ========================================================================
         async function cargarHistoricoDesdeGithub() {
             document.getElementById('loader-text').innerText = "Extrayendo historial y metas pasadas...";
             const urls = [
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv"
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv", startMonth: 1 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv", startMonth: 2 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv", startMonth: 3 },
+                { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv", startMonth: 5 }
             ];
             
-            let currentMonth = 1; // Arranca en Enero (1)
-            
-            for (let url of urls) {
+            for (let file of urls) {
                 try {
-                    let res = await fetch(url + "?cb=" + new Date().getTime());
+                    let res = await fetch(file.url + "?cb=" + new Date().getTime());
                     if (!res.ok) continue;
                     let text = await res.text();
                     
-                    // Divide el archivo por si tiene más de 1 mes adentro (ej: Marzo y Abril)
-                    let blocks = text.split('TABLA 1:');
+                    // Expresión regular que detecta "--- TABLA 1" o similar
+                    let blocks = text.split(/--- TABLA 1/i);
+                    let monthIdx = file.startMonth;
+                    
                     for(let i = 1; i < blocks.length; i++) {
                         let blockText = blocks[i];
                         
-                        if(!HISTORICO_METAS[currentMonth.toString()]) {
-                            HISTORICO_METAS[currentMonth.toString()] = { 
-                                name: "Mes " + currentMonth, diasMes: 25, diasTranscurridos: 25, 
+                        if(!HISTORICO_METAS[monthIdx.toString()]) {
+                            HISTORICO_METAS[monthIdx.toString()] = { 
+                                name: "Mes " + monthIdx, diasMes: 25, diasTranscurridos: 25, 
                                 global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} 
                             };
                         }
@@ -957,8 +1026,8 @@
                         
                         for(let line of lines) {
                             let l = line.trim();
-                            if(l.includes('TABLA 2:')) { currentTable = 2; continue; }
-                            else if(l.includes('TABLA 3:')) { currentTable = 3; continue; }
+                            if(l.toUpperCase().includes('TABLA 2')) { currentTable = 2; continue; }
+                            else if(l.toUpperCase().includes('TABLA 3')) { currentTable = 3; continue; }
                             
                             let parts = l.split(',');
                             
@@ -967,7 +1036,7 @@
                                 let vend = parts[2] ? parts[2].trim() : "";
                                 let meta = parseInt(parts[3].replace(/\./g, '')) || 0;
                                 if(vend && vend !== 'Vendedor' && meta > 0) {
-                                    HISTORICO_METAS[currentMonth.toString()].vendedoresTotales[vend] = meta;
+                                    HISTORICO_METAS[monthIdx.toString()].vendedoresTotales[vend] = meta;
                                 }
                             }
                             
@@ -977,11 +1046,11 @@
                                 let marca = parts[3] ? parts[3].trim() : "";
                                 let meta = parseInt(parts[4].replace(/\./g, '')) || 0;
                                 if(vend && vend !== 'Vendedor' && marca && meta > 0) {
-                                    HISTORICO_METAS[currentMonth.toString()].vendedorMarca[vend + '|||' + marca] = meta;
+                                    HISTORICO_METAS[monthIdx.toString()].vendedorMarca[vend + '|||' + marca] = meta;
                                 }
                             }
                         }
-                        currentMonth++; 
+                        monthIdx++; 
                     }
                 } catch(e) { console.error("Error leyendo de GitHub:", e); }
             }
@@ -989,11 +1058,7 @@
 
         async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
-            
-            // 1. Carga los históricos de GitHub primero
             await cargarHistoricoDesdeGithub();
-            
-            // 2. Luego carga las ventas en vivo de Google Sheets
             descargarDatosCruzadosBI();
         }
 
@@ -1008,7 +1073,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Conectando con Google Sheets...";
+                document.getElementById('loader-text').innerText = "Conectando con Google Sheets en vivo...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1383,7 +1448,7 @@
                 let sumM = 0;
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        if(k.toUpperCase().endsWith("|||" + filtrosActivos.marca.toUpperCase())) sumM += METAS_ACTIVAS.vendedorMarca[k];
+                        if(normalizarTexto(k).endsWith("|||" + normalizarTexto(filtrosActivos.marca))) sumM += METAS_ACTIVAS.vendedorMarca[k];
                     });
                 }
                 objetivoFiltrado = sumM;
@@ -1535,17 +1600,19 @@
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
                 if (METAS_ACTIVAS.vendedorMarca) {
-                    let odoo = String(v).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+                    let odooLimpio = normalizarTexto(v).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+                    
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
                         if (parts.length === 2) {
-                            let csvKey = parts[0].toUpperCase().trim();
+                            let csvKeyLimpio = normalizarTexto(parts[0]);
                             let isMatch = false;
                             
-                            if (csvKey === odoo || v.toUpperCase().includes(csvKey)) { isMatch = true; }
-                            else {
-                                let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
-                                if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) { isMatch = true; }
+                            if (csvKeyLimpio === odooLimpio || normalizarTexto(v).includes(csvKeyLimpio)) { 
+                                isMatch = true; 
+                            } else {
+                                let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
+                                if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) { isMatch = true; }
                             }
                             if (isMatch && METAS_ACTIVAS.vendedorMarca[k] > 0) { marcasUnicas.add(parts[1]); }
                         }
@@ -1575,9 +1642,9 @@
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                     let row = `<tr class="${rowClass}"><td>${m}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let mUpper = String(m).toUpperCase();
-                    let isMainBrand = LISTA_MARCAS.some(lm => String(lm).toUpperCase() === mUpper);
-                    let isWeapon = LISTA_ARMAS.some(la => String(la).toUpperCase() === mUpper);
+                    let mUpper = normalizarTexto(m);
+                    let isMainBrand = LISTA_MARCAS.some(lm => normalizarTexto(lm) === mUpper);
+                    let isWeapon = LISTA_ARMAS.some(la => normalizarTexto(la) === mUpper);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1599,9 +1666,9 @@
                 // ==========================================
                 // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
                 // ==========================================
-                let nUpper = String(v).toUpperCase();
+                let nUpper = normalizarTexto(v);
                 
-                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas de la tabla de bonos
+                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas
                 let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
@@ -1641,7 +1708,7 @@
 
                     hTablaBonos += `
                         <tr>
-                            <td><strong>${v}</strong></td>
+                            <td class="text-left"><strong>${v}</strong></td>
                             <td>${vData.canal || "General"}</td>
                             <td style="color:#2b7a78; font-weight:bold; font-size:10.5px;">${escalaRol}</td>
                             <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
@@ -1723,7 +1790,6 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
