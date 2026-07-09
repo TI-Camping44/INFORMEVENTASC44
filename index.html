@@ -24,7 +24,7 @@
         ::-webkit-scrollbar-track { background: #edf2f7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 
-        /* --- MENÚ LATERAL (SIDEBAR) --- */
+        /* --- MENÚ LATERAL --- */
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; }
         .sidebar-logo { width: 90%; max-width: 120px; margin: 0 auto 15px auto; display: block; background-color: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
@@ -62,6 +62,7 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* --- CONTENEDORES Y TABLAS --- */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
         .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
@@ -105,35 +106,28 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
+           OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
-            
             .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .sidebar-logo { display: none; }
-            .sidebar h2 { display: none; }
+            .sidebar-logo, .sidebar h2 { display: none; }
             .menu-item { flex: 0 0 auto; margin-right: 8px; margin-bottom: 0; font-size: 12px; padding: 8px 14px; margin-top: 0 !important; white-space: nowrap; }
-            
             .main-content { padding: 15px; width: 100%; overflow: visible; }
-            
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
-            
             .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
-            
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
             .fichas-grid { grid-template-columns: 1fr; } 
-            
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; }
             table.excel-table { min-width: 600px; }
         }
         
-        /* Desactiva la vista de impresión genérica (usaremos un generador propio) */
+        /* Oculta la vista nativa de impresión, usaremos el generador inteligente */
         @media print { body { display: none; } }
     </style>
 </head>
@@ -141,7 +135,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Sincronizando Base de Datos YTD Anual...</div>
+        <div id="loader-text">Sincronizando Base de Datos YTD e Historial de GitHub...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -470,10 +464,10 @@
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
-                    <span style="font-size: 12px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
-                    <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF</button>
+                    <span style="font-size: 13px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
+                    <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF (A4 Vertical)</button>
                 </div>
-                <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 12px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
+                <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
                     <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
                 </div>
                 <div style="overflow-x:auto;">
@@ -580,71 +574,107 @@
             if (element) element.classList.add('active');
         }
 
-        // ==========================================
-        // NUEVO MOTOR DE EXPORTACIÓN PDF (PERFECTO)
-        // ==========================================
+        // =========================================================================
+        // 🔥 NUEVO GENERADOR DE PDF (A4 VERTICAL - DISEÑO EDITORIAL IMPOLUTO)
+        // =========================================================================
         function exportarBonosPDF() {
-            let tbody = document.getElementById('grid-bonos-vendedores').innerHTML;
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+            let tbody = document.getElementById('grid-bonos-vendedores').innerHTML;
             
-            // Abre una ventana totalmente nueva y limpia solo para inyectar la tabla y forzar su impresión
+            // Abre una ventana totalmente nueva, en blanco, e inyecta la estructura para el PDF
             let printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Reporte de Bonos - ${currentMonthTxt}</title>
+                    <title>Liquidación de Bonos - ${currentMonthTxt}</title>
                     <style>
-                        @page { size: A4 landscape; margin: 12mm; }
-                        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2c42; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                        h1 { color: #dd6b20; font-size: 18px; text-transform: uppercase; border-bottom: 2px solid #1a2c42; padding-bottom: 8px; margin-bottom: 15px; }
-                        .info-box { background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 10px; margin-bottom: 20px; font-size: 11px; color: #7b341e; }
+                        /* Configuración milimétrica para Hoja A4 Vertical (Portrait) */
+                        @page { size: A4 portrait; margin: 15mm; }
                         
-                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
-                        th { background-color: #1a2c42 !important; color: white !important; padding: 8px; text-align: left; }
-                        td { border: 1px solid #cbd5e0; padding: 6px 8px; }
-                        tr:nth-child(even) td { background-color: #f7fafc !important; }
+                        body { 
+                            font-family: 'Segoe UI', Arial, sans-serif; 
+                            color: #1a2c42; 
+                            -webkit-print-color-adjust: exact !important; 
+                            print-color-adjust: exact !important; 
+                            background: white; 
+                            margin: 0; 
+                        }
+                        
+                        /* Cabecera con Estilo Profesional */
+                        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #1a2c42; padding-bottom: 12px; margin-bottom: 20px; }
+                        .header h1 { margin: 0; font-size: 16pt; color: #1a2c42; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .header h2 { margin: 5px 0 0 0; font-size: 11pt; color: #dd6b20; }
+                        .header .logo { font-size: 20pt; font-weight: 900; color: #1a2c42; letter-spacing: -1px; }
+                        
+                        /* Cuadro de Información y Reglas */
+                        .info-box { background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px 15px; margin-bottom: 25px; font-size: 9pt; color: #7b341e; border-radius: 4px; border-top: 1px solid #feebc8; border-right: 1px solid #feebc8; border-bottom: 1px solid #feebc8; }
+                        
+                        /* Estilos de la Tabla ajustados para A4 Vertical */
+                        table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+                        th { background-color: #1a2c42 !important; color: white !important; padding: 10px 6px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #2c4a6b; }
+                        td { border-bottom: 1px solid #e2e8f0; padding: 9px 6px; vertical-align: middle; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+                        tr:nth-child(even) td { background-color: #f8fafc !important; }
                         
                         .text-right { text-align: right; }
                         .text-center { text-align: center; }
-                        .num-positivo { color: #38a169; font-weight: bold; }
-                        .num-negativo { color: #e53e3e; font-weight: bold; }
+                        .text-left { text-align: left; }
+                        .num-positivo { color: #2b7a78; font-weight: bold; }
+                        .num-negativo { color: #c53030; font-weight: bold; }
                         
-                        /* Forzar los colores de las etiquetas (badges) en la impresión */
+                        /* Etiquetas Visuales (Badges) */
                         strong { font-weight: 800; }
-                        span { display: inline-block; padding: 4px 6px; border-radius: 4px; font-weight: bold; }
-                        span.badge-success { background-color: #c6f6d5 !important; color: #22543d !important; border: 1px solid #9ae6b4 !important;}
-                        span.badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; border: 1px solid #feb2b2 !important;}
-                        span.badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important;}
+                        span.badge-success { background-color: #c6f6d5 !important; color: #22543d !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #9ae6b4 !important;}
+                        span.badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #feb2b2 !important;}
+                        span.badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #cbd5e0 !important;}
+                        
+                        /* OCULTAMOS COLUMNAS QUE NO ENTRAN EN A4 VERTICAL (Canal y Escala) */
+                        th:nth-child(2), td:nth-child(2),
+                        th:nth-child(3), td:nth-child(3) { display: none !important; }
+                        
+                        .footer { margin-top: 30px; font-size: 7.5pt; color: #a0aec0; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
                     </style>
                 </head>
                 <body>
-                    <h1>💰 CONTROL OFICIAL DE BONOS - ${currentMonthTxt}</h1>
-                    <div class="info-box">
-                        <strong>CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+). Si la venta neta del mes es inferior, el bono se liquida en 0 ₲.
+                    <div class="header">
+                        <div>
+                            <h1>Reporte Oficial de Liquidación de Bonos</h1>
+                            <h2>Período Evaluado: ${currentMonthTxt}</h2>
+                        </div>
+                        <div class="logo">CAMPING 44</div>
                     </div>
+                    
+                    <div class="info-box">
+                        <strong>REGLA DE CALIFICACIÓN APLICADA:</strong> Para el cobro de bonos por marcas, es estrictamente obligatorio haber superado el 100% de la Meta General de Ventas. Las liquidaciones marcadas con "₲ 0" corresponden a metas generales no alcanzadas o falta de activación de las marcas mínimas requeridas.
+                    </div>
+                    
                     <table>
                         <thead>
                             <tr>
-                                <th>Vendedor</th>
-                                <th>Canal Base</th>
-                                <th>Escala Detectada</th>
-                                <th class="text-right">Meta del Mes (₲)</th>
-                                <th class="text-right">Venta Real (₲)</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-center">¿Alcanzó Meta?</th>
-                                <th class="text-center">Marcas Activadas</th>
-                                <th class="text-right">Monto de Bono A Pagar</th>
+                                <th class="text-left">Vendedor</th>
+                                <th>Canal</th>
+                                <th>Escala</th>
+                                <th class="text-right">Meta (₲)</th>
+                                <th class="text-right">Venta (₲)</th>
+                                <th class="text-center">% Logro</th>
+                                <th class="text-center">Estado Meta</th>
+                                <th class="text-center">Marcas Activas</th>
+                                <th class="text-right">Bono a Pagar</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${tbody}
                         </tbody>
                     </table>
+                    
+                    <div class="footer">
+                        Documento generado automáticamente por el Sistema BI de Camping 44. Uso exclusivo de Dirección Comercial y Recursos Humanos.
+                    </div>
+                    
                     <script>
                         // Al terminar de cargar la ventana, lanza la impresión y luego se cierra
                         window.onload = function() { 
-                            setTimeout(function() { window.print(); window.close(); }, 500);
+                            setTimeout(function() { window.print(); window.close(); }, 800);
                         }
                     <\/script>
                 </body>
@@ -782,37 +812,66 @@
             return canalCSV || "Salon";
         }
 
+        // =========================================================================
+        // 🔥 ALGORITMO INTELIGENTE DE COINCIDENCIA DE NOMBRES (CSV vs ODOO)
+        // =========================================================================
+        function buscarMetaPorNombre(nombreOdoo, diccionario) {
+            let odoo = String(nombreOdoo).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            
+            // 1. Si coincide de forma exacta
+            if (diccionario[nombreOdoo]) return diccionario[nombreOdoo];
+            if (diccionario[odoo]) return diccionario[odoo];
+            
+            // 2. Si el nombre de Odoo contiene el nombre del CSV (Ej: "Oscar David Maldonado Yudis" contiene "Oscar Maldonado")
+            for (let key in diccionario) {
+                let csvKey = String(key).toUpperCase().trim();
+                if (csvKey === "VENDEDOR" || csvKey === "") continue;
+                
+                // Casos especiales para canales genéricos
+                if (csvKey.includes("CONSUM") && odoo.includes("CONSUM")) return diccionario[key];
+                
+                // Dividimos el nombre del CSV en palabras ("Oscar", "Maldonado")
+                let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
+                
+                // Verificamos si TODAS las palabras del CSV están dentro del nombre completo de Odoo
+                if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) {
+                    return diccionario[key];
+                }
+            }
+            return 0;
+        }
+
         function getMetaVendedor(nombreOdoo, diccionarioMetas) {
             if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            
             let nameUpper = String(nombreOdoo).toUpperCase().trim();
-            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-
             if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(nameUpper)) {
                 return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
             }
-
-            let fallbackMatch = 0;
-            for (let k in diccionarioMetas) {
-                let kUpper = String(k).toUpperCase().trim();
-                if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(kUpper) || kUpper.includes("VARIOS")) continue; 
-                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo) return diccionarioMetas[k];
-                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) fallbackMatch = diccionarioMetas[k];
-            }
-            return fallbackMatch;
+            // Usa el nuevo algoritmo inteligente
+            return buscarMetaPorNombre(nombreOdoo, diccionarioMetas);
         }
 
         function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
             if(!diccionarioVM) return 0;
-            let query = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = String(nombreOdoo).toUpperCase();
-            let marcaUpper = String(marca).toUpperCase();
+            let queryExact = nombreOdoo + "|||" + marca;
+            if(diccionarioVM[queryExact]) return diccionarioVM[queryExact];
+            
+            let odoo = String(nombreOdoo).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            let marcaUpper = String(marca).toUpperCase().trim();
+            
             for (let k in diccionarioVM) {
                 let parts = String(k).split('|||');
-                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
+                if (parts.length === 2 && parts[1].toUpperCase().trim() === marcaUpper) {
+                    let csvKey = parts[0].toUpperCase().trim();
+                    if (csvKey === "VENDEDOR" || csvKey === "") continue;
+                    
+                    if (csvKey.includes("CONSUM") && odoo.includes("CONSUM")) return diccionarioVM[k];
+                    
+                    let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
+                    if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) {
+                        return diccionarioVM[k];
+                    }
+                }
             }
             return 0;
         }
@@ -862,7 +921,7 @@
         }
 
         // ========================================================================
-        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB (Solución a los Históricos)
+        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB
         // ========================================================================
         async function cargarHistoricoDesdeGithub() {
             document.getElementById('loader-text').innerText = "Extrayendo historial y metas pasadas...";
@@ -881,7 +940,7 @@
                     if (!res.ok) continue;
                     let text = await res.text();
                     
-                    // Divide el archivo cada vez que encuentra TABLA 1 (útil si hay 2 meses pegados)
+                    // Divide el archivo por si tiene más de 1 mes adentro (ej: Marzo y Abril)
                     let blocks = text.split('TABLA 1:');
                     for(let i = 1; i < blocks.length; i++) {
                         let blockText = blocks[i];
@@ -903,7 +962,7 @@
                             
                             let parts = l.split(',');
                             
-                            // Extrae Meta General del Vendedor (TABLA 1)
+                            // TABLA 1: Canal[0], Cod[1], Vendedor[2], Meta General[3]
                             if(currentTable === 1 && parts.length >= 4) {
                                 let vend = parts[2] ? parts[2].trim() : "";
                                 let meta = parseInt(parts[3].replace(/\./g, '')) || 0;
@@ -912,7 +971,7 @@
                                 }
                             }
                             
-                            // Extrae Meta Específica por Marca (TABLA 3)
+                            // TABLA 3: Canal[0], Vendedor[1], Categoría[2], Marca[3], Meta[4]
                             if(currentTable === 3 && parts.length >= 5) {
                                 let vend = parts[1] ? parts[1].trim() : "";
                                 let marca = parts[3] ? parts[3].trim() : "";
@@ -922,7 +981,7 @@
                                 }
                             }
                         }
-                        currentMonth++; // Suma un mes y sigue con el próximo bloque
+                        currentMonth++; 
                     }
                 } catch(e) { console.error("Error leyendo de GitHub:", e); }
             }
@@ -1416,6 +1475,7 @@
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
+            // ENRUTAMIENTO ESTRICTO Y COMPLETO PARA LOS 7 CANALES
             let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hDirV = ""; let hRepV = "";
             let canalesSegmentos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             
@@ -1463,6 +1523,7 @@
             document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
+            // RENDERIZADO DE FICHAS Y TABLA DE BONOS POR CANAL
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let hTablaBonos = "";
 
@@ -1474,13 +1535,19 @@
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
                 if (METAS_ACTIVAS.vendedorMarca) {
-                    let vNameUpper = String(v).toUpperCase();
+                    let odoo = String(v).toUpperCase().replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
-                        if (parts.length === 2 && (parts[0].toUpperCase().includes(vNameUpper) || vNameUpper.includes(parts[0].toUpperCase()))) {
-                            if (METAS_ACTIVAS.vendedorMarca[k] > 0) {
-                                marcasUnicas.add(parts[1]); 
+                        if (parts.length === 2) {
+                            let csvKey = parts[0].toUpperCase().trim();
+                            let isMatch = false;
+                            
+                            if (csvKey === odoo || v.toUpperCase().includes(csvKey)) { isMatch = true; }
+                            else {
+                                let csvWords = csvKey.split(/\s+/).filter(w => w.length > 2);
+                                if (csvWords.length > 0 && csvWords.every(w => odoo.includes(w))) { isMatch = true; }
                             }
+                            if (isMatch && METAS_ACTIVAS.vendedorMarca[k] > 0) { marcasUnicas.add(parts[1]); }
                         }
                     });
                 }
@@ -1529,7 +1596,12 @@
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
+                // ==========================================
+                // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
+                // ==========================================
                 let nUpper = String(v).toUpperCase();
+                
+                // FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas de la tabla de bonos
                 let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
@@ -1582,6 +1654,7 @@
                     `;
                 }
 
+                // CONSTRUCCIÓN FICHA VENDEDOR
                 let fichaHtml = `
                 <div class="ficha-vendedor">
                     <div class="ficha-header">▶ ${v}</div>
@@ -1650,9 +1723,10 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
+            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
+            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             try {
                 if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
