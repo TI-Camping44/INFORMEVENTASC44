@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         /* REGLA DE ORO RESPONSIVA UNIVERSAL */
         * { box-sizing: border-box; }
@@ -15,7 +17,6 @@
             --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
-            --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
             --row-success-bg: #e6fffa;
         }
 
@@ -63,7 +64,7 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- CONTENEDORES Y TABLAS RESPONSIVAS --- */
+        /* --- CONTENEDORES Y TABLAS --- */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
         .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
@@ -96,6 +97,7 @@
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
+        .text-left { text-align: left; }
         .num-negativo { color: var(--red-alert) !important; font-weight: bold; }
         .num-positivo { color: var(--green-success) !important; font-weight: bold; }
         
@@ -109,7 +111,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           OPTIMIZACIÓN PARA CELULARES
+           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
            ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
@@ -133,9 +135,6 @@
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; }
             table.excel-table { min-width: 700px; }
         }
-
-        /* Oculta la impresión por defecto del navegador, porque armé un generador A4 impecable */
-        @media print { body { display: none; } }
     </style>
 </head>
 <body>
@@ -205,7 +204,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -283,7 +281,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -316,7 +313,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -344,7 +340,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -372,7 +367,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -413,7 +407,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -441,7 +434,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -469,7 +461,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -500,7 +491,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -536,7 +526,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -584,104 +573,92 @@
         }
 
         // =========================================================================
-        // 🔥 GENERADOR DE PDF A4 VERTICAL (DISEÑO EDITORIAL PROFESIONAL)
+        // 🔥 NUEVO GENERADOR DE PDF PROFESIONAL CON JSPDF (Librería Pura)
         // =========================================================================
         function exportarBonosPDF() {
-            let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
-            let tbody = document.getElementById('grid-bonos-vendedores').innerHTML;
-            
-            let printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Reporte de Liquidación de Bonos - ${currentMonthTxt}</title>
-                    <style>
-                        /* Configuración para A4 Vertical */
-                        @page { size: A4 portrait; margin: 15mm 12mm; }
-                        
-                        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2c42; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white; margin: 0; }
-                        
-                        /* Cabecera Corporativa */
-                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1a2c42; padding-bottom: 15px; margin-bottom: 20px; }
-                        .header-text h1 { margin: 0 0 5px 0; font-size: 16pt; color: #1a2c42; text-transform: uppercase; letter-spacing: 0.5px; }
-                        .header-text h2 { margin: 0; font-size: 11pt; color: #dd6b20; font-weight: 600; }
-                        .header .logo { font-size: 20pt; font-weight: 900; color: #1a2c42; letter-spacing: -1px; }
-                        
-                        /* Regla de Negocio */
-                        .info-box { background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 10px 15px; margin-bottom: 20px; font-size: 9pt; color: #7b341e; border-radius: 4px; border: 1px solid #feebc8; }
-                        
-                        /* Tabla Estilo Factura / Reporte */
-                        table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-                        th { background-color: #1a2c42 !important; color: white !important; padding: 10px 6px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1a2c42; }
-                        td { border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 8px 6px; vertical-align: middle; }
-                        tr:nth-child(even) td { background-color: #f8fafc !important; }
-                        
-                        .text-left { text-align: left; }
-                        .text-right { text-align: right; }
-                        .text-center { text-align: center; }
-                        .num-positivo { color: #2b7a78; font-weight: bold; }
-                        .num-negativo { color: #c53030; font-weight: bold; }
-                        
-                        /* Badges */
-                        strong { font-weight: 800; }
-                        span.badge-success { background-color: #c6f6d5 !important; color: #22543d !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #9ae6b4 !important;}
-                        span.badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #feb2b2 !important;}
-                        span.badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5pt; border: 1px solid #cbd5e0 !important;}
-                        
-                        /* OCULTAMOS COLUMNAS QUE NO ENTRAN EN A4 VERTICAL */
-                        th:nth-child(2), td:nth-child(2), /* Canal Base */
-                        th:nth-child(3), td:nth-child(3)  /* Escala Detectada */
-                        { display: none !important; }
-                        
-                        .footer { margin-top: 30px; font-size: 7.5pt; color: #a0aec0; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <div class="header-text">
-                            <h1>Reporte de Liquidación de Bonos</h1>
-                            <h2>Período Evaluado: ${currentMonthTxt}</h2>
-                        </div>
-                        <div class="logo">CAMPING 44</div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <strong>REGLA DE CALIFICACIÓN:</strong> Para el cobro de bonos por marcas, es estrictamente obligatorio haber superado el 100% de la Meta General de Ventas. Las liquidaciones marcadas con "₲ 0" corresponden a metas no alcanzadas o falta de activación de las marcas mínimas requeridas.
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="text-left">Vendedor</th>
-                                <th>Canal Base</th>
-                                <th>Escala</th>
-                                <th class="text-right">Meta General (₲)</th>
-                                <th class="text-right">Venta Real (₲)</th>
-                                <th class="text-center">% Logro</th>
-                                <th class="text-center">Estado Meta</th>
-                                <th class="text-center">Marcas Activas</th>
-                                <th class="text-right">Bono a Pagar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tbody}
-                        </tbody>
-                    </table>
-                    
-                    <div class="footer">
-                        Documento generado automáticamente por el Sistema BI de Camping 44. Uso exclusivo de Dirección Comercial y Recursos Humanos.
-                    </div>
-                    
-                    <script>
-                        window.onload = function() { 
-                            setTimeout(function() { window.print(); window.close(); }, 800);
+            try {
+                // Instanciamos jsPDF (Orientación: Portrait (Vertical), Unidad: mm, Formato: A4)
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+                
+                // --- CABECERA EDITORIAL ---
+                doc.setTextColor(26, 44, 66); // Color #1a2c42
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("REPORTE OFICIAL DE LIQUIDACION DE BONOS", 14, 20);
+                
+                doc.setTextColor(221, 107, 32); // Color Naranja
+                doc.setFontSize(10);
+                doc.text(`Periodo Evaluado: ${currentMonthTxt}`, 14, 26);
+                
+                // Texto de Reglas
+                doc.setTextColor(123, 52, 30);
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text("REGLA EXCLUYENTE: Para calificar a la escala de bonos, el colaborador debe", 14, 34);
+                doc.text("superar el 100% de la Meta General. En caso contrario, el sistema liquida en 0 Gs.", 14, 39);
+
+                // --- CONSTRUCCIÓN DE LOS DATOS DE LA TABLA ---
+                let table = document.getElementById("grid-bonos-vendedores");
+                let rows = table.querySelectorAll("tr");
+                let bodyData = [];
+                
+                rows.forEach(row => {
+                    let cols = row.querySelectorAll("td");
+                    if(cols.length > 0) {
+                        let estadoTexto = cols[6].innerText.includes("SI ALCANZO") ? "SI ALCANZO" : "NO";
+                        let rowData = [
+                            cols[0].innerText, // Vendedor
+                            cols[3].innerText, // Meta
+                            cols[4].innerText, // Venta
+                            cols[5].innerText, // % Logrado
+                            estadoTexto,       // ¿Alcanzó?
+                            cols[7].innerText, // Marcas Activadas
+                            cols[8].innerText  // Bono
+                        ];
+                        bodyData.push(rowData);
+                    }
+                });
+
+                // --- DIBUJAR TABLA (AUTOTABLE) ---
+                doc.autoTable({
+                    startY: 45,
+                    head: [['VENDEDOR', 'META GRAL', 'VENTA REAL', '%', 'ESTADO', 'MARCAS', 'BONO']],
+                    body: bodyData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [26, 44, 66], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+                    bodyStyles: { fontSize: 8, valign: 'middle' },
+                    columnStyles: {
+                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 50 },
+                        1: { halign: 'right' },
+                        2: { halign: 'right', fontStyle: 'bold' },
+                        3: { halign: 'center' },
+                        4: { halign: 'center' },
+                        5: { halign: 'center' },
+                        6: { halign: 'right', fontStyle: 'bold', textColor: [34, 84, 61] } // Verde para Bonos
+                    },
+                    // Si el bono o estado es negativo, pintarlo de rojo
+                    didParseCell: function(data) {
+                        if (data.section === 'body') {
+                            if (data.column.index === 6 && data.cell.raw.includes('0')) {
+                                data.cell.styles.textColor = [197, 48, 48]; // Rojo
+                            }
+                            if (data.column.index === 4 && data.cell.raw === 'NO') {
+                                data.cell.styles.textColor = [197, 48, 48]; // Rojo
+                            }
                         }
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
+                    }
+                });
+
+                // Descarga automática y directa a la PC (sin ventana fea)
+                doc.save(`Liquidacion_Bonos_${currentMonthTxt.replace(/\s+/g, '_')}.pdf`);
+
+            } catch(e) {
+                alert("Hubo un error generando el PDF. Asegurate de estar conectado a Internet.");
+                console.error(e);
+            }
         }
 
         function copiarLinkVendedor() {
@@ -717,11 +694,31 @@
         let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {}, ventasGlobales: 0, ventasPorCanal: {}, ventasPorVendedor: {}, ventasMarcaPorVendedor: {}, ventasMarcasGlobal: {} };
 
         // =========================================================================
-        // 🔥 NORMALIZADOR DE NOMBRES (SIN ACENTOS NI EXTRAS) PARA EMPAREJAR 100%
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, sin sufijos)
         // =========================================================================
         function normalizarTexto(texto) {
             if (!texto) return "";
             return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+        }
+
+        // =========================================================================
+        // 🔥 ALGORITMO DE FUSIÓN (ODOO vs GITHUB)
+        // Permite encontrar "Giovanni Jara" dentro de "Giovanni Emanuel Jara Aprea"
+        // =========================================================================
+        function sonElMismoVendedor(nombreA, nombreB) {
+            let a = normalizarTexto(nombreA).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            let b = normalizarTexto(nombreB).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+            
+            if (a === b) return true;
+
+            let wordsA = a.split(/\s+/).filter(w => w.length > 2);
+            let wordsB = b.split(/\s+/).filter(w => w.length > 2);
+
+            // Si el nombre corto del CSV está contenido completamente en el nombre largo de Odoo
+            if (wordsA.length > 0 && wordsA.every(w => b.includes(w))) return true;
+            if (wordsB.length > 0 && wordsB.every(w => a.includes(w))) return true;
+            
+            return false;
         }
 
         function parseCSV(text) {
@@ -820,68 +817,6 @@
             return canalCSV || "Salon";
         }
 
-        // =========================================================================
-        // 🔥 BUSCADOR INTELIGENTE: EMPAREJA EL CSV CON ODOO AUNQUE TENGAN ACENTOS
-        // =========================================================================
-        function buscarMetaPorNombre(nombreOdoo, diccionario) {
-            let odooLimpio = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-            
-            // Busca exacto (ej: "GIOVANNI EMANUEL JARA APREA")
-            if (diccionario[nombreOdoo]) return diccionario[nombreOdoo];
-            if (diccionario[odooLimpio]) return diccionario[odooLimpio];
-            
-            // Si el nombre corto del CSV (ej: "GIOVANNI JARA") está dentro del largo de Odoo
-            for (let key in diccionario) {
-                let csvKeyLimpio = normalizarTexto(key);
-                if (csvKeyLimpio === "VENDEDOR" || csvKeyLimpio === "") continue;
-                
-                if (csvKeyLimpio.includes("CONSUM") && odooLimpio.includes("CONSUM")) return diccionario[key];
-                
-                // Dividimos el nombre corto "GIOVANNI JARA" en ["GIOVANNI", "JARA"]
-                let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
-                
-                // Si "GIOVANNI EMANUEL JARA APREA" incluye "GIOVANNI" y "JARA", hace MATCH.
-                if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) {
-                    return diccionario[key];
-                }
-            }
-            return 0;
-        }
-
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            let nameUpper = normalizarTexto(nombreOdoo);
-            if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(nameUpper)) {
-                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
-            }
-            return buscarMetaPorNombre(nombreOdoo, diccionarioMetas);
-        }
-
-        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
-            if(!diccionarioVM) return 0;
-            let queryExact = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[queryExact]) return diccionarioVM[queryExact];
-            
-            let odooLimpio = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-            let marcaUpper = normalizarTexto(marca);
-            
-            for (let k in diccionarioVM) {
-                let parts = String(k).split('|||');
-                if (parts.length === 2 && normalizarTexto(parts[1]) === marcaUpper) {
-                    let csvKeyLimpio = normalizarTexto(parts[0]);
-                    if (csvKeyLimpio === "VENDEDOR" || csvKeyLimpio === "") continue;
-                    
-                    if (csvKeyLimpio.includes("CONSUM") && odooLimpio.includes("CONSUM")) return diccionarioVM[k];
-                    
-                    let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
-                    if (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w))) {
-                        return diccionarioVM[k];
-                    }
-                }
-            }
-            return 0;
-        }
-
         function construirDropdownMesesDinámico(mesActualLive) {
             let select = document.getElementById('select-mes');
             if (!select) return;
@@ -927,10 +862,10 @@
         }
 
         // ========================================================================
-        // 🔥 MOTOR DE EXTRACCIÓN GITHUB (EXTRAE METAS Y VENTAS HISTÓRICAS)
+        // 🔥 EXTRACCIÓN AUTOMÁTICA DE CSVs DESDE GITHUB
         // ========================================================================
         async function cargarHistoricoDesdeGithub() {
-            document.getElementById('loader-text').innerText = "Procesando Historial desde GitHub...";
+            document.getElementById('loader-text').innerText = "Extrayendo historial de metas pasadas...";
             const urls = [
                 { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv", startMonth: 1 },
                 { url: "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv", startMonth: 2 },
@@ -980,11 +915,13 @@
                                 let venta = parseInt(parts[4].replace(/\./g, '')) || 0;
                                 
                                 if(longName && longName !== 'Cod') {
-                                    shortToLongName[shortName] = longName;
+                                    shortToLongName[shortName] = longName; // Guardamos enlace para la Tabla 3
                                     let cNormalizado = obtenerCanalReal(longName, canalRaw);
                                     
-                                    if (meta > 0) obj.vendedoresTotales[longName] = meta;
+                                    // Guardar Metas
+                                    if (meta >= 0) obj.vendedoresTotales[longName] = meta;
                                     
+                                    // Guardar Ventas
                                     if (!obj.ventasPorVendedor[longName]) {
                                         obj.ventasPorVendedor[longName] = { bruto: venta, nc: 0, neta: venta, canal: cNormalizado };
                                     } else {
@@ -1004,16 +941,16 @@
                                 }
                             }
                             
-                            // TABLA 3: Guardamos Metas de Marca y Venta de Marca Histórica
+                            // TABLA 3: Guardamos Metas de Marca y Venta de Marca
                             if(currentTable === 3 && parts.length >= 6) {
                                 let shortName = parts[1] ? parts[1].trim() : "";
-                                let longName = shortToLongName[shortName] || shortName; // Usa el nombre de Odoo
+                                let longName = shortToLongName[shortName] || shortName; 
                                 let marca = parts[3] ? parts[3].trim() : "";
                                 let meta = parseInt(parts[4].replace(/\./g, '')) || 0;
                                 let venta = parseInt(parts[5].replace(/\./g, '')) || 0;
                                 
                                 if(longName && longName !== 'Vendedor' && marca) {
-                                    if(meta > 0) obj.vendedorMarca[longName + '|||' + marca] = meta;
+                                    if(meta >= 0) obj.vendedorMarca[longName + '|||' + marca] = meta;
                                     
                                     if (!obj.ventasMarcaPorVendedor[longName]) {
                                         obj.ventasMarcaPorVendedor[longName] = {};
@@ -1076,7 +1013,7 @@
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD (GitHub + Live) a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base conectada con Google Sheets y GitHub a las: ${horaStr}`);
                 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
@@ -1184,6 +1121,11 @@
             let canalesSet = new Set();
             let marcasSet = new Set();
 
+            // Agregar vendedores del historial para que aparezcan en el filtro
+            Object.keys(HISTORICO_METAS).forEach(m => {
+                Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
+            });
+
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "") continue; 
@@ -1242,7 +1184,7 @@
 
             if(selV) {
                 let optV = `<option value="">-- Todos los Vendedores --</option>`;
-                Array.from(vendedores).sort().forEach(v => { if(v) optV += `<option value="${v}">${v}</option>`; });
+                Array.from(vendedores).sort().forEach(v => { if(v && !v.includes("Vta. On Line") && !v.includes("Consum. Final")) optV += `<option value="${v}">${v}</option>`; });
                 selV.innerHTML = optV;
             }
             if(selC) {
@@ -1326,6 +1268,8 @@
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let dataFichasVend = {};
 
+            if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
+
             let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
             let diasTotalesActivos = METAS_ACTIVAS.diasMes;
             let filtroTime = 0;
@@ -1358,7 +1302,7 @@
                 if (METAS_ACTIVAS.ventasPorVendedor) {
                     Object.keys(METAS_ACTIVAS.ventasPorVendedor).forEach(v => {
                         let vInfo = METAS_ACTIVAS.ventasPorVendedor[v];
-                        if (filtrosActivos.vendedor && v !== filtrosActivos.vendedor) return;
+                        if (filtrosActivos.vendedor && !sonElMismoVendedor(v, filtrosActivos.vendedor)) return; // FUSIÓN INTELIGENTE
                         if (filtrosActivos.canal && vInfo.canal !== filtrosActivos.canal) return;
 
                         if(!acumVendPorCanal[vInfo.canal]) acumVendPorCanal[vInfo.canal] = {};
@@ -1380,7 +1324,7 @@
                 
                 lineasDeDatosGlobales.forEach(r => {
                     if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
-                    if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
+                    if (filtrosActivos.vendedor && !sonElMismoVendedor(r.vendedor, filtrosActivos.vendedor)) return; // FUSIÓN INTELIGENTE
                     if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
                     if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
                     if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
@@ -1446,7 +1390,22 @@
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
-                objetivoFiltrado = getMetaVendedorMarca(filtrosActivos.vendedor, filtrosActivos.marca, METAS_ACTIVAS.vendedorMarca);
+                // Algoritmo cruzado para Meta Especifica
+                let mF = 0;
+                let odooLimpio = normalizarTexto(filtrosActivos.vendedor).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+                let marcaUpper = normalizarTexto(filtrosActivos.marca);
+                
+                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length === 2 && normalizarTexto(parts[1]) === marcaUpper) {
+                        let csvKeyLimpio = normalizarTexto(parts[0]);
+                        let csvWords = csvKeyLimpio.split(/\s+/).filter(w => w.length > 2);
+                        if (csvKeyLimpio === odooLimpio || (csvWords.length > 0 && csvWords.every(w => odooLimpio.includes(w)))) {
+                            mF += METAS_ACTIVAS.vendedorMarca[k];
+                        }
+                    }
+                });
+                objetivoFiltrado = mF;
             } else if (filtrosActivos.vendedor) {
                 objetivoFiltrado = getMetaVendedor(filtrosActivos.vendedor, METAS_ACTIVAS.vendedoresTotales);
             } else if (filtrosActivos.canal) {
@@ -1608,7 +1567,6 @@
                 
                 if (METAS_ACTIVAS.vendedorMarca) {
                     let odooLimpio = normalizarTexto(v).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-                    
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
                         if (parts.length === 2) {
@@ -1675,7 +1633,6 @@
                 // ==========================================
                 let nUpper = normalizarTexto(v);
                 
-                // Filtro para ocultar canales o gente sin metas de la tabla de comisiones
                 let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
 
                 if (!ocultarDeBonos) {
@@ -1728,7 +1685,6 @@
                     `;
                 }
 
-                // CONSTRUCCIÓN FICHA VENDEDOR
                 let fichaHtml = `
                 <div class="ficha-vendedor">
                     <div class="ficha-header">▶ ${v}</div>
@@ -1797,7 +1753,6 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            // Corrige valores cero a gris en las listas
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
