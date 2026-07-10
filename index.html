@@ -148,7 +148,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Sincronizando Base de Datos YTD e Historial de GitHub...</div>
+        <div id="loader-text">Sincronizando Base de Datos YTD...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -481,7 +481,7 @@
                 <div class="excel-title" style="background: #dd6b20;">
                     <span style="font-size: 13px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4 Vertical)</button>
+                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4)</button>
                         <button class="btn-sync" style="background:#38a169; font-size:11px; padding:8px 12px;" onclick="exportarBonosExcel()">📊 Exportar a EXCEL</button>
                     </div>
                 </div>
@@ -636,13 +636,13 @@
                 doc.setTextColor(26, 44, 66);
                 doc.setFontSize(16);
                 doc.setFont("helvetica", "bold");
-                doc.text("REPORTE OFICIAL DE LIQUIDACION DE BONOS", 14, 20);
+                doc.text("REPORTE OFICIAL DE LIQUIDACIÓN DE BONOS", 14, 20);
                 
                 doc.setTextColor(221, 107, 32); 
                 doc.setFontSize(10);
-                doc.text(`Periodo Evaluado: ${currentMonthTxt}`, 14, 26);
+                doc.text(`Período Evaluado: ${currentMonthTxt}`, 14, 26);
                 
-                // Regla (Texto sin tildes raras para evitar errores de codificación)
+                // Regla
                 doc.setTextColor(123, 52, 30);
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "normal");
@@ -659,7 +659,7 @@
                         let estadoTexto = cols[6].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO";
                         let marcasClean = cols[7].innerText.replace("activas", "").trim();
                         
-                        // EL SECRETO: Quitamos el "₲" y ponemos "Gs." para que jsPDF dibuje los números completos
+                        // EL SECRETO: Quitamos el "₲" y lo cambiamos por "Gs." para que la librería PDF dibuje todo
                         let metaLimpia = cols[3].innerText.replace(/₲/g, 'Gs.');
                         let ventaLimpia = cols[4].innerText.replace(/₲/g, 'Gs.');
                         let bonoLimpio = cols[8].innerText.replace(/₲/g, 'Gs.');
@@ -692,7 +692,7 @@
                         3: { halign: 'center' },
                         4: { halign: 'center', fontStyle: 'bold' },
                         5: { halign: 'center' },
-                        6: { halign: 'right', fontStyle: 'bold', textColor: [34, 84, 61] } // Verde
+                        6: { halign: 'right', fontStyle: 'bold', textColor: [34, 84, 61] }
                     },
                     didParseCell: function(data) {
                         if (data.section === 'body') {
@@ -740,27 +740,85 @@
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
-        // HISTÓRICO GLOBAL
-        let HISTORICO_METAS = {};
+        // LA BASE INTOCABLE (Resuelve los problemas de importación y formatos raros)
+        const HISTORICO_METAS = {
+            "1": { name: "Enero", diasMes: 23.5, diasTranscurridos: 23.5, global: 2200000000, 
+                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 65000000 }
+            },
+            "2": { name: "Febrero", diasMes: 22.0, diasTranscurridos: 22.0, global: 2200000000, 
+                   canales: { "Salon": 615000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 970000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 200000000, "SALON (Varios)": 15000000, "Tobias Sosa - Salon": 200000000, "Giovanni Jara - Salon": 200000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 485000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 485000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 85000000, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 85000000 }
+            },
+            "3": { name: "Marzo", diasMes: 23.0, diasTranscurridos: 23.0, global: 2455000000, 
+                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 250000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 685000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 685000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678, "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 145260057 }
+            },
+            "4": { name: "Abril", diasMes: 22.0, diasTranscurridos: 22.0, global: 2455000000, 
+                   canales: { "Salon": 470000000, "Online": 615000000, "E-commerce": 0, "Mayoristas": 1370000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 150000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 200000000, "Oscar Daniel Zárate Villamayor - Online": 200000000, "Hugo Javier González Arce - Online": 200000000, "ONLINE (Varios)": 15000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Barbara Cristhel Magali Casco Mendoza - Mayoristas": 270000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
+            },
+            "5": { name: "Mayo", diasMes: 20.5, diasTranscurridos: 20.5, global: 2300000000, 
+                   canales: { "Salon": 395000000, "Online": 685000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 75000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 220000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 25000000, "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000 },
+                   vendedorMarca: { "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 121949678 }
+            },
+            "6": { name: "Junio", diasMes: 22.0, global: 2310000000, diasTranscurridos: 22.0,
+                   canales: { "Salon": 425000000, "Online": 665000000, "E-commerce": 120000000, "Mayoristas": 1100000000, "Venta Externa": 0, "Directorio": 0, "Reparaciones": 0 },
+                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1100000000, "Oscar David Maldonado Yudis - Salon": 220000000, "SALON (Varios)": 5000000, "Oscar David Noguera Oviedo - Salon": 100000000, "Sergio Daniel Ocampos Román - Salon": 100000000, "Marcelo Evaristo Sánchez Rojas - Online": 100000000, "Oscar Daniel Zárate Villamayor - Online": 220000000, "Hugo Javier González Arce - Online": 220000000, "ONLINE (Varios)": 5000000, "Oscar David Noguera Oviedo - E-commerce": 120000000 },
+                   vendedorMarca: { 
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||ASG": 34268400,
+                        "Oscar David Maldonado Yudis - Salon|||ASG": 10886900,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||ASG": 5083900,
+                        "Oscar Daniel Zárate Villamayor - Online|||ASG": 2545000,
+                        "Hugo Javier González Arce - Online|||ASG": 1520500,
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||TSS": 171216713,
+                        "Oscar David Maldonado Yudis - Salon|||TSS": 25719000,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||TSS": 3602000,
+                        "Oscar Daniel Zárate Villamayor - Online|||TSS": 569000,
+                        "Hugo Javier González Arce - Online|||TSS": 1198000,
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Crosman": 27112615,
+                        "Oscar David Maldonado Yudis - Salon|||Crosman": 6259000,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Crosman": 6259000,
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Umarex": 139591636,
+                        "Oscar David Maldonado Yudis - Salon|||Umarex": 71368875,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Umarex": 46193875,
+                        "Oscar Daniel Zárate Villamayor - Online|||Umarex": 8357500,
+                        "Hugo Javier González Arce - Online|||Umarex": 9599875,
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Doberman": 162118046,
+                        "Oscar David Maldonado Yudis - Salon|||Doberman": 12768900,
+                        "Marcelo Evaristo Sánchez Rojas - Online|||Doberman": 6376000,
+                        "Oscar Daniel Zárate Villamayor - Online|||Doberman": 3412000,
+                        "Hugo Javier González Arce - Online|||Doberman": 2290000,
+                        "Antonio De Jesus Fernandez Benitez - Mayoristas|||Konus": 21767250,
+                        "Oscar David Maldonado Yudis - Salon|||Konus": 1173250
+                   }
+            }
+        };
 
-        // Variable global para Google Sheets Actual
         let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
 
         // =========================================================================
-        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES (Sin tildes, mayúsculas puras)
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES
         // =========================================================================
-        function normalizarTexto(texto) {
+        function limpiarNombre(texto) {
             if (!texto) return "";
-            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
+                        .replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "")
+                        .trim();
         }
 
         // =========================================================================
-        // 🔥 ALGORITMO DE FUSIÓN (ODOO vs GITHUB CSV)
+        // 🔥 ALGORITMO DE EMPAREJAMIENTO
         // =========================================================================
-        function sonElMismoVendedor(nombreOdoo, nombreCSV) {
-            if (!nombreOdoo || !nombreCSV) return false;
-            let a = normalizarTexto(nombreOdoo).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-            let b = normalizarTexto(nombreCSV).replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
+        function sonElMismoVendedor(nombreA, nombreB) {
+            if (!nombreA || !nombreB) return false;
+            let a = limpiarNombre(nombreA);
+            let b = limpiarNombre(nombreB);
             
             if (a === b) return true;
 
@@ -847,8 +905,8 @@
         }
 
         function obtenerCanalReal(vendedor, canalCSV) {
-            let vUpper = normalizarTexto(vendedor);
-            let cUpper = normalizarTexto(canalCSV);
+            let vUpper = limpiarNombre(vendedor);
+            let cUpper = limpiarNombre(canalCSV);
 
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
@@ -913,99 +971,8 @@
             }
         }
 
-        // ========================================================================
-        // 🔥 MOTOR DE EXTRACCIÓN GITHUB (SOLO LEE LAS METAS, CERO DUPLICACIÓN)
-        // ========================================================================
-        async function cargarHistoricoDesdeGithub() {
-            document.getElementById('loader-text').innerText = "Extrayendo historial y metas pasadas...";
-            const urls = [
-                { url: "ENERO2026.csv", startMonth: 1 },
-                { url: "FEBRERO2026.csv", startMonth: 2 },
-                { url: "MARZO Y ABRIL 2026.csv", startMonth: 3 },
-                { url: "MAYO Y JUNIO 2026.csv", startMonth: 5 }
-            ];
-            
-            for (let file of urls) {
-                try {
-                    let fullUrl = file.url + "?cb=" + new Date().getTime();
-                    let res = await fetch(fullUrl).catch(() => null);
-                    
-                    if (!res || !res.ok) {
-                        fullUrl = "https://ti-camping44.github.io/INFORMEVENTASC44/" + file.url + "?cb=" + new Date().getTime();
-                        res = await fetch(fullUrl).catch(() => null);
-                    }
-                    if (!res || !res.ok) continue;
-                    
-                    let text = await res.text();
-                    let blocks = text.split(/--- TABLA 1/i);
-                    let monthIdx = file.startMonth;
-                    
-                    for(let i = 1; i < blocks.length; i++) {
-                        let blockText = blocks[i];
-                        
-                        if(!HISTORICO_METAS[monthIdx.toString()]) {
-                            HISTORICO_METAS[monthIdx.toString()] = { 
-                                name: "Mes " + monthIdx, diasMes: 25, diasTranscurridos: 25, 
-                                global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} 
-                            };
-                        }
-                        let obj = HISTORICO_METAS[monthIdx.toString()];
-                        
-                        let currentTable = 1;
-                        let lines = blockText.split('\n');
-                        let shortToLongName = {};
-                        
-                        for(let line of lines) {
-                            let l = line.trim();
-                            if(l.toUpperCase().includes('TABLA 2')) { currentTable = 2; continue; }
-                            else if(l.toUpperCase().includes('TABLA 3')) { currentTable = 3; continue; }
-                            
-                            let parts = l.split(',');
-                            
-                            // TABLA 1: SOLO METAS GENERALES
-                            if(currentTable === 1 && parts.length >= 4) {
-                                let canalRaw = parts[0] ? parts[0].trim() : "";
-                                let longName = parts[1] && parts[1].trim() !== '' ? parts[1].trim() : (parts[2] ? parts[2].trim() : "");
-                                let shortName = parts[2] ? parts[2].trim() : "";
-                                let meta = parseInt(parts[3].replace(/\./g, '')) || 0;
-                                
-                                if(longName && longName !== 'Cod' && longName !== 'Vendedor') {
-                                    shortToLongName[shortName] = longName;
-                                    let vClean = normalizarTexto(longName);
-                                    
-                                    // IGNORAR FILAS QUE NO SON PERSONAS REALES
-                                    let esBasura = ["TOTAL ON-LINE", "CONSUM. FINAL", "MAYORISTA 25", "33", "120", "100", "LICITACION", "DIRECTORIO", "MAYORISTA", "TOTAL"].some(b => vClean.includes(b));
-                                    
-                                    if(!esBasura && meta > 0) {
-                                        obj.vendedoresTotales[longName] = meta;
-                                        obj.global += meta;
-                                        let cNorm = obtenerCanalReal(longName, canalRaw);
-                                        obj.canales[cNorm] = (obj.canales[cNorm] || 0) + meta;
-                                    }
-                                }
-                            }
-                            
-                            // TABLA 3: SOLO METAS DE MARCAS
-                            if(currentTable === 3 && parts.length >= 5) {
-                                let shortName = parts[1] ? parts[1].trim() : "";
-                                let longName = shortToLongName[shortName] || shortName; 
-                                let marca = parts[3] ? parts[3].trim() : "";
-                                let meta = parseInt(parts[4].replace(/\./g, '')) || 0;
-                                
-                                if(longName && longName !== 'Vendedor' && marca && meta > 0) {
-                                    obj.vendedorMarca[longName + '|||' + marca] = meta;
-                                }
-                            }
-                        }
-                        monthIdx++; 
-                    }
-                } catch(e) { console.error("Error procesando CSV:", e); }
-            }
-        }
-
-        async function iniciarSincronizacion() {
+        function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
-            await cargarHistoricoDesdeGithub();
             descargarDatosCruzadosBI();
         }
 
@@ -1020,7 +987,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Conectando Google Sheets en vivo...";
+                document.getElementById('loader-text').innerText = "Conectando con Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1046,11 +1013,13 @@
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
+                
+                // EXCLUSIVAMENTE LAS VENTAS EN VIVO. (NADA DE GITHUB)
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. Historial y Datos en vivo conectados: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base conectada a Google Sheets a las: ${horaStr}`);
                 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
@@ -1095,7 +1064,8 @@
                         }
                     }
                     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
-                        METAS_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
+                        let vClean = limpiarNombre(String(row[8]));
+                        METAS_LIVE.vendedoresTotales[vClean] = handleNum(row[9]);
                     }
                 });
 
@@ -1142,7 +1112,9 @@
                                     let marc = (filas[r][col] || "").toString().trim();
                                     let metaVal = filas[r][col+1];
                                     if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
-                                        METAS_LIVE.vendedorMarca[currentVend + "|||" + marc] = handleNum(metaVal);
+                                        let vClean = limpiarNombre(currentVend);
+                                        let mClean = limpiarNombre(marc);
+                                        METAS_LIVE.vendedorMarca[vClean + '|||' + mClean] = handleNum(metaVal);
                                     }
                                 }
                             }
@@ -1157,6 +1129,10 @@
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let marcasSet = new Set();
+
+            Object.keys(HISTORICO_METAS).forEach(m => {
+                Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
+            });
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
@@ -1217,7 +1193,10 @@
             if(selV) {
                 let optV = `<option value="">-- Todos los Vendedores --</option>`;
                 Array.from(vendedores).sort().forEach(v => { 
-                    if(v && !v.includes("Vta. On Line") && !v.includes("Consum. Final") && !v.includes("Total On-Line")) optV += `<option value="${v}">${v}</option>`; 
+                    let vClean = limpiarNombre(v);
+                    if(v && !vClean.includes("VTA. ON LINE") && !vClean.includes("CONSUM. FINAL") && !vClean.includes("TOTAL ON-LINE")) {
+                        optV += `<option value="${v}">${v}</option>`; 
+                    }
                 });
                 selV.innerHTML = optV;
             }
@@ -1321,7 +1300,7 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
-            // EXTRAEMOS LAS VENTAS SÓLO DE GOOGLE SHEETS (100% Precisión, 0 Duplicación)
+            // SÓLO FACTURAS REALES DE GOOGLE SHEETS
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
                 
@@ -1587,21 +1566,19 @@
                 let marcasAlcanzadas = 0;
 
                 Array.from(marcasUnicas).sort().forEach(m => {
-                    let mClean = normalizarTexto(m);
+                    let mClean = limpiarNombre(m);
                     let val = 0;
                     
                     Object.keys(vData.marcas).forEach(vm => {
-                        if (normalizarTexto(vm) === mClean) val += vData.marcas[vm];
+                        if (limpiarNombre(vm) === mClean) val += vData.marcas[vm];
                     });
 
                     let mAsig = 0;
                     for (let k in METAS_ACTIVAS.vendedorMarca) {
                         let parts = String(k).split('|||');
-                        if (parts.length === 2 && normalizarTexto(parts[1]) === mClean) {
-                            if (sonElMismoVendedor(parts[0], v)) {
-                                mAsig = METAS_ACTIVAS.vendedorMarca[k];
-                                break;
-                            }
+                        if (parts.length === 2 && limpiarNombre(parts[1]) === mClean && sonElMismoVendedor(parts[0], v)) {
+                            mAsig = METAS_ACTIVAS.vendedorMarca[k];
+                            break;
                         }
                     }
                     
@@ -1617,12 +1594,12 @@
                     }
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
-                    let displayBrand = Object.keys(vData.marcas).find(x => normalizarTexto(x) === mClean) || m;
+                    let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || m;
                     
                     let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let isMainBrand = LISTA_MARCAS.some(lm => normalizarTexto(lm) === mClean);
-                    let isWeapon = LISTA_ARMAS.some(la => normalizarTexto(la) === mClean);
+                    let isMainBrand = LISTA_MARCAS.some(lm => limpiarNombre(lm) === mClean);
+                    let isWeapon = LISTA_ARMAS.some(la => limpiarNombre(la) === mClean);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1647,11 +1624,11 @@
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // TABLA BONOS Y COMISIONES (SIN FANTASMAS)
+                // LÓGICA DE BONOS (REGLAS EXCLUYENTES Y LIMPIAS)
                 // ==========================================
-                let nUpper = normalizarTexto(v);
+                let nUpper = limpiarNombre(v);
                 
-                let isBasura = ["TOTAL", "CONSUM.", "MAYORISTA 25", "33", "120", "100", "LICITACION", "MAYORISTA", "SIN VENDEDOR", "ONLINE"].some(b => nUpper.includes(b));
+                let isBasura = ["TOTAL", "CONSUM", "MAYORISTA 25", "33", "120", "100", "LICITACION", "MAYORISTA", "SIN VENDEDOR", "ONLINE"].some(b => nUpper.includes(b));
                 let isEmpty = (obj === 0 && net === 0);
                 
                 if (!isBasura && !isEmpty) {
