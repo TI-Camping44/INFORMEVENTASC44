@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
+    <!-- Gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Exportación PDF Profesional -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Exportación EXCEL Real -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* REGLA DE ORO RESPONSIVA */
@@ -120,7 +123,6 @@
             .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
             .sidebar h2 { display: none; }
             .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
-            
             .main-content { padding: 10px; width: 100%; overflow: visible; }
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
@@ -128,13 +130,10 @@
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
-            
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
             .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
-            
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
-            table.excel-table { min-width: 700px; }
         }
 
         @media print { body { display: none; } }
@@ -207,6 +206,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -284,6 +284,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -316,6 +317,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -343,6 +345,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -370,6 +373,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -410,6 +414,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -437,6 +442,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -464,6 +470,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -474,7 +481,7 @@
                     </div>
                 </div>
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
-                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Aquí podrás monitorear qué equipo llegó a su cuota mensual y el detalle de sus marcas activadas.
+                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Aquí podrás monitorear qué equipo llegó a su cuota mensual y el detalle de sus marcas activadas (divididas en Grales. y Armas/Muni.).
                 </div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table" id="tabla-exportar-bonos">
@@ -495,6 +502,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -530,6 +538,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -577,7 +586,7 @@
         }
 
         // =========================================================================
-        // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
+        // 🔥 EXPORTACIÓN EXCEL REAL (XLSX)
         // =========================================================================
         function exportarBonosExcel() {
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
@@ -644,7 +653,6 @@
                 
                 rows.forEach(row => {
                     if (row.classList.contains('header-segmento')) {
-                        // Insertamos la cabecera de Canal como una fila especial
                         bodyData.push([{ content: row.innerText.trim(), colSpan: 7, styles: { fillColor: [44, 74, 107], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' } }]);
                     } else {
                         let cols = row.querySelectorAll("td");
@@ -688,7 +696,6 @@
                         6: { halign: 'center' }
                     },
                     didParseCell: function(data) {
-                        // Pintamos de rojo si es "NO"
                         if (data.section === 'body' && data.row.cells[0].colSpan === 1) { 
                             if (data.column.index === 4 && data.cell.raw === 'NO') {
                                 data.cell.styles.textColor = [197, 48, 48];
@@ -731,6 +738,7 @@
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
+        // Base maestra local de Metas Históricas
         let HISTORICO_METAS = {
             "1": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
             "2": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
@@ -755,19 +763,23 @@
         }
 
         // =========================================================================
-        // 🔥 ALGORITMO DE FUSIÓN (El Fin de los Fantasmas)
+        // 🔥 ALGORITMO DE EMPAREJAMIENTO EXTREMADAMENTE ESTRICTO (Para evitar clones)
         // =========================================================================
         function sonElMismoVendedor(nombreA, nombreB) {
             if (!nombreA || !nombreB) return false;
             let a = limpiarNombre(nombreA);
             let b = limpiarNombre(nombreB);
+            
             if (a === b) return true;
-            let wordsA = a.split(/\s+/).filter(w => w.length > 2);
-            let wordsB = b.split(/\s+/).filter(w => w.length > 2);
-            if (wordsA.length > 0 && wordsB.length > 0) {
-                if (wordsA.every(w => b.includes(w))) return true;
-                if (wordsB.every(w => a.includes(w))) return true;
-            }
+
+            // Dividir en palabras ignorando las chiquitas
+            let wordsA = a.split(/\s+/).filter(w => w.length > 3);
+            let wordsB = b.split(/\s+/).filter(w => w.length > 3);
+
+            // Requiere que TODAS las palabras significativas de uno existan en el otro
+            if (wordsA.length > 0 && wordsA.every(w => b.includes(w))) return true;
+            if (wordsB.length > 0 && wordsB.every(w => a.includes(w))) return true;
+            
             return false;
         }
 
@@ -911,12 +923,12 @@
             }
         }
 
-        // ========================================================================
-        // 🔥 INICIO DEL SISTEMA
-        // ========================================================================
         async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
-            
+            descargarDatosCruzadosBI();
+        }
+
+        async function descargarDatosCruzadosBI() {
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
                 if (loader && loader.style.display !== 'none') {
@@ -927,7 +939,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
+                document.getElementById('loader-text').innerText = "Conectando con Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -954,7 +966,18 @@
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 
-                // Procesamos las ventas EN VIVO
+                // MÁXIMA SEGURIDAD: SI FALLAN LAS METAS PARA UN MES, COPIAMOS EL MES ANTERIOR
+                for (let i = 2; i <= 12; i++) {
+                    let curr = i.toString();
+                    let prev = (i - 1).toString();
+                    if (HISTORICO_METAS[curr] && Object.keys(HISTORICO_METAS[curr].vendedorMarca).length === 0) {
+                        if (HISTORICO_METAS[prev]) {
+                            HISTORICO_METAS[curr].vendedorMarca = JSON.parse(JSON.stringify(HISTORICO_METAS[prev].vendedorMarca));
+                            HISTORICO_METAS[curr].vendedoresTotales = JSON.parse(JSON.stringify(HISTORICO_METAS[prev].vendedoresTotales));
+                        }
+                    }
+                }
+
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
@@ -1006,7 +1029,12 @@
                     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
                         let vClean = limpiarNombre(String(row[8]));
                         let meta = handleNum(row[9]);
-                        if(meta > 0) METAS_LIVE.vendedoresTotales[vClean] = meta;
+                        
+                        const BASURA_LIST = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE", "MAYORISTA", "DIRECTORIO"];
+                        let isBasura = false;
+                        BASURA_LIST.forEach(b => { if(vClean === b || vClean.startsWith(b)) isBasura = true; });
+                        
+                        if(!isBasura && meta > 0) METAS_LIVE.vendedoresTotales[vClean] = meta;
                     }
                 });
 
@@ -1072,7 +1100,7 @@
             let canalesSet = new Set();
             let marcasSet = new Set();
 
-            // Metemos al menú a los vendedores históricos aunque no hayan vendido nada
+            // Metemos al menú a los vendedores históricos aunque no hayan vendido nada en la base nueva
             Object.keys(HISTORICO_METAS).forEach(m => {
                 Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
             });
@@ -1137,7 +1165,7 @@
                 let optV = `<option value="">-- Todos los Vendedores --</option>`;
                 Array.from(vendedores).sort().forEach(v => { 
                     let vClean = limpiarNombre(v);
-                    const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
+                    const BASURA = ["TOTAL", "CONSUM", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
                     if(v && !BASURA.some(b => vClean === b || vClean.startsWith(b))) {
                         optV += `<option value="${v}">${v}</option>`; 
                     }
@@ -1184,8 +1212,8 @@
             try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos", "BWC"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
+        const LISTA_MARCAS = ["ASG", "TSS", "CROSMAN", "UMAREX", "DOBERMAN", "KONUS", "GSM", "BWC", "TRUGLO", "FAB DEFENSE", "MIGUEL NIETO", "NTK", "COLEMAN", "IMALENT", "APOLO", "AITOR", "ROCKY BOOTS", "KCI", "NITECORE", "CATERPILLAR", "POLYMER", "SNAKE", "FOBUS", "BERETTA MOD", "B.E ARMOR", "B.E. ARMOR", "VECTOR OPTICS", "CAMPING 44", "DESCUENTOS"];
+        const LISTA_ARMAS = ["MENDOZA", "BOITO", "DERYA", "ARMED", "TINCK", "EMTAN", "REXIO", "RUGER", "TANFOGLIO", "WALTHER", "AHSS", "KOR", "BERETTA", "ROCK ISLAND", "GB", "SAGA", "SELLIER & BELLOT", "ARMSCOR", "IMI", "GOLDEN EAGLE", "FEDERAL"];
 
         function obtenerMetasEstructuraBI() {
             let mesSelec = filtrosActivos.mes;
@@ -1315,7 +1343,6 @@
                         else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
                         else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                         
-                        // Los inyectamos para que se vean sus 0
                         dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, nc: 0, bruto: 0 };
                     }
                 });
@@ -1536,10 +1563,10 @@
 
                 let marcasUnicas = new Set();
                 
-                // Las marcas que vendió en el Google Sheet
+                // Marcas vendidas
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(limpiarNombre(m)));
                 
-                // Las marcas que tiene asignadas como meta en el histórico blindado
+                // Marcas asignadas como meta
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
@@ -1557,9 +1584,14 @@
                 let marcasGenAsig = 0, marcasGenAlc = 0;
                 let aymAsig = 0, aymAlc = 0;
 
+                // EL SECRETO PARA NO DUPLICAR MARCAS: Recorremos el Set (que es único)
                 Array.from(marcasUnicas).sort().forEach(mClean => {
-                    let val = vData.marcas[mClean] || 0; // Usar el nombre limpio
+                    let val = 0;
                     
+                    Object.keys(vData.marcas).forEach(vm => {
+                        if (limpiarNombre(vm) === mClean) val += vData.marcas[vm];
+                    });
+
                     let mAsig = 0;
                     for (let k in METAS_ACTIVAS.vendedorMarca) {
                         let parts = String(k).split('|||');
@@ -1584,8 +1616,6 @@
                     }
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
-                    
-                    // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
                     let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
                     
                     let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
@@ -1608,22 +1638,22 @@
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
 
-                let totalMarcasAsig = marcasGenAsig + aymAsig;
-                let totalMarcasAlc = marcasGenAlc + aymAlc;
-
-                let pctMarcas = totalMarcasAsig > 0 ? ((totalMarcasAlc / totalMarcasAsig) * 100).toFixed(0) + "%" : "0%";
                 let pctAlcanzado = esp > 0 ? ((net/esp)*100).toFixed(0) : 0;
                 let clsAlcanzado = pctAlcanzado >= 100 ? 'num-positivo' : 'num-negativo';
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // LÓGICA DE BONOS (RENOVADA Y AGRUPADA)
+                // LÓGICA DE BONOS (TOTALMENTE LIMPIA)
                 // ==========================================
                 let nUpper = limpiarNombre(v);
                 
-                let isBasura = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE", "SALON", "MAYORISTA", "DIRECTORIO", "REPARACIONES", "EXTERNA", "E-COMMERCE"].some(b => nUpper === b || nUpper.startsWith(b));
-                let isEmpty = (obj === 0 && net === 0 && totalMarcasAsig === 0);
+                // Filtro Exterminador: Saca a los genéricos de la lista de bonos
+                const BASURA_LIST = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE", "SALON", "MAYORISTA", "DIRECTORIO", "REPARACIONES", "EXTERNA", "E-COMMERCE"];
+                let isBasura = false;
+                BASURA_LIST.forEach(b => { if(nUpper === b || nUpper.startsWith(b)) isBasura = true; });
+                
+                let isEmpty = (obj === 0 && net === 0 && marcasGenAsig === 0 && aymAsig === 0);
                 
                 if (!isBasura && !isEmpty) {
                     let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
@@ -1674,8 +1704,8 @@
                                 <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${totalMarcasAsig}</td></tr>
-                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${totalMarcasAlc > 0 ? 'num-positivo' : 'num-negativo'}">${totalMarcasAlc}</td><td class="text-center">-</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${marcasGenAsig + aymAsig}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${marcasGenAlc + aymAlc > 0 ? 'num-positivo' : 'num-negativo'}">${marcasGenAlc + aymAlc}</td><td class="text-center">-</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
                             </tbody>
                         </table>
@@ -1709,7 +1739,6 @@
             document.getElementById('grid-fichas-directorio').innerHTML = hFichasDir;
             document.getElementById('grid-fichas-reparaciones').innerHTML = hFichasRep;
             
-            // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
             let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             canalesSegmentosBonos.forEach(c => {
