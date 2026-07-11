@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        /* REGLA DE ORO RESPONSIVA */
         * { box-sizing: border-box; }
         html, body { width: 100%; max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
 
@@ -26,6 +27,7 @@
         ::-webkit-scrollbar-track { background: #edf2f7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 
+        /* --- MENÚ LATERAL --- */
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; }
         .sidebar-logo { width: 90%; max-width: 120px; margin: 0 auto 15px auto; display: block; background-color: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
@@ -35,6 +37,7 @@
         .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: auto; border-left: 3px solid white; }
         .menu-item.bonos-highlight:hover { background-color: #c05621; }
 
+        /* --- CONTENIDO PRINCIPAL --- */
         .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; width: calc(100% - 220px); }
 
         .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
@@ -62,6 +65,7 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* --- CONTENEDORES Y TABLAS --- */
         .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
         .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
@@ -107,12 +111,16 @@
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* =========================================================
+           OPTIMIZACIÓN PARA CELULARES
+           ========================================================= */
         @media (max-width: 992px) {
             body { flex-direction: column; overflow-y: auto; } 
             .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
             .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
             .sidebar h2 { display: none; }
             .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
+            
             .main-content { padding: 10px; width: 100%; overflow: visible; }
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
@@ -120,10 +128,13 @@
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
+            
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
             .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
+            
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
+            table.excel-table { min-width: 700px; }
         }
 
         @media print { body { display: none; } }
@@ -133,7 +144,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Sincronizando Base de Datos YTD e Historial de GitHub...</div>
+        <div id="loader-text">Cargando Base Operativa Blindada...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -162,7 +173,9 @@
                 <label>👤 Vendedor</label>
                 <select id="select-vendedor" onchange="aplicarFiltrosDropdown()"></select>
             </div>
+            
             <button id="btn-share-vendor" class="btn-clear-filters" style="background-color: #3182ce; color: white; border: none; margin-bottom: 2px;" onclick="copiarLinkVendedor()">🔗 Compartir a Comercial</button>
+            
             <div class="filter-group">
                 <label>🏷️ Canal / Equipo</label>
                 <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
@@ -456,7 +469,7 @@
                 <div class="excel-title" style="background: #dd6b20;">
                     <span style="font-size: 13px; letter-spacing: 0.5px;">💰 CONTROL DE KPIs (METAS Y MARCAS)</span>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4)</button>
+                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4 Vertical)</button>
                         <button class="btn-sync" style="background:#38a169; font-size:11px; padding:8px 12px;" onclick="exportarBonosExcel()">📊 Exportar a EXCEL</button>
                     </div>
                 </div>
@@ -467,13 +480,13 @@
                     <table class="excel-table" id="tabla-exportar-bonos">
                         <thead>
                             <tr style="background:#f7fafc;">
-                                <th class="text-left">VENDEDOR</th>
-                                <th class="text-right">META GRAL (Gs)</th>
-                                <th class="text-right">VENTA REAL (Gs)</th>
-                                <th class="text-center">% LOGRO</th>
-                                <th class="text-center">ESTADO META</th>
-                                <th class="text-center">MARCAS GRALES.</th>
-                                <th class="text-center">ARMAS/MUNI.</th>
+                                <th class="text-left">Vendedor</th>
+                                <th class="text-right">Meta del Mes (₲)</th>
+                                <th class="text-right">Venta Real (₲)</th>
+                                <th class="text-center">% Logrado</th>
+                                <th class="text-center">¿Alcanzó Meta?</th>
+                                <th class="text-center">Marcas (Grales)</th>
+                                <th class="text-center">Armas y Municiones</th>
                             </tr>
                         </thead>
                         <tbody id="grid-bonos-vendedores"></tbody>
@@ -555,9 +568,6 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 1. FUNCIONES UI & EXPORTACIÓN
-        // =========================================================================
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -566,6 +576,9 @@
             if (element) element.classList.add('active');
         }
 
+        // =========================================================================
+        // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
+        // =========================================================================
         function exportarBonosExcel() {
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
             let table = document.getElementById("tabla-exportar-bonos");
@@ -580,10 +593,10 @@
                     currentCanal = row.innerText.replace(/---/g, '').trim();
                 } else {
                     let cols = row.querySelectorAll("td");
-                    if(cols.length >= 7) {
+                    if(cols.length > 0) {
                         let estado = cols[4].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO ALCANZO";
-                        let mGen = cols[5].innerText.replace("activas", "").trim();
-                        let mAyM = cols[6].innerText.replace("activas", "").trim();
+                        let mGen = cols[5].innerText.trim();
+                        let mAyM = cols[6].innerText.trim();
                         let meta = cols[1].innerText.replace(/₲|Gs\./g, '').trim();
                         let venta = cols[2].innerText.replace(/₲|Gs\./g, '').trim();
                         
@@ -598,18 +611,17 @@
             XLSX.writeFile(wb, `Control_KPIs_${currentMonthTxt.replace(/\s+/g, '_')}.xlsx`);
         }
 
+        // =========================================================================
+        // 🔥 GENERADOR PROFESIONAL DE PDF (JSPDF + AUTOTABLE)
+        // =========================================================================
         function exportarBonosPDF() {
             try {
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    alert("⚠️ Error: La librería de PDF no pudo cargar. Comprueba tu conexión a Internet o usa la opción de exportar a Excel.");
-                    return;
-                }
-
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4'); 
+                const doc = new jsPDF('p', 'mm', 'a4'); // A4 Vertical
                 
                 let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
                 
+                // Cabecera
                 doc.setTextColor(26, 44, 66);
                 doc.setFontSize(16);
                 doc.setFont("helvetica", "bold");
@@ -617,8 +629,9 @@
                 
                 doc.setTextColor(221, 107, 32); 
                 doc.setFontSize(10);
-                doc.text(`Periodo Evaluado: ${currentMonthTxt}`, 14, 26);
+                doc.text(`Período Evaluado: ${currentMonthTxt}`, 14, 26);
                 
+                // Regla
                 doc.setTextColor(123, 52, 30);
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "normal");
@@ -631,25 +644,26 @@
                 
                 rows.forEach(row => {
                     if (row.classList.contains('header-segmento')) {
+                        // Insertamos la cabecera de Canal como una fila especial
                         bodyData.push([{ content: row.innerText.trim(), colSpan: 7, styles: { fillColor: [44, 74, 107], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' } }]);
                     } else {
                         let cols = row.querySelectorAll("td");
-                        if(cols.length >= 7) {
+                        if(cols.length > 0) {
                             let estadoTexto = cols[4].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO";
-                            let marcasGenClean = cols[5].innerText.replace("activas", "").trim();
-                            let armasClean = cols[6].innerText.replace("activas", "").trim();
+                            let mGenClean = cols[5].innerText.trim();
+                            let mAyMClean = cols[6].innerText.trim();
                             
                             let metaLimpia = cols[1].innerText.replace(/₲|Gs\./g, 'Gs.');
                             let ventaLimpia = cols[2].innerText.replace(/₲|Gs\./g, 'Gs.');
                             
                             let rowData = [
-                                cols[0].innerText.trim(), 
-                                metaLimpia.trim(),        
-                                ventaLimpia.trim(),       
-                                cols[3].innerText.trim(), 
+                                cols[0].innerText, 
+                                metaLimpia,        
+                                ventaLimpia,       
+                                cols[3].innerText, 
                                 estadoTexto,       
-                                marcasGenClean,       
-                                armasClean         
+                                mGenClean,       
+                                mAyMClean         
                             ];
                             bodyData.push(rowData);
                         }
@@ -674,6 +688,7 @@
                         6: { halign: 'center' }
                     },
                     didParseCell: function(data) {
+                        // Pintamos de rojo si es "NO"
                         if (data.section === 'body' && data.row.cells[0].colSpan === 1) { 
                             if (data.column.index === 4 && data.cell.raw === 'NO') {
                                 data.cell.styles.textColor = [197, 48, 48];
@@ -705,702 +720,200 @@
                 prompt("Copiá este enlace y mandáselo al vendedor:", urlObj.toString());
             });
         }
+    </script>
 
-        // =========================================================================
-        // 2. VARIABLES GLOBALES MAESTRAS (DECLARADAS UNA SOLA VEZ)
-        // =========================================================================
+    <script>
         var chartLine = null;
         var chartPie = null;
+
         let lineasDeDatosGlobales = [];
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
-        const LISTA_MARCAS = ["ASG", "TSS", "CROSMAN", "UMAREX", "DOBERMAN", "KONUS", "GSM", "BWC", "TRUGLO", "FAB DEFENSE", "MIGUEL NIETO", "NTK", "COLEMAN", "IMALENT", "APOLO", "AITOR", "ROCKY BOOTS", "KCI", "NITECORE", "CATERPILLAR", "POLYMER", "SNAKE", "FOBUS", "BERETTA MOD", "B.E ARMOR", "B.E. ARMOR", "VECTOR OPTICS", "CAMPING 44", "DESCUENTOS"];
-        const LISTA_ARMAS = ["MENDOZA", "BOITO", "DERYA", "ARMED", "TINCK", "EMTAN", "REXIO", "RUGER", "TANFOGLIO", "WALTHER", "AHSS", "KOR", "BERETTA", "ROCK ISLAND", "GB", "SAGA", "SELLIER & BELLOT", "ARMSCOR", "IMI", "GOLDEN EAGLE", "FEDERAL"];
-
-        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
-
-        // HISTORIAL DE METAS TOTALMENTE DESCOMPRIMIDO PARA ENERO A JUNIO 2026
-        const HISTORICO_METAS = {
-            "1": {
-                "diasMes": 25,
-                "diasTranscurridos": 25,
-                "global": 2200000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000,
-                    "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 200000000,
-                    "GIOVANNI EMANUEL JARA APREA": 200000000,
-                    "CESAR ALEJANDRO RAHI GERAGHTY": 15000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 200000000,
-                    "OSCAR DAVID ZARATE VILLAMAYOR": 200000000,
-                    "JHAMYL DANIEL INSFRAN NUNEZ": 15000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 200000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000,
-                    "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000
-                }
-            },
-            "2": {
-                "diasMes": 25,
-                "diasTranscurridos": 25,
-                "global": 2200000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000,
-                    "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 200000000,
-                    "GIOVANNI EMANUEL JARA APREA": 200000000,
-                    "CESAR ALEJANDRO RAHI GERAGHTY": 15000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 200000000,
-                    "OSCAR DAVID ZARATE VILLAMAYOR": 200000000,
-                    "JHAMYL DANIEL INSFRAN NUNEZ": 15000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 200000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000,
-                    "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000
-                }
-            },
-            "3": {
-                "diasMes": 25,
-                "diasTranscurridos": 25,
-                "global": 2455000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 685000000,
-                    "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 685000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 220000000,
-                    "GIOVANNI EMANUEL JARA APREA": 200000000,
-                    "CESAR ALEJANDRO RAHI GERAGHTY": 50000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 200000000,
-                    "OSCAR DAVID ZARATE VILLAMAYOR": 200000000,
-                    "JHAMYL DANIEL INSFRAN NUNEZ": 15000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 200000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 145260057,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000,
-                    "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000,
-                    "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000
-                }
-            },
-            "4": {
-                "diasMes": 25,
-                "diasTranscurridos": 25,
-                "global": 2455000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000,
-                    "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 270000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 220000000,
-                    "OSCAR DAVID NOGUERA OVIEDO": 100000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 200000000,
-                    "OSCAR DAVID ZARATE VILLAMAYOR": 200000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 200000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||ASG": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||TSS": 2000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 4000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||NTK": 5000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 2000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000
-                }
-            },
-            "5": {
-                "diasMes": 25,
-                "diasTranscurridos": 25,
-                "global": 2300000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 220000000,
-                    "OSCAR DAVID NOGUERA OVIEDO": 100000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 220000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000,
-                    "JHAMYL DANIEL INSFRAN NUNEZ": 15000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 220000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000
-                }
-            },
-            "6": {
-                "diasMes": 22.0,
-                "diasTranscurridos": 22.0,
-                "global": 2310000000,
-                "canales": {},
-                "vendedoresTotales": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000,
-                    "OSCAR DAVID MALDONADO YUDIS": 220000000,
-                    "OSCAR DAVID NOGUERA OVIEDO": 100000000,
-                    "SERGIO DANIEL OCAMPOS ROMAN": 100000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS": 220000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000,
-                    "HUGO JAVIER GONZALEZ ARCE": 220000000,
-                    "GIOVANNI EMANUEL JARA APREA": 200000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000
-                },
-                "vendedorMarca": {
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 75000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 180000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 25000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 240000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 180000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 20000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BWC": 5500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TRUGLO": 4000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 4500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||MIGUEL NIETO": 6000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 9500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||IMALENT": 5000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 30000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||AITOR": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ROCKY BOOTS": 5500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KCI": 15000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NITECORE": 17000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 3000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||SNAKE": 6500000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FOBUS": 7000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 10000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||B.E. ARMOR": 14000000,
-                    "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 50000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TSS": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BWC": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||TRUGLO": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FAB DEFENSE": 1500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NTK": 7000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||COLEMAN": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||APOLO": 750000,
-                    "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||ROCKY BOOTS": 1150000,
-                    "OSCAR DAVID MALDONADO YUDIS|||KCI": 2000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||CATERPILLAR": 1000000,
-                    "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 1500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 1500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||BERETTA MOD": 500000,
-                    "OSCAR DAVID MALDONADO YUDIS|||B.E. ARMOR": 4700000,
-                    "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 4500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||ASG": 4000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||TSS": 16000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 4000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 21000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 18000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||KONUS": 1000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||BWC": 1000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||TRUGLO": 500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||FAB DEFENSE": 1500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||MIGUEL NIETO": 1000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||NTK": 7000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||COLEMAN": 3000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||IMALENT": 500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||APOLO": 750000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||AITOR": 1000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||ROCKY BOOTS": 1150000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||KCI": 2000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 3000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||CATERPILLAR": 1000000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||SNAKE": 1500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||BERETTA MOD": 500000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||B.E. ARMOR": 4700000,
-                    "OSCAR DAVID NOGUERA OVIEDO|||VECTOR OPTICS": 4500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||CROSMAN": 4000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||KONUS": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||BWC": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||TRUGLO": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||FAB DEFENSE": 1500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||MIGUEL NIETO": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||COLEMAN": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||IMALENT": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 750000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||AITOR": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||ROCKY BOOTS": 1150000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||KCI": 2000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||NITECORE": 3000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||CATERPILLAR": 1000000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||SNAKE": 1500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||FOBUS": 1500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||BERETTA MOD": 500000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||B.E. ARMOR": 4700000,
-                    "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 4500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||ASG": 3000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||TSS": 3000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||CROSMAN": 4000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||UMAREX": 12000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||DOBERMAN": 8000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||KONUS": 1000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||BWC": 1000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||TRUGLO": 500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||FAB DEFENSE": 1500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||MIGUEL NIETO": 1000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||NTK": 7000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||COLEMAN": 3000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||IMALENT": 500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||APOLO": 750000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||AITOR": 1000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||ROCKY BOOTS": 1150000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||KCI": 2000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||NITECORE": 3000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||CATERPILLAR": 1000000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||SNAKE": 1500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||FOBUS": 1500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||BERETTA MOD": 500000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||B.E. ARMOR": 4700000,
-                    "OSCAR DANIEL ZARATE VILLAMAYOR|||VECTOR OPTICS": 4500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TSS": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||KONUS": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BWC": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FAB DEFENSE": 1500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||MIGUEL NIETO": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NTK": 7000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||IMALENT": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||APOLO": 750000,
-                    "HUGO JAVIER GONZALEZ ARCE|||AITOR": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||ROCKY BOOTS": 1150000,
-                    "HUGO JAVIER GONZALEZ ARCE|||KCI": 2000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||NITECORE": 3000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||CATERPILLAR": 1000000,
-                    "HUGO JAVIER GONZALEZ ARCE|||SNAKE": 1500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||BERETTA MOD": 500000,
-                    "HUGO JAVIER GONZALEZ ARCE|||B.E. ARMOR": 4700000,
-                    "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 4500000,
-                    "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||TSS": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000,
-                    "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000,
-                    "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000,
-                    "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||BWC": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||TRUGLO": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||FAB DEFENSE": 1500000,
-                    "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000,
-                    "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||APOLO": 750000,
-                    "GIOVANNI EMANUEL JARA APREA|||AITOR": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1150000,
-                    "GIOVANNI EMANUEL JARA APREA|||KCI": 2000000,
-                    "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000,
-                    "GIOVANNI EMANUEL JARA APREA|||CATERPILLAR": 1000000,
-                    "GIOVANNI EMANUEL JARA APREA|||SNAKE": 1500000,
-                    "GIOVANNI EMANUEL JARA APREA|||FOBUS": 1500000,
-                    "GIOVANNI EMANUEL JARA APREA|||BERETTA MOD": 500000,
-                    "GIOVANNI EMANUEL JARA APREA|||B.E. ARMOR": 4700000,
-                    "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 4500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||KONUS": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||BWC": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||TRUGLO": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||FAB DEFENSE": 1500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||IMALENT": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 750000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||ROCKY BOOTS": 1150000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||KCI": 2000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||NITECORE": 3000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||CATERPILLAR": 1000000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||SNAKE": 1500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 1500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||BERETTA MOD": 500000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||B.E. ARMOR": 4700000,
-                    "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 4500000
-                }
+        let HISTORICO_METAS = {
+            "1": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "2": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "3": {"diasMes": 25, "diasTranscurridos": 25, "global": 2455000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 685000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 685000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 50000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 145260057, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "4": {"diasMes": 25, "diasTranscurridos": 25, "global": 2455000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 270000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||ASG": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "OSCAR DAVID NOGUERA OVIEDO|||TSS": 2000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 1000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 4000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "OSCAR DAVID NOGUERA OVIEDO|||NTK": 5000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 2000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "5": {"diasMes": 25, "diasTranscurridos": 25, "global": 2300000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 220000000, "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 220000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "6": {"diasMes": 22.0, "diasTranscurridos": 22.0, "global": 2310000000, "canales": {}, "vendedoresTotales": { "ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "SERGIO DANIEL OCAMPOS ROMAN": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 220000000, "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000, "HUGO JAVIER GONZALEZ ARCE": 220000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000 },
+                  "vendedorMarca": { "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 75000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 180000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 25000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 240000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 180000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 20000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BWC": 5500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TRUGLO": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 4500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||MIGUEL NIETO": 6000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 9500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||IMALENT": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 30000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||AITOR": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ROCKY BOOTS": 5500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KCI": 15000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NITECORE": 17000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||SNAKE": 6500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FOBUS": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 10000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||B.E. ARMOR": 14000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 50000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||BWC": 1000000, "OSCAR DAVID MALDONADO YUDIS|||TRUGLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||FAB DEFENSE": 1500000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NTK": 7000000, "OSCAR DAVID MALDONADO YUDIS|||COLEMAN": 3000000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 750000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||ROCKY BOOTS": 1150000, "OSCAR DAVID MALDONADO YUDIS|||KCI": 2000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||CATERPILLAR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 1500000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 1500000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA MOD": 500000, "OSCAR DAVID MALDONADO YUDIS|||B.E. ARMOR": 4700000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 4500000, "OSCAR DAVID NOGUERA OVIEDO|||ASG": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||TSS": 16000000, "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 21000000, "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 18000000, "OSCAR DAVID NOGUERA OVIEDO|||KONUS": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||BWC": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||TRUGLO": 500000, "OSCAR DAVID NOGUERA OVIEDO|||FAB DEFENSE": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||MIGUEL NIETO": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||NTK": 7000000, "OSCAR DAVID NOGUERA OVIEDO|||COLEMAN": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||IMALENT": 500000, "OSCAR DAVID NOGUERA OVIEDO|||APOLO": 750000, "OSCAR DAVID NOGUERA OVIEDO|||AITOR": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||ROCKY BOOTS": 1150000, "OSCAR DAVID NOGUERA OVIEDO|||KCI": 2000000, "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||CATERPILLAR": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||SNAKE": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||BERETTA MOD": 500000, "OSCAR DAVID NOGUERA OVIEDO|||B.E. ARMOR": 4700000, "OSCAR DAVID NOGUERA OVIEDO|||VECTOR OPTICS": 4500000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||CROSMAN": 4000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||KONUS": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||BWC": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TRUGLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||FAB DEFENSE": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||MIGUEL NIETO": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||COLEMAN": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMALENT": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 750000, "MARCELO EVARISTO SANCHEZ ROJAS|||AITOR": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ROCKY BOOTS": 1150000, "MARCELO EVARISTO SANCHEZ ROJAS|||KCI": 2000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NITECORE": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||CATERPILLAR": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||SNAKE": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||FOBUS": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||BERETTA MOD": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||B.E. ARMOR": 4700000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 4500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||ASG": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||TSS": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||CROSMAN": 4000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||UMAREX": 12000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||DOBERMAN": 8000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||KONUS": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||BWC": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||TRUGLO": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||FAB DEFENSE": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||MIGUEL NIETO": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||NTK": 7000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||COLEMAN": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||IMALENT": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||APOLO": 750000, "OSCAR DANIEL ZARATE VILLAMAYOR|||AITOR": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||ROCKY BOOTS": 1150000, "OSCAR DANIEL ZARATE VILLAMAYOR|||KCI": 2000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||NITECORE": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||CATERPILLAR": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||SNAKE": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||FOBUS": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||BERETTA MOD": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||B.E. ARMOR": 4700000, "OSCAR DANIEL ZARATE VILLAMAYOR|||VECTOR OPTICS": 4500000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||BWC": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||FAB DEFENSE": 1500000, "HUGO JAVIER GONZALEZ ARCE|||MIGUEL NIETO": 1000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||IMALENT": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 750000, "HUGO JAVIER GONZALEZ ARCE|||AITOR": 1000000, "HUGO JAVIER GONZALEZ ARCE|||ROCKY BOOTS": 1150000, "HUGO JAVIER GONZALEZ ARCE|||KCI": 2000000, "HUGO JAVIER GONZALEZ ARCE|||NITECORE": 3000000, "HUGO JAVIER GONZALEZ ARCE|||CATERPILLAR": 1000000, "HUGO JAVIER GONZALEZ ARCE|||SNAKE": 1500000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA MOD": 500000, "HUGO JAVIER GONZALEZ ARCE|||B.E. ARMOR": 4700000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 4500000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||BWC": 1000000, "GIOVANNI EMANUEL JARA APREA|||TRUGLO": 500000, "GIOVANNI EMANUEL JARA APREA|||FAB DEFENSE": 1500000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 3000000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||APOLO": 750000, "GIOVANNI EMANUEL JARA APREA|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1150000, "GIOVANNI EMANUEL JARA APREA|||KCI": 2000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||CATERPILLAR": 1000000, "GIOVANNI EMANUEL JARA APREA|||SNAKE": 1500000, "GIOVANNI EMANUEL JARA APREA|||FOBUS": 1500000, "GIOVANNI EMANUEL JARA APREA|||BERETTA MOD": 500000, "GIOVANNI EMANUEL JARA APREA|||B.E. ARMOR": 4700000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 4500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||KONUS": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||BWC": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TRUGLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FAB DEFENSE": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||IMALENT": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 750000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ROCKY BOOTS": 1150000, "TOBIAS EZEQUIEL SOSA ZARACHO|||KCI": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NITECORE": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CATERPILLAR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||SNAKE": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||BERETTA MOD": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||B.E. ARMOR": 4700000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 4500000 }
             }
         };
 
-        // Recalcular montos de canales en base a nombres en el histórico
-        for(let m in HISTORICO_METAS){
-            let g = 0; let c = {"Salon":0,"Online":0,"Mayoristas":0,"E-commerce":0,"Venta Externa":0,"Directorio":0,"Reparaciones":0};
-            for(let v in HISTORICO_METAS[m].vendedoresTotales){
-                g += HISTORICO_METAS[m].vendedoresTotales[v];
-                if(v.includes("MAYORISTA")) c["Mayoristas"]+=HISTORICO_METAS[m].vendedoresTotales[v];
-                else if(v.includes("ONLINE") || ["MARCELO EVARISTO SANCHEZ ROJAS", "OSCAR DANIEL ZARATE VILLAMAYOR", "HUGO JAVIER GONZALEZ ARCE", "ALEJANDRO DAVID CABRERA MORA", "JHAMYL DANIEL INSFRAN NUNEZ", "VICTOR FABIAN BAZAN GONZALEZ"].includes(v)) c["Online"]+=HISTORICO_METAS[m].vendedoresTotales[v];
-                else if(v.includes("ECOMMERCE") || v.includes("E-COMMERCE")) c["E-commerce"]+=HISTORICO_METAS[m].vendedoresTotales[v];
-                else c["Salon"]+=HISTORICO_METAS[m].vendedoresTotales[v];
-            }
-            HISTORICO_METAS[m].global = g;
-            for(let key in c) if(c[key]>0) HISTORICO_METAS[m].canales[key] = c[key];
+        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+
+        // =========================================================================
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES
+        // =========================================================================
+        function limpiarNombre(texto) {
+            if (!texto) return "";
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
+                        .replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "")
+                        .trim();
         }
 
+        // =========================================================================
+        // 🔥 ALGORITMO DE FUSIÓN (El Fin de los Fantasmas)
+        // =========================================================================
+        function sonElMismoVendedor(nombreA, nombreB) {
+            if (!nombreA || !nombreB) return false;
+            let a = limpiarNombre(nombreA);
+            let b = limpiarNombre(nombreB);
+            if (a === b) return true;
+            let wordsA = a.split(/\s+/).filter(w => w.length > 2);
+            let wordsB = b.split(/\s+/).filter(w => w.length > 2);
+            if (wordsA.length > 0 && wordsB.length > 0) {
+                if (wordsA.every(w => b.includes(w))) return true;
+                if (wordsB.every(w => a.includes(w))) return true;
+            }
+            return false;
+        }
+
+        function parseCSV(text) {
+            let ret = [['']], i = 0, j = 0, s = true;
+            for (let k = 0; k < text.length; k++) {
+                let l = text[k];
+                if (l === '"') { s = !s; }
+                else if (l === ',' && s) { ret[i][++j] = ''; }
+                else if (l === '\n' && s) { 
+                    if (ret[i][j].endsWith('\r')) ret[i][j] = ret[i][j].slice(0, -1);
+                    ret[++i] = ['']; j = 0; 
+                }
+                else { ret[i][j] += l; }
+            }
+            return ret.map(r => r.map(c => c.trim()));
+        }
+
+        function parseDateToTime(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0]; 
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return new Date(p[2].length === 4 ? p[2] : p[0], parseInt(p[1], 10)-1, p[2].length === 4 ? p[0] : p[2]).getTime();
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return new Date(p[0].length === 4 ? p[0] : p[2], parseInt(p[1], 10)-1, p[0].length === 4 ? p[2] : p[0]).getTime();
+            }
+            return 0;
+        }
+
+        function getMonthFromDate(dStr) {
+            if(!dStr) return 0;
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return parseInt(p[1], 10);
+            } else if (datePart.includes('-')) {
+                let p = datePart.split('-');
+                return parseInt(p[1], 10);
+            }
+            return 0;
+        }
+
+        function getIsoTime(isoStr) {
+            if(!isoStr) return 0;
+            let p = isoStr.split('-');
+            return new Date(p[0], parseInt(p[1], 10)-1, parseInt(p[2], 10)).getTime();
+        }
+
+        function dateToIsoString(dStr) {
+            let datePart = String(dStr).split(' ')[0];
+            if (datePart.includes('/')) {
+                let p = datePart.split('/');
+                return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else if (datePart.includes('-')) {
+                return datePart; 
+            }
+            return "";
+        }
+
+        function handleNum(val) {
+            if (!val) return 0;
+            let str = String(val).replace(/\./g, ''); 
+            if (str.includes(',')) str = str.split(',')[0]; 
+            return parseInt(str.replace(/[^0-9-]/g, ''), 10) || 0;
+        }
+
+        function actualizarBannerEstado(tipo, mensaje) {
+            let banner = document.getElementById('status-banner');
+            if (banner) {
+                banner.className = tipo === 'success' ? 'banner-success' : 'banner-error';
+                banner.innerHTML = mensaje;
+            }
+        }
+
+        function obtenerCanalReal(vendedor, canalCSV) {
+            let vUpper = limpiarNombre(vendedor);
+            let cUpper = limpiarNombre(canalCSV);
+
+            if (vUpper.includes("DIRECTORIO")) return "Directorio";
+            if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
+            if (vUpper.includes("REPARACIONES") || vUpper.includes("TALLER") || vUpper.includes("SERVICIO")) return "Reparaciones";
+            if (vUpper.includes("MAYORISTAS") || vUpper.includes("MAYORISTA")) return "Mayoristas";
+            if (vUpper.includes("E-COMMERCE") || vUpper.includes("ECOMMERCE")) return "E-commerce";
+            if (vUpper.includes("ONLINE") || vUpper === "ONLINE") return "Online";
+            if (vUpper.includes("SALON") || vUpper === "SALON") return "Salon";
+
+            if (cUpper.includes("DIRECTORIO")) return "Directorio";
+            if (cUpper.includes("VENTA EXTERNA") || cUpper.includes("EXTERNA")) return "Venta Externa";
+            if (cUpper.includes("REPARACIONES") || cUpper.includes("TALLER")) return "Reparaciones";
+            if (cUpper.includes("MAYORISTAS") || cUpper.includes("MAYORISTA")) return "Mayoristas";
+            if (cUpper.includes("E-COMMERCE") || cUpper.includes("ECOMMERCE")) return "E-commerce";
+            if (cUpper.includes("ONLINE")) return "Online";
+            if (cUpper.includes("SALON")) return "Salon";
+
+            return canalCSV || "Salon";
+        }
+
+        function construirDropdownMesesDinámico(mesActualLive) {
+            let select = document.getElementById('select-mes');
+            if (!select) return;
+            let html = `<option value="">-- Año Completo (YTD) --</option>`;
+            const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            for (let m = 1; m <= 12; m++) {
+                if (m < mesActualLive) {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                } else if (m === mesActualLive) {
+                    html += `<option value="${m}" selected>${mesesNombres[m-1]} 2026 (Actual)</option>`;
+                } else {
+                    html += `<option value="${m}">${mesesNombres[m-1]} 2026</option>`;
+                }
+            }
+            select.innerHTML = html;
+        }
+
+        function poblarDropdownDiasTranscurridos(maxDias) {
+            let selectTrans = document.getElementById('lbl-dias-trans');
+            if (!selectTrans) return;
+            if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
+            let html = "";
+            
+            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : 
+                             ((filtrosActivos.mes && parseInt(filtrosActivos.mes) !== filtrosActivos.mesActualLive) ? 
+                             (HISTORICO_METAS[filtrosActivos.mes] ? HISTORICO_METAS[filtrosActivos.mes].diasTranscurridos : maxDias) : 
+                             METAS_LIVE.diasTranscurridos);
+                             
+            for (let d = 0.5; d <= maxDias; d += 0.5) {
+                let selected = (Math.abs(d - currentVal) < 0.1) ? "selected" : "";
+                html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
+            }
+            selectTrans.innerHTML = html;
+        }
+
+        function recalcularSimulacionDias() {
+            let selectTrans = document.getElementById('lbl-dias-trans');
+            if (selectTrans) {
+                simulacionDiasTrans = parseFloat(selectTrans.value);
+                filtrarYRenderizarTodo();
+            }
+        }
+
+        // ========================================================================
+        // 🔥 INICIO DEL SISTEMA
+        // ========================================================================
         async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
             
@@ -1414,7 +927,7 @@
             }, 3000);
 
             try {
-                document.getElementById('loader-text').innerText = "Conectando con Google Sheets...";
+                document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -1439,157 +952,10 @@
                 });
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
+                procesarMetasConfigActuales(filasConfigFormateadas);
                 
-                // Mapear Metas Live de Config
-                let dMesFinal = 25; let dTransFinal = 4.5;
-                filasConfigFormateadas.forEach((row, idx) => {
-                    if(!row || row.length === 0) return; 
-                    let col0 = String(row[0] || "").trim();
-                    if (col0 === "Días Hábiles del Mes:") dMesFinal = parseFloat(String(row[1]).replace(',', '.')) || dMesFinal;
-                    if (col0 === "Días Hábiles Transcurridos:") dTransFinal = parseFloat(String(row[1]).replace(',', '.')) || dTransFinal;
-                    if (row[3] && idx === 3) METAS_LIVE.global = handleNum(row[3]);
-                    if (row[5]) {
-                        let cNorm = obtenerCanalReal("", String(row[5]).trim());
-                        if (["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Directorio", "Reparaciones"].includes(cNorm)) {
-                            METAS_LIVE.canales[cNorm] = handleNum(row[6]);
-                        }
-                    }
-                    if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
-                        let vClean = limpiarNombre(String(row[8]));
-                        let meta = handleNum(row[9]);
-                        if(esVendedorReal(vClean) && meta > 0) METAS_LIVE.vendedoresTotales[vClean] = meta;
-                    }
-                });
-
-                METAS_LIVE.diasMes = dMesFinal;
-                METAS_LIVE.diasTranscurridos = dTransFinal;
-                if (simulacionDiasTrans === null) simulacionDiasTrans = dTransFinal;
-                poblarDropdownDiasTranscurridos(dMesFinal);
-
-                let brandHeaderRowIdx = -1;
-                for(let i=0; i<filasConfigFormateadas.length && i<20; i++) {
-                    if(filasConfigFormateadas[i]) {
-                        for(let c=0; c<filasConfigFormateadas[i].length; c++) {
-                            if((filasConfigFormateadas[i][c] || "").toString().toUpperCase().trim() === "MARCA" || (filasConfigFormateadas[i][c] || "").toString().toUpperCase().trim() === "MARCAS") { 
-                                brandHeaderRowIdx = i; 
-                                break; 
-                            }
-                        }
-                        if (brandHeaderRowIdx !== -1) break;
-                    }
-                }
-
-                if (brandHeaderRowIdx > 0) {
-                    let headerRow = filasConfigFormateadas[brandHeaderRowIdx];
-                    for (let col = 0; col < headerRow.length; col++) {
-                        if ((headerRow[col] || "").toString().toUpperCase().trim() === "MARCA" || (headerRow[col] || "").toString().toUpperCase().trim() === "MARCAS") {
-                            let currentVend = "";
-                            for (let rUp = brandHeaderRowIdx - 1; rUp >= 0; rUp--) {
-                                let possibleName = (filasConfigFormateadas[rUp][col] || "").toString().trim();
-                                if (possibleName && !possibleName.startsWith("---") && !possibleName.toUpperCase().includes("METAS INDIVIDUALES")) {
-                                    currentVend = possibleName; break;
-                                }
-                            }
-                            if (currentVend) {
-                                for (let r = brandHeaderRowIdx + 1; r < filasConfigFormateadas.length; r++) {
-                                    if(!filasConfigFormateadas[r]) continue;
-                                    let marc = (filasConfigFormateadas[r][col] || "").toString().trim();
-                                    let metaVal = filasConfigFormateadas[r][col+1];
-                                    if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
-                                        let vClean = limpiarNombre(currentVend);
-                                        let mClean = limpiarNombre(marc);
-                                        let meta = handleNum(metaVal);
-                                        if(esVendedorReal(vClean) && meta > 0) { METAS_LIVE.vendedorMarca[vClean + '|||' + mClean] = meta; }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                for (let i = 2; i <= 12; i++) {
-                    let curr = i.toString();
-                    let prev = (i - 1).toString();
-                    if (HISTORICO_METAS[curr] && Object.keys(HISTORICO_METAS[curr].vendedorMarca).length === 0) {
-                        if (HISTORICO_METAS[prev]) {
-                            HISTORICO_METAS[curr].vendedorMarca = JSON.parse(JSON.stringify(HISTORICO_METAS[prev].vendedorMarca));
-                            HISTORICO_METAS[curr].vendedoresTotales = JSON.parse(JSON.stringify(HISTORICO_METAS[prev].vendedoresTotales));
-                        }
-                    }
-                }
-
-                lineasDeDatosGlobales = [];
-                let vendedoresSet = new Set();
-                let canalesSet = new Set();
-                let marcasSet = new Set();
-
-                Object.keys(HISTORICO_METAS).forEach(m => {
-                    Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
-                });
-
-                for (let i = 1; i < filasDataFormateadas.length; i++) {
-                    let r = filasDataFormateadas[i];
-                    if (!r || r.length < 31 || r[1] === "") continue; 
-
-                    let cNormalizado = obtenerCanalReal(r[17], r[18]);
-                    let d = { fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14], unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30]) };
-                    
-                    let dp = String(d.fecha).split(' ')[0];
-                    if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
-                    else if(dp.includes('-')) d.mesIdx = parseInt(dp.split('-')[1], 10);
-
-                    if(d.vendedor) vendedoresSet.add(d.vendedor);
-                    if(d.canal) canalesSet.add(d.canal);
-                    if(d.marcaFinal) marcasSet.add(d.marcaFinal);
-
-                    lineasDeDatosGlobales.push(d);
-                }
-
-                fechasGlobalesOrdenadas = Array.from(new Set(lineasDeDatosGlobales.map(d=>d.fecha))).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
-                
-                let selV = document.getElementById('select-vendedor');
-                if(selV) {
-                    let optV = `<option value="">-- Todos los Vendedores --</option>`;
-                    Array.from(vendedoresSet).sort().forEach(v => { 
-                        if(esVendedorReal(v)) optV += `<option value="${v}">${v}</option>`; 
-                    });
-                    selV.innerHTML = optV;
-                }
-                let selC = document.getElementById('select-canal');
-                if(selC) {
-                    let optC = `<option value="">-- Todos los Canales --</option>`;
-                    Array.from(canalesSet).sort().forEach(c => { if(c) optC += `<option value="${c}">${c}</option>`; });
-                    selC.innerHTML = optC;
-                }
-                let selM = document.getElementById('select-marca');
-                if(selM) {
-                    let optM = `<option value="">-- Todas las Marcas --</option>`;
-                    Array.from(marcasSet).sort().forEach(m => {
-                        if(m && !String(m).includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
-                    });
-                    selM.innerHTML = optM;
-                }
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const vendorQuery = urlParams.get('vendedor');
-                
-                if (vendorQuery) {
-                    setTimeout(() => {
-                        let filterV = document.getElementById('select-vendedor');
-                        if (filterV) { filterV.value = vendorQuery; filterV.disabled = true; }
-                        filtrosActivos.vendedor = vendorQuery;
-                        
-                        document.getElementById('select-mes').disabled = true;
-                        document.getElementById('select-canal').disabled = true;
-                        document.getElementById('select-fecha').disabled = true;
-                        document.getElementById('select-marca').disabled = true;
-                        document.getElementById('btn-share-vendor').style.display = 'none';
-                        document.getElementById('btn-reset').style.display = 'none';
-                        document.getElementById('btn-sync').style.display = 'none';
-                        
-                        try { filtrarYRenderizarTodo(); } catch(e){}
-                    }, 100);
-                }
+                // Procesamos las ventas EN VIVO
+                procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -1606,6 +972,220 @@
                 document.getElementById('loader').style.display = 'none';
             }
         }
+
+        function procesarMetasConfigActuales(filas) {
+            METAS_LIVE.canales = {};
+            METAS_LIVE.vendedoresTotales = {};
+            METAS_LIVE.vendedorMarca = {};
+
+            let dMesFinal = 25;
+            let dTransFinal = 4.5;
+
+            try {
+                filas.forEach((row, idx) => {
+                    if(!row || row.length === 0) return; 
+                    
+                    let col0 = String(row[0] || "").trim();
+                    if (col0 === "Días Hábiles del Mes:") {
+                        let val = parseFloat(String(row[1]).replace(',', '.'));
+                        if (val > 0 && val <= 31) dMesFinal = val;
+                    }
+                    if (col0 === "Días Hábiles Transcurridos:") {
+                        let val = parseFloat(String(row[1]).replace(',', '.'));
+                        if (val > 0 && val <= 31) dTransFinal = val;
+                    }
+                    if (row[3] && idx === 3) METAS_LIVE.global = handleNum(row[3]);
+
+                    if (row[5]) {
+                        let colCanal = String(row[5]).trim();
+                        let colCanalNorm = obtenerCanalReal("", colCanal);
+                        if (["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Directorio", "Reparaciones"].includes(colCanalNorm)) {
+                            METAS_LIVE.canales[colCanalNorm] = handleNum(row[6]);
+                        }
+                    }
+                    if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
+                        let vClean = limpiarNombre(String(row[8]));
+                        let meta = handleNum(row[9]);
+                        if(meta > 0) METAS_LIVE.vendedoresTotales[vClean] = meta;
+                    }
+                });
+
+                METAS_LIVE.diasMes = dMesFinal;
+                METAS_LIVE.diasTranscurridos = dTransFinal;
+
+                if (simulacionDiasTrans === null) {
+                    simulacionDiasTrans = dTransFinal;
+                }
+                poblarDropdownDiasTranscurridos(dMesFinal);
+
+                let brandHeaderRowIdx = -1;
+                for(let i=0; i<filas.length && i<20; i++) {
+                    if(filas[i]) {
+                        for(let c=0; c<filas[i].length; c++) {
+                            let cellText = (filas[i][c] || "").toString().toUpperCase().trim();
+                            if(cellText === "MARCA" || cellText === "MARCAS") {
+                                brandHeaderRowIdx = i;
+                                break;
+                            }
+                        }
+                        if (brandHeaderRowIdx !== -1) break;
+                    }
+                }
+
+                if (brandHeaderRowIdx > 0) {
+                    let headerRow = filas[brandHeaderRowIdx];
+                    for (let col = 0; col < headerRow.length; col++) {
+                        let cellHead = (headerRow[col] || "").toString().toUpperCase().trim();
+                        if (cellHead === "MARCA" || cellHead === "MARCAS") {
+                            let currentVend = "";
+                            
+                            for (let rUp = brandHeaderRowIdx - 1; rUp >= 0; rUp--) {
+                                let possibleName = (filas[rUp][col] || "").toString().trim();
+                                if (possibleName && !possibleName.startsWith("---") && !possibleName.toUpperCase().includes("METAS INDIVIDUALES")) {
+                                    currentVend = possibleName;
+                                    break;
+                                }
+                            }
+                            
+                            if (currentVend) {
+                                for (let r = brandHeaderRowIdx + 1; r < filas.length; r++) {
+                                    if(!filas[r]) continue;
+                                    let marc = (filas[r][col] || "").toString().trim();
+                                    let metaVal = filas[r][col+1];
+                                    if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
+                                        let vClean = limpiarNombre(currentVend);
+                                        let mClean = limpiarNombre(marc);
+                                        let meta = handleNum(metaVal);
+                                        if(meta > 0) METAS_LIVE.vendedorMarca[vClean + '|||' + mClean] = meta;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e) { console.error("Error al leer metas de marcas", e); }
+        }
+
+        function procesarVentasData(filas) {
+            lineasDeDatosGlobales = [];
+            let vendedoresSet = new Set();
+            let canalesSet = new Set();
+            let marcasSet = new Set();
+
+            // Metemos al menú a los vendedores históricos aunque no hayan vendido nada
+            Object.keys(HISTORICO_METAS).forEach(m => {
+                Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
+            });
+
+            for (let i = 1; i < filas.length; i++) {
+                let r = filas[i];
+                if (!r || r.length < 31 || r[1] === "") continue; 
+
+                let cNormalizado = obtenerCanalReal(r[17], r[18]);
+                let d = {
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14], 
+                    unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30])
+                };
+                
+                let dp = String(d.fecha).split(' ')[0];
+                if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
+                else if(dp.includes('-')) d.mesIdx = parseInt(dp.split('-')[1], 10);
+
+                if(d.vendedor) vendedoresSet.add(d.vendedor);
+                if(d.canal) canalesSet.add(d.canal);
+                if(d.marcaFinal) marcasSet.add(d.marcaFinal);
+
+                lineasDeDatosGlobales.push(d);
+            }
+
+            fechasGlobalesOrdenadas = Array.from(new Set(lineasDeDatosGlobales.map(d=>d.fecha))).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
+            popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const vendorQuery = urlParams.get('vendedor');
+            
+            if (vendorQuery) {
+                setTimeout(() => {
+                    let selV = document.getElementById('select-vendedor');
+                    if (selV) {
+                        selV.value = vendorQuery;
+                        selV.disabled = true; 
+                    }
+                    filtrosActivos.vendedor = vendorQuery;
+                    
+                    document.getElementById('select-mes').disabled = true;
+                    document.getElementById('select-canal').disabled = true;
+                    document.getElementById('select-fecha').disabled = true;
+                    document.getElementById('select-marca').disabled = true;
+                    document.getElementById('btn-share-vendor').style.display = 'none';
+                    document.getElementById('btn-reset').style.display = 'none';
+                    document.getElementById('btn-sync').style.display = 'none';
+                    
+                    try { filtrarYRenderizarTodo(); } catch(e){}
+                }, 100);
+            } else {
+                try { filtrarYRenderizarTodo(); } catch(e){}
+            }
+        }
+
+        function popularDropdownFiltros(vendedores, canales, marcas) {
+            let selV = document.getElementById('select-vendedor');
+            let selC = document.getElementById('select-canal');
+            let selM = document.getElementById('select-marca');
+
+            if(selV) {
+                let optV = `<option value="">-- Todos los Vendedores --</option>`;
+                Array.from(vendedores).sort().forEach(v => { 
+                    let vClean = limpiarNombre(v);
+                    const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
+                    if(v && !BASURA.some(b => vClean === b || vClean.startsWith(b))) {
+                        optV += `<option value="${v}">${v}</option>`; 
+                    }
+                });
+                selV.innerHTML = optV;
+            }
+            if(selC) {
+                let optC = `<option value="">-- Todos los Canales --</option>`;
+                Array.from(canales).sort().forEach(c => { if(c) optC += `<option value="${c}">${c}</option>`; });
+                selC.innerHTML = optC;
+            }
+            if(selM) {
+                let optM = `<option value="">-- Todas las Marcas --</option>`;
+                Array.from(marcas).sort().forEach(m => {
+                    if(m && !String(m).includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
+                });
+                selM.innerHTML = optM;
+            }
+        }
+
+        function aplicarFiltrosDropdown() {
+            let oldMes = filtrosActivos.mes;
+            filtrosActivos.mes = document.getElementById('select-mes').value;
+            filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
+            filtrosActivos.canal = document.getElementById('select-canal').value;
+            filtrosActivos.fecha = document.getElementById('select-fecha').value; 
+            filtrosActivos.marca = document.getElementById('select-marca').value;
+            
+            if (filtrosActivos.mes !== oldMes) {
+                simulacionDiasTrans = null; 
+            }
+            try { filtrarYRenderizarTodo(); } catch(e){}
+        }
+
+        function limpiarTodosLosFiltros() {
+            filtrosActivos.mes = String(filtrosActivos.mesActualLive);
+            document.getElementById('select-mes').value = String(filtrosActivos.mesActualLive);
+            document.getElementById('select-vendedor').value = "";
+            document.getElementById('select-canal').value = "";
+            document.getElementById('select-fecha').value = "";
+            document.getElementById('select-marca').value = "";
+            
+            simulacionDiasTrans = METAS_LIVE.diasTranscurridos;
+            try { filtrarYRenderizarTodo(); } catch(e){}
+        }
+
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos", "BWC"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
         function obtenerMetasEstructuraBI() {
             let mesSelec = filtrosActivos.mes;
@@ -1664,6 +1244,7 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
+            // PROCESAMOS VENTAS EN VIVO DE ODOO (ÚNICA FUENTE DE VENTAS)
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
                 
@@ -1708,7 +1289,8 @@
                     }
                 }
 
-                if(r.vendedor && esVendedorReal(r.vendedor)) {
+                // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
+                if(r.vendedor) {
                     if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
                     if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
@@ -1718,23 +1300,23 @@
                 }
             });
 
+            // EL SECRETO PARA QUE TODOS APAREZCAN AUNQUE VENDAN 0:
             if (METAS_ACTIVAS && METAS_ACTIVAS.vendedoresTotales) {
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(vMeta => {
-                    if (esVendedorReal(vMeta)) {
-                        let found = false;
-                        Object.keys(dataFichasVend).forEach(vReal => {
-                            if (sonElMismoVendedor(vMeta, vReal)) found = true;
-                        });
+                    let found = false;
+                    Object.keys(dataFichasVend).forEach(vReal => {
+                        if (sonElMismoVendedor(vMeta, vReal)) found = true;
+                    });
+                    
+                    if (!found) {
+                        let guessedCanal = "Salon";
+                        if (vMeta.includes("MAYORISTA")) guessedCanal = "Mayoristas";
+                        else if (vMeta.includes("ONLINE")) guessedCanal = "Online";
+                        else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
+                        else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                         
-                        if (!found) {
-                            let guessedCanal = "Salon";
-                            if (vMeta.includes("MAYORISTA") || vMeta.includes("FERNANDEZ") || vMeta.includes("CASCO")) guessedCanal = "Mayoristas";
-                            else if (vMeta.includes("ONLINE") || vMeta.includes("GONZALEZ ARCE") || vMeta.includes("CABRERA") || vMeta.includes("SANCHEZ") || vMeta.includes("ZARATE") || vMeta.includes("INSFRAN")) guessedCanal = "Online";
-                            else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
-                            else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
-                            
-                            dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, nc: 0, bruto: 0 };
-                        }
+                        // Los inyectamos para que se vean sus 0
+                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, nc: 0, bruto: 0 };
                     }
                 });
             }
@@ -1886,10 +1468,9 @@
 
                 let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
                 
+                // Mostrar vendedores reales
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
-                        if (!esVendedorReal(v)) return;
-                        
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
                         let obj = 0;
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
@@ -1909,8 +1490,9 @@
                     });
                 }
                 
+                // Mostrar vendedores con meta pero 0 ventas
                 Object.keys(dataFichasVend).forEach(v => {
-                    if (esVendedorReal(v) && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
+                    if (dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
                         let obj = 0;
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
                             if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
@@ -1950,12 +1532,14 @@
 
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
-                if(!vData || !esVendedorReal(v)) return;
+                if(!vData) return;
 
                 let marcasUnicas = new Set();
                 
+                // Las marcas que vendió en el Google Sheet
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(limpiarNombre(m)));
                 
+                // Las marcas que tiene asignadas como meta en el histórico blindado
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
@@ -1974,13 +1558,8 @@
                 let aymAsig = 0, aymAlc = 0;
 
                 Array.from(marcasUnicas).sort().forEach(mClean => {
-                    if(!mClean) return;
+                    let val = vData.marcas[mClean] || 0; // Usar el nombre limpio
                     
-                    let val = 0;
-                    Object.keys(vData.marcas).forEach(vm => {
-                        if (limpiarNombre(vm) === mClean) val += vData.marcas[vm];
-                    });
-
                     let mAsig = 0;
                     for (let k in METAS_ACTIVAS.vendedorMarca) {
                         let parts = String(k).split('|||');
@@ -2005,6 +1584,8 @@
                     }
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
+                    
+                    // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
                     let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
                     
                     let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
@@ -2027,18 +1608,28 @@
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
 
+                let totalMarcasAsig = marcasGenAsig + aymAsig;
+                let totalMarcasAlc = marcasGenAlc + aymAlc;
+
+                let pctMarcas = totalMarcasAsig > 0 ? ((totalMarcasAlc / totalMarcasAsig) * 100).toFixed(0) + "%" : "0%";
                 let pctAlcanzado = esp > 0 ? ((net/esp)*100).toFixed(0) : 0;
                 let clsAlcanzado = pctAlcanzado >= 100 ? 'num-positivo' : 'num-negativo';
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
-                let isEmpty = (obj === 0 && net === 0 && marcasGenAsig === 0 && aymAsig === 0);
+                // ==========================================
+                // LÓGICA DE BONOS (RENOVADA Y AGRUPADA)
+                // ==========================================
+                let nUpper = limpiarNombre(v);
                 
-                if (!isEmpty) {
+                let isBasura = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE", "SALON", "MAYORISTA", "DIRECTORIO", "REPARACIONES", "EXTERNA", "E-COMMERCE"].some(b => nUpper === b || nUpper.startsWith(b));
+                let isEmpty = (obj === 0 && net === 0 && totalMarcasAsig === 0);
+                
+                if (!isBasura && !isEmpty) {
                     let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
                     let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
 
-                    let badgeMeta = logroMeta ? `<span class="badge badge-success">SI ALCANZO</span>` : `<span class="badge badge-pending">NO</span>`;
+                    let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO</span>`;
                     
                     let txtMGen = marcasGenAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${marcasGenAlc} de ${marcasGenAsig}</span>`;
                     let txtAyM = aymAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${aymAlc} de ${aymAsig}</span>`;
@@ -2083,8 +1674,8 @@
                                 <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${marcasGenAsig + aymAsig}</td></tr>
-                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${marcasGenAlc + aymAlc > 0 ? 'num-positivo' : 'num-negativo'}">${marcasGenAlc + aymAlc}</td><td class="text-center">-</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${totalMarcasAsig}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${totalMarcasAlc > 0 ? 'num-positivo' : 'num-negativo'}">${totalMarcasAlc}</td><td class="text-center">-</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
                             </tbody>
                         </table>
@@ -2092,7 +1683,6 @@
                 </div>`;
 
                 let canalReal = vData.canal || "";
-                let nUpper = limpiarNombre(v);
                 
                 if (canalReal === "E-commerce" || nUpper.includes("E-COMMERCE") || nUpper.includes("ECOMMERCE")) {
                     hFichasEcom += fichaHtml;
@@ -2119,6 +1709,7 @@
             document.getElementById('grid-fichas-directorio').innerHTML = hFichasDir;
             document.getElementById('grid-fichas-reparaciones').innerHTML = hFichasRep;
             
+            // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
             let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             canalesSegmentosBonos.forEach(c => {
@@ -2140,6 +1731,7 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
+            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
