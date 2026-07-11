@@ -143,7 +143,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Cargando Base Operativa Blindada...</div>
+        <div id="loader-text">Sincronizando Base de Datos YTD e Historial...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -481,7 +481,7 @@
                     </div>
                 </div>
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
-                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Aquí podrás monitorear qué equipo llegó a su cuota mensual y el detalle de sus marcas activadas (divididas en Grales. y Armas/Muni.).
+                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Aquí podrás monitorear qué equipo llegó a su cuota mensual y el detalle de sus marcas activadas.
                 </div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table" id="tabla-exportar-bonos">
@@ -578,6 +578,9 @@
 
     <!-- DECLARACIONES MAESTRAS. TODAS UNA SOLA VEZ PARA EVITAR ERRORES FATALES EN EL NAVEGADOR -->
     <script>
+        // ----------------------------------------------------------
+        // 1. VARIABLES GLOBALES (Declaradas solo aquí)
+        // ----------------------------------------------------------
         var chartLine = null;
         var chartPie = null;
 
@@ -591,7 +594,7 @@
 
         let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
 
-        const HISTORICO_METAS = {
+        let HISTORICO_METAS = {
             "1": {
                 "diasMes": 25,
                 "diasTranscurridos": 25,
@@ -1313,7 +1316,7 @@
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
                 
-                // MÁXIMA SEGURIDAD
+                // MÁXIMA SEGURIDAD: COPIAMOS METAS DEL MES ANTERIOR SI ESTÁN VACÍAS
                 for (let i = 2; i <= 12; i++) {
                     let curr = i.toString();
                     let prev = (i - 1).toString();
@@ -1665,6 +1668,7 @@
                 }
             });
 
+            // EL SECRETO PARA QUE TODOS APAREZCAN AUNQUE VENDAN 0
             if (METAS_ACTIVAS && METAS_ACTIVAS.vendedoresTotales) {
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(vMeta => {
                     if (esVendedorReal(vMeta)) {
@@ -1675,8 +1679,8 @@
                         
                         if (!found) {
                             let guessedCanal = "Salon";
-                            if (vMeta.includes("MAYORISTA") || vMeta.includes("FERNANDEZ") || vMeta.includes("CASCO")) guessedCanal = "Mayoristas";
-                            else if (vMeta.includes("ONLINE") || vMeta.includes("GONZALEZ ARCE") || vMeta.includes("CABRERA") || vMeta.includes("SANCHEZ") || vMeta.includes("ZARATE") || vMeta.includes("INSFRAN")) guessedCanal = "Online";
+                            if (vMeta.includes("MAYORISTA")) guessedCanal = "Mayoristas";
+                            else if (vMeta.includes("ONLINE")) guessedCanal = "Online";
                             else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
                             else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                             
@@ -1833,6 +1837,7 @@
 
                 let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
                 
+                // Mostrar vendedores reales
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         if (!esVendedorReal(v)) return;
@@ -1982,6 +1987,9 @@
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
+                // ==========================================
+                // LÓGICA DE BONOS EXCLUYENTES
+                // ==========================================
                 let isEmpty = (obj === 0 && net === 0 && marcasGenAsig === 0 && aymAsig === 0);
                 
                 if (!isEmpty) {
