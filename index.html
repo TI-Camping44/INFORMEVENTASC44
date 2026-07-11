@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
-    <!-- Gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Exportación PDF Profesional -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- Exportación EXCEL Real -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* REGLA DE ORO RESPONSIVA */
@@ -206,7 +203,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -284,7 +280,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -317,7 +312,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -345,7 +339,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -373,7 +366,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -414,7 +406,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -442,7 +433,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -470,7 +460,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -502,7 +491,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -538,7 +526,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -576,7 +563,6 @@
 
     </div>
 
-    <!-- EL BLOQUE MAESTRO DE JAVASCRIPT: Todo unificado aquí para evitar errores -->
     <script>
         // 1. UI Y EXPORTACIONES
         function switchTab(tabId, element) {
@@ -1405,6 +1391,7 @@
             }
         };
 
+        // Recalcular montos de canales en base a nombres
         for(let m in HISTORICO_METAS){
             let g = 0; let c = {"Salon":0,"Online":0,"Mayoristas":0,"E-commerce":0,"Venta Externa":0,"Directorio":0,"Reparaciones":0};
             for(let v in HISTORICO_METAS[m].vendedoresTotales){
@@ -1681,6 +1668,7 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
+            // PROCESAMOS VENTAS EN VIVO DE ODOO
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
                 
@@ -1725,6 +1713,7 @@
                     }
                 }
 
+                // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
                 if(r.vendedor && esVendedorReal(r.vendedor)) {
                     if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
@@ -1974,8 +1963,10 @@
                 // EL SECRETO: USAR SET PARA NO DUPLICAR MARCAS BAJO NINGUNA CIRCUNSTANCIA
                 let marcasUnicas = new Set();
                 
+                // Marcas vendidas en el sheet
                 Object.keys(vData.marcas).forEach(m => marcasUnicas.add(limpiarNombre(m)));
                 
+                // Marcas asignadas en el histórico
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
