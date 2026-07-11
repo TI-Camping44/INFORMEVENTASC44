@@ -5,198 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* REGLA DE ORO RESPONSIVA UNIVERSAL */
+        /* REGLA DE ORO RESPONSIVA */
         * { box-sizing: border-box; }
-        html, body { max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
+        html, body { width: 100%; max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
 
         :root {
             --bg-app: #f4f7f6; --navy-main: #1a2c42; --navy-light: #2c4a6b; --teal-accent: #2b7a78;
             --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
-            --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
             --row-success-bg: #e6fffa;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; height: 100vh; color: var(--text-dark); font-size: 11px; overflow: hidden; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; flex-direction: row; height: 100vh; color: var(--text-dark); font-size: 12px; }
 
-        .sidebar { width: 190px; background-color: var(--navy-main); color: white; padding: 12px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #edf2f7; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+
+        /* --- MENÚ LATERAL --- */
+        .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; }
         .sidebar-logo { width: 90%; max-width: 120px; margin: 0 auto 15px auto; display: block; background-color: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
-        .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
-        .menu-item { padding: 8px 10px; margin-bottom: 4px; background-color: transparent; border-radius: 4px; font-weight: bold; font-size: 10.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
+        .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+        .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
         .menu-item.active { background-color: var(--teal-accent); color: white; }
-        .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: 15px; border-left: 3px solid white; }
+        .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: auto; border-left: 3px solid white; }
         .menu-item.bonos-highlight:hover { background-color: #c05621; }
 
-        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; -webkit-overflow-scrolling: touch; }
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; width: calc(100% - 220px); }
 
-        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 10px 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
-        .filter-group { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 130px; }
-        .filter-group label { font-size: 9px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 6px 10px; font-size: 10.5px; border-radius: 4px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; transition: border-color 0.2s; }
+        .filter-panel { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1 1 160px; min-width: 140px; }
+        .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 8px 10px; font-size: 11.5px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; transition: border-color 0.2s; }
+        .btn-clear-filters { flex: 0 1 auto; background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+
+        .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+        .sheet-title-main { flex: 1 1 300px; }
+        .sheet-title-main h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--navy-main); }
+        .sheet-title-main h3 { margin: 5px 0 0 0; font-size: 13px; font-weight: 700; color: var(--teal-accent); }
         
-        .btn-clear-filters { background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 7px 12px; border-radius: 4px; font-weight: bold; font-size: 10.5px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1px;}
-        .btn-clear-filters:hover { background-color: #e2e8f0; }
+        .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; }
+        .time-box-table { border-collapse: collapse; font-size: 11px; background: white; }
+        .time-box-table td { padding: 5px 10px; border: 1px solid var(--gray-border); }
+        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 12px; color: var(--text-dark); border-bottom: 1px dashed var(--teal-accent); padding: 0 4px; text-align: right; width: 60px; outline: none; cursor: pointer; }
+        .btn-sync { background-color: var(--teal-accent); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; }
 
-        .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 12px 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
-        .sheet-title-main h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--navy-main); letter-spacing: 0.5px; }
-        .sheet-title-main h3 { margin: 4px 0 0 0; font-size: 12px; font-weight: 700; color: var(--teal-accent); }
-        .btn-sync { background-color: var(--teal-accent); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        .time-box-table { border-collapse: collapse; font-size: 10px; background: white; }
-        .time-box-table td { padding: 4px 8px; border: 1px solid var(--gray-border); }
-        .select-simulador { border: none; background: transparent; font-weight: bold; font-size: 11px; color: var(--text-dark); border-bottom: 1px dashed var(--teal-accent); padding: 0 4px; text-align: right; width: 55px; }
-
-        #status-banner { display: block; padding: 8px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; font-size: 11px; text-align: center; }
+        #status-banner { display: block; padding: 10px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 12px; text-align: center; }
         .banner-success { background-color: var(--green-banner-bg); color: var(--green-banner-text); border: 1px solid var(--green-banner-border); }
+        .banner-error { background-color: var(--red-banner-bg); color: var(--red-banner-text); border: 1px solid var(--red-banner-border); }
 
-        .tab-content { display: none; }
+        .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* SEPARACIÓN MEJORADA DE CONTENEDORES */
-        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
-        .excel-title { font-size: 11px; font-weight: bold; background: var(--navy-main); color: white; padding: 8px 12px; margin: -12px -12px 12px -12px; border-top-left-radius: 6px; border-top-right-radius: 6px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
+        /* --- CONTENEDORES Y TABLAS --- */
+        .excel-container { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); width: 100%; overflow-x: auto; }
+        .excel-title { font-size: 12px; font-weight: bold; background: var(--navy-main); color: white; padding: 10px 15px; margin: -15px -15px 15px -15px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; position: sticky; left: 0; z-index: 10; }
         
-        table.excel-table { width: 100%; border-collapse: collapse; font-size: 10px; min-width: 600px; }
-        table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 8px 10px; border: 1px solid var(--gray-border); text-align: left; }
-        table.excel-table td { padding: 7px 10px; border: 1px solid var(--gray-border); white-space: nowrap; }
-        table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; font-size: 11px; padding: 8px 10px; letter-spacing: 0.5px; }
+        .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        table.excel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 650px; }
+        table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 10px 12px; border: 1px solid var(--gray-border); text-align: left; }
+        table.excel-table td { padding: 8px 12px; border: 1px solid var(--gray-border); white-space: nowrap; vertical-align: middle; }
+        table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; font-size: 12px; padding: 10px 12px; letter-spacing: 0.5px; }
         table.excel-table tr.total-segmento td { background-color: #f7fafc !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
         table.excel-table tr:hover { background-color: #f8fafc; }
 
-        /* BADGES MEJORADOS */
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9.5px; display: inline-block; text-align: center; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
         .badge-pending { background-color: #fed7d7; color: #742a2a; border: 1px solid #feb2b2; }
         .badge-brand { background-color: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; }
 
-        .fichas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; margin-top: 10px; }
-        .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 9.5px; border-radius: 6px; overflow: hidden; }
-        .ficha-header { background: var(--navy-light); color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 10px; position: sticky; left: 0; }
-        .ficha-table { width: 100%; border-collapse: collapse; min-width: 250px; }
-        .ficha-table th { background: #f8fafc; padding: 5px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 9.5px;}
-        .ficha-table td { padding: 4px 6px; border-bottom: 1px dashed #e2e8f0; } 
+        .fichas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; margin-top: 10px; width: 100%; }
+        .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 10.5px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; }
+        .ficha-table { width: 100%; border-collapse: collapse; min-width: 100%; }
+        .ficha-table th { background: #f8fafc; padding: 6px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 10.5px;}
+        .ficha-table td { padding: 5px 8px; border-bottom: 1px dashed #e2e8f0; } 
         
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
-        .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 4px 6px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
+        .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 5px 8px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
         .ficha-subtotal { background: #edf2f7; font-weight: bold; border-top: 1px solid #cbd5e0; }
-        .ficha-total-final { background: #e2e8f0; font-weight: bold; font-size: 10.5px; }
-        .ficha-kpi-header { background: #2d3748; color: white; text-align: center; padding: 5px; font-weight: bold; }
+        .ficha-total-final { background: #e2e8f0; font-weight: bold; font-size: 11.5px; }
+        .ficha-kpi-header { background: #2d3748; color: white; text-align: center; padding: 6px; font-weight: bold; }
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
+        .text-left { text-align: left; }
         .num-negativo { color: var(--red-alert) !important; font-weight: bold; }
         .num-positivo { color: var(--green-success) !important; font-weight: bold; }
         
-        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 6px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        .three-column-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 25px; width: 100%; }
+        .grid-1-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; width: 100%; }
+        .three-column-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; }
+        .chart-wrapper { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); width: 100%; }
 
         .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; z-index: 5000; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--teal-accent); animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =========================================================
-           SÚPER OPTIMIZACIÓN RESPONSIVA (CELULARES)
+           OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: hidden; } 
-            
-            /* Sidebar convertida en menú horizontal superior deslizable */
-            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; position: relative; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
-            .sidebar-logo { display: none; }
+        @media (max-width: 992px) {
+            body { flex-direction: column; overflow-y: auto; } 
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
             .sidebar h2 { display: none; }
-            .menu-item { flex: 0 0 auto; margin-right: 8px; margin-bottom: 0; font-size: 11.5px; padding: 8px 12px; margin-top: 0 !important;}
+            .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
             
-            /* Área principal */
-            .main-content { padding: 12px; overflow-y: auto; overflow-x: hidden; }
-            .filter-panel { flex-direction: column; align-items: stretch; padding: 12px; }
-            .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; }
-            .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; gap: 10px; padding: 12px; }
-            .sheet-header-box > div:last-child { flex-direction: column; gap: 10px; }
+            .main-content { padding: 10px; width: 100%; overflow: visible; }
+            .filter-panel { flex-direction: column; align-items: stretch; }
+            .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
+            .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
             
-            /* Reordenamiento de Grillas a 1 sola columna */
-            .charts-row, .grid-1-2, .three-column-grid, .fichas-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 15px; width: 100%; }
+            .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
+            .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
             
-            /* Contenedores de Tablas (Scroll Horizontal Interno Activado) */
-            .excel-container { width: 100% !important; padding: 10px; box-sizing: border-box; overflow-x: auto; margin-bottom: 20px; }
-            table.excel-table { min-width: 500px; } /* Evita que la tabla se aplaste, activa scroll con el dedo */
-            .ficha-vendedor { width: 100%; box-sizing: border-box; overflow-x: auto; }
+            .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
+            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
+            table.excel-table { min-width: 700px; }
         }
 
-        /* =========================================================
-           SÚPER CONFIGURACIÓN DE IMPRESIÓN (PDF PERFECTO)
-           ========================================================= */
-        @media print {
-            @page {
-                size: landscape; /* Fuerza orientación horizontal */
-                margin: 8mm; /* Márgenes pequeños para aprovechar espacio */
-            }
-            body { 
-                background-color: white !important; 
-                font-size: 8.5pt !important; 
-                zoom: 70%; /* Reduce la escala general para que la tabla ancha encaje */
-                display: block !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            
-            .sidebar, .filter-panel, .btn-sync, #btn-share-vendor, #btn-reset, #status-banner, .select-simulador { display: none !important; }
-            .main-content { padding: 0 !important; width: 100% !important; overflow: visible !important; }
-            
-            .tab-content { display: none !important; }
-            .tab-content.active { display: block !important; }
-            
-            .excel-container { 
-                border: none !important; 
-                box-shadow: none !important; 
-                width: 100% !important; 
-                margin: 0 !important; 
-                padding: 0 !important;
-                overflow: visible !important;
-            }
-            .excel-title { background-color: #1a2c42 !important; color: white !important; margin: 0 0 10px 0 !important; }
-            
-            /* FUERZA A LA TABLA A ENCAJAR */
-            table.excel-table { 
-                width: 100% !important; 
-                table-layout: auto !important; /* Permite auto-ajustar las columnas */
-                border-collapse: collapse !important; 
-            }
-            table.excel-table th, table.excel-table td { 
-                border: 1px solid #cbd5e0 !important; 
-                padding: 4px !important; /* Reduce el relleno interno */
-                font-size: 8.5pt !important; /* Letra más chica */
-                white-space: normal !important; /* Permite que el texto baje a la siguiente línea */
-                word-wrap: break-word !important; 
-            }
-            table.excel-table tr { page-break-inside: avoid !important; }
-            
-            .badge-success { background-color: #c6f6d5 !important; color: #22543d !important; border: 1px solid #9ae6b4 !important;}
-            .badge-pending { background-color: #fed7d7 !important; color: #742a2a !important; border: 1px solid #feb2b2 !important;}
-            .badge-brand { background-color: #e2e8f0 !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important;}
-        }
+        @media print { body { display: none; } }
     </style>
 </head>
 <body>
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div>Sincronizando Base de Datos YTD y GitHub...</div>
+        <div id="loader-text">Cargando Base Operativa Blindada...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
-        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" onerror="this.style.display='none'">
+        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
@@ -207,7 +159,7 @@
         <div class="menu-item" onclick="switchTab('tab-reparaciones', this)">🔧 Reparaciones</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
         <div class="menu-item" onclick="switchTab('tab-marcas', this)">⚔️ Marcas y Líneas</div>
-        <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 Pagos de Bonos</div>
+        <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
     </div>
 
     <div class="main-content">
@@ -246,45 +198,46 @@
                 <h2 id="txt-meta-global">Cargando Estructura Inteligente...</h2>
                 <h3 id="txt-avance-general">AVANCE GENERAL: --%</h3>
             </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="header-actions">
                 <table class="time-box-table">
-                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 12px; padding-right:8px;">--</td></tr>
+                    <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-habiles">Días hábiles</td><td id="lbl-dias-totales" class="text-right" style="font-weight:bold; font-size: 13px; padding-right:8px;">--</td></tr>
                     <tr><td style="background:var(--gray-bg); font-weight:bold;" id="lbl-txt-transcurridos">Transcurridos</td><td><select id="lbl-dias-trans" class="select-simulador" onchange="recalcularSimulacionDias()"></select></td></tr>
                 </table>
                 <button class="btn-sync" id="btn-sync" onclick="iniciarSincronizacion()">🔄 Actualizar Base</button>
             </div>
         </div>
 
-        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Canales</th>
-                            <th class="text-right">Ventas Acumuladas</th>
-                            <th class="text-right">Esperado al Período Filtrado:</th>
-                            <th class="text-right">% Logrado a Hoy</th>
-                            <th class="text-right">Objetivo del Período</th>
-                            <th class="text-right">% Logrado Final</th>
-                            <th class="text-right">Proyección venta</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-objetivos-base"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Canales</th>
+                                <th class="text-right">Ventas Acumuladas</th>
+                                <th class="text-right">Esperado al Período Filtrado:</th>
+                                <th class="text-right">% Logrado a Hoy</th>
+                                <th class="text-right">Objetivo del Período</th>
+                                <th class="text-right">% Logrado Final</th>
+                                <th class="text-right">Proyección venta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-objetivos-base"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📅 CURVA DE CRECIMIENTO: ACUMULADO REAL VS ACUMULADO ESPERADO</span>
-                    <div style="height: 220px; width: 100%; position: relative;" id="container-lineChart">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📅 CURVA DE CRECIMIENTO: ACUMULADO REAL VS ACUMULADO ESPERADO</span>
+                    <div style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
                         <canvas id="lineChart"></canvas>
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 PARTICIPACIÓN DEL CANAL</span>
-                    <div style="height: 220px; width: 100%; position: relative;" id="container-pieChart">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 PARTICIPACIÓN DEL CANAL</span>
+                    <div style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
@@ -293,56 +246,63 @@
             <div class="grid-1-2">
                 <div class="excel-container">
                     <div class="excel-title">📅 RESUMEN DE VENTAS POR DÍA</div>
-                    <table class="excel-table">
-                        <thead>
-                            <tr><th>Fecha</th><th class="text-right">Venta del Día</th><th class="text-right">Acumulado Período</th></tr>
-                        </thead>
-                        <tbody id="grid-ventas-diarias"></tbody>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead>
+                                <tr><th>Fecha</th><th class="text-right">Venta del Día</th><th class="text-right">Acumulado Período</th></tr>
+                            </thead>
+                            <tbody id="grid-ventas-diarias"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="excel-container">
                     <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
-                    <table class="excel-table" style="margin-bottom: 20px;">
-                        <tr><td style="padding: 8px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 13px;">₲ 0</td></tr>
-                        <tr><td style="padding: 8px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 13px;">₲ 0</td></tr>
-                        <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 8px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 14px;">₲ 0</td></tr>
-                    </table>
+                    <div class="table-responsive-wrapper" style="margin-bottom: 20px;">
+                        <table class="excel-table">
+                            <tr><td style="padding: 10px;"><strong>Total Facturas (Venta Bruta)</strong></td><td id="tot-bruta" class="text-right num-positivo" style="font-size: 14px;">₲ 0</td></tr>
+                            <tr><td style="padding: 10px;"><strong>Total Notas de Crédito</strong></td><td id="tot-nc" class="text-right num-negativo" style="font-size: 14px;">₲ 0</td></tr>
+                            <tr style="background:var(--gray-bg); font-weight:bold;"><td style="padding: 10px;">VENTA NETA (Real)</td><td id="tot-neta" class="text-right" style="font-size: 15px;">₲ 0</td></tr>
+                        </table>
+                    </div>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>Canal</th>
+                                    <th class="text-right">Ventas Neta</th>
+                                    <th class="text-right">Esperado Período</th>
+                                    <th class="text-right">% Logrado</th>
+                                    <th class="text-right">Objetivo Período</th>
+                                    <th class="text-right">% Logrado Mes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grid-canales-resumen"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-consumidor" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
+                <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Canal</th>
-                                <th class="text-right">Ventas Neta</th>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
                                 <th class="text-right">Esperado Período</th>
                                 <th class="text-right">% Logrado</th>
                                 <th class="text-right">Objetivo Período</th>
                                 <th class="text-right">% Logrado Mes</th>
                             </tr>
                         </thead>
-                        <tbody id="grid-canales-resumen"></tbody>
+                        <tbody id="grid-vendedores-consumidor"></tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-
-        <!-- PESTAÑA CONSUMIDOR FINAL -->
-        <div id="tab-consumidor" class="tab-content">
-            <div class="excel-container">
-                <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-consumidor"></tbody>
-                </table>
             </div>
             
             <div class="excel-container">
@@ -356,24 +316,25 @@
             </div>
         </div>
 
-        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-externa"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
+                                <th class="text-right">Esperado Período</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Período</th>
+                                <th class="text-right">% Logrado Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-vendedores-externa"></tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="excel-container">
@@ -382,24 +343,25 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-directorio"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
+                                <th class="text-right">Esperado Período</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Período</th>
+                                <th class="text-right">% Logrado Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-vendedores-directorio"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="excel-container">
@@ -408,36 +370,39 @@
             </div>
         </div>
 
-        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
-                <table class="excel-table" style="margin-bottom: 25px;">
-                    <thead>
-                        <tr style="background:var(--navy-main); color:white;">
-                            <th>Cliente / Distribuidor</th>
-                            <th class="text-right">Ventas Brutas</th>
-                            <th class="text-right">Notas de Crédito</th>
-                            <th class="text-right">Total Venta Neta (GS)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ecommerce-lista"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table" style="margin-bottom: 25px;">
+                        <thead>
+                            <tr style="background:var(--navy-main); color:white;">
+                                <th>Cliente / Distribuidor</th>
+                                <th class="text-right">Ventas Brutas</th>
+                                <th class="text-right">Notas de Crédito</th>
+                                <th class="text-right">Total Venta Neta (GS)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ecommerce-lista"></tbody>
+                    </table>
+                </div>
                 <div class="excel-title">👥 RESUMEN VENDEDORES ASIGNADOS A E-COMMERCE</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-ecommerce"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
+                                <th class="text-right">Esperado Período</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Período</th>
+                                <th class="text-right">% Logrado Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-vendedores-ecommerce"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="excel-container">
@@ -445,24 +410,25 @@
             </div>
         </div>
 
-        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-mayoristas"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
+                                <th class="text-right">Esperado Período</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Período</th>
+                                <th class="text-right">% Logrado Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-vendedores-mayoristas"></tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="excel-container">
@@ -471,24 +437,25 @@
             </div>
         </div>
 
-        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Vendedor / Canal</th>
-                            <th class="text-right">Ventas Netas</th>
-                            <th class="text-right">Devoluciones (NC)</th>
-                            <th class="text-right">Esperado Período</th>
-                            <th class="text-right">% Logrado</th>
-                            <th class="text-right">Objetivo Período</th>
-                            <th class="text-right">% Logrado Mes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-vendedores-reparaciones"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor / Canal</th>
+                                <th class="text-right">Ventas Netas</th>
+                                <th class="text-right">Devoluciones (NC)</th>
+                                <th class="text-right">Esperado Período</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Período</th>
+                                <th class="text-right">% Logrado Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-vendedores-reparaciones"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="excel-container">
@@ -497,91 +464,103 @@
             </div>
         </div>
 
-        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
-                    <span style="font-size: 12px; letter-spacing: 0.5px;">💰 CONTROL DE PAGOS DE BONOS Y COMISIONES</span>
-                    <button class="btn-sync" style="background:#2b7a78; font-size:10px; padding:6px 10px;" onclick="exportarBonosPDF()">📥 Exportar Reporte a PDF</button>
+                    <span style="font-size: 13px; letter-spacing: 0.5px;">💰 CONTROL DE KPIs (METAS Y MARCAS)</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-sync" style="background:#2b7a78; font-size:11px; padding:8px 12px;" onclick="exportarBonosPDF()">📄 Exportar a PDF (A4 Vertical)</button>
+                        <button class="btn-sync" style="background:#38a169; font-size:11px; padding:8px 12px;" onclick="exportarBonosExcel()">📊 Exportar a EXCEL</button>
+                    </div>
                 </div>
                 <div style="padding: 15px; background: #fffaf0; border: 1px solid #feebc8; margin-bottom: 20px; font-size: 11.5px; color: #7b341e; border-radius: 6px; border-left: 5px solid #dd6b20;">
-                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Si la venta neta del mes es inferior a la meta general, el sistema asigna automáticamente un premio de <strong>₲ 0</strong>.
+                    <strong>⚠️ CONDICIÓN EXCLUYENTE DE BONOS:</strong> Para calificar a CUALQUIER escala de bonos de marcas, el colaborador debe <strong>ALCANZAR O SUPERAR SU META GENERAL DEL MES (100%+)</strong>. Aquí podrás monitorear qué equipo llegó a su cuota mensual y el detalle de sus marcas activadas.
                 </div>
-                <table class="excel-table">
-                    <thead>
-                        <tr style="background:#f7fafc;">
-                            <th>Vendedor</th>
-                            <th>Canal Base</th>
-                            <th>Escala Detectada</th>
-                            <th class="text-right">Meta del Mes (₲)</th>
-                            <th class="text-right">Venta Real (₲)</th>
-                            <th class="text-center">% Logrado</th>
-                            <th class="text-center">¿Alcanzó Meta?</th>
-                            <th class="text-center">Marcas Activadas</th>
-                            <th class="text-right" style="font-size: 11px;">Monto de Bono A Pagar</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grid-bonos-vendedores"></tbody>
-                </table>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table" id="tabla-exportar-bonos">
+                        <thead>
+                            <tr style="background:#f7fafc;">
+                                <th class="text-left">Vendedor</th>
+                                <th class="text-right">Meta del Mes (₲)</th>
+                                <th class="text-right">Venta Real (₲)</th>
+                                <th class="text-center">% Logrado</th>
+                                <th class="text-center">¿Alcanzó Meta?</th>
+                                <th class="text-center">Marcas (Grales)</th>
+                                <th class="text-center">Armas y Municiones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-bonos-vendedores"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
                 <div class="three-column-grid">
-                    <div class="excel-container" style="margin-bottom:0;">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:10px; border-radius:4px;">Por Canal de Distribución</span>
-                        <table class="excel-table">
-                            <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
-                            <tbody id="nc-por-canal"></tbody>
-                        </table>
+                    <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Por Canal de Distribución</span>
+                        <div class="table-responsive-wrapper">
+                            <table class="excel-table">
+                                <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
+                                <tbody id="nc-por-canal"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="excel-container" style="margin-bottom:0;">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:10px; border-radius:4px;">Top 5 Clientes Afectados</span>
-                        <table class="excel-table">
-                            <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
-                            <tbody id="nc-por-cliente"></tbody>
-                        </table>
+                    <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Top 5 Clientes Afectados</span>
+                        <div class="table-responsive-wrapper">
+                            <table class="excel-table">
+                                <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
+                                <tbody id="nc-por-cliente"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="excel-container" style="margin-bottom:0;">
-                        <span style="font-weight:bold; font-size:11px; display:block; padding:8px; background:var(--gray-bg); margin-bottom:10px; border-radius:4px;">Cronología Completa</span>
-                        <table class="excel-table">
-                            <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
-                            <tbody id="nc-por-fecha"></tbody>
-                        </table>
+                    <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Cronología Completa</span>
+                        <div class="table-responsive-wrapper">
+                            <table class="excel-table">
+                                <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
+                                <tbody id="nc-por-fecha"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
                     <div class="excel-title">MARCAS PRINCIPALES</div>
-                    <table class="excel-table">
-                        <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th></tr></thead>
-                        <tbody id="marcas-lista"></tbody>
-                        <tfoot id="marcas-footer"></tfoot>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <tbody id="marcas-lista"></tbody>
+                            <tfoot id="marcas-footer"></tfoot>
+                        </table>
+                    </div>
                 </div>
                 <div class="excel-container">
                     <div class="excel-title">ARMAS Y MUNICIONES</div>
-                    <table class="excel-table">
-                        <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th></tr></thead>
-                        <tbody id="armas-lista"></tbody>
-                        <tfoot id="armas-footer"></tfoot>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <tbody id="armas-lista"></tbody>
+                            <tfoot id="armas-footer"></tfoot>
+                        </table>
+                    </div>
                 </div>
                 <div class="excel-container">
                     <div class="excel-title">RESTO DE MARCAS</div>
-                    <table class="excel-table">
-                        <thead><tr><th>Clasificación</th><th class="text-right">Ventas en GS</th></tr></thead>
-                        <tbody id="resto-lista"></tbody>
-                        <tfoot id="resto-footer"></tfoot>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th>Clasificación</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <tbody id="resto-lista"></tbody>
+                            <tfoot id="resto-footer"></tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -597,11 +576,133 @@
             if (element) element.classList.add('active');
         }
 
+        // =========================================================================
+        // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
+        // =========================================================================
+        function exportarBonosExcel() {
+            let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+            let table = document.getElementById("tabla-exportar-bonos");
+            let rows = table.querySelectorAll("tbody tr");
+            
+            let data = [];
+            data.push(['CANAL / EQUIPO', 'VENDEDOR', 'META GRAL (Gs)', 'VENTA REAL (Gs)', '% LOGRO', 'ESTADO META', 'MARCAS (GRALES)', 'ARMAS Y MUNICIONES']);
+            
+            let currentCanal = "";
+            rows.forEach(row => {
+                if (row.classList.contains('header-segmento')) {
+                    currentCanal = row.innerText.replace(/---/g, '').trim();
+                } else {
+                    let cols = row.querySelectorAll("td");
+                    if(cols.length > 0) {
+                        let estado = cols[4].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO ALCANZO";
+                        let mGen = cols[5].innerText.trim();
+                        let mAyM = cols[6].innerText.trim();
+                        let meta = cols[1].innerText.replace(/₲|Gs\./g, '').trim();
+                        let venta = cols[2].innerText.replace(/₲|Gs\./g, '').trim();
+                        
+                        data.push([ currentCanal, cols[0].innerText, meta, venta, cols[3].innerText, estado, mGen, mAyM ]);
+                    }
+                }
+            });
+            
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Control_KPIs");
+            XLSX.writeFile(wb, `Control_KPIs_${currentMonthTxt.replace(/\s+/g, '_')}.xlsx`);
+        }
+
+        // =========================================================================
+        // 🔥 GENERADOR PROFESIONAL DE PDF (JSPDF + AUTOTABLE)
+        // =========================================================================
         function exportarBonosPDF() {
-            switchTab('tab-bonos', document.querySelector('.menu-item.bonos-highlight'));
-            setTimeout(() => {
-                window.print();
-            }, 300);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4'); // A4 Vertical
+                
+                let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+                
+                // Cabecera
+                doc.setTextColor(26, 44, 66);
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("REPORTE OFICIAL DE KPIs (METAS Y MARCAS)", 14, 20);
+                
+                doc.setTextColor(221, 107, 32); 
+                doc.setFontSize(10);
+                doc.text(`Período Evaluado: ${currentMonthTxt}`, 14, 26);
+                
+                // Regla
+                doc.setTextColor(123, 52, 30);
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "normal");
+                doc.text("REGLA EXCLUYENTE: Para calificar a la escala de bonos de marcas, el colaborador debe", 14, 34);
+                doc.text("superar el 100% de la Meta General de Ventas. El reporte se agrupa por canales.", 14, 38);
+
+                let table = document.getElementById("tabla-exportar-bonos");
+                let rows = table.querySelectorAll("tbody tr");
+                let bodyData = [];
+                
+                rows.forEach(row => {
+                    if (row.classList.contains('header-segmento')) {
+                        // Insertamos la cabecera de Canal como una fila especial
+                        bodyData.push([{ content: row.innerText.trim(), colSpan: 7, styles: { fillColor: [44, 74, 107], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' } }]);
+                    } else {
+                        let cols = row.querySelectorAll("td");
+                        if(cols.length > 0) {
+                            let estadoTexto = cols[4].innerText.includes("ALCANZ") ? "SI ALCANZO" : "NO";
+                            let mGenClean = cols[5].innerText.trim();
+                            let mAyMClean = cols[6].innerText.trim();
+                            
+                            let metaLimpia = cols[1].innerText.replace(/₲|Gs\./g, 'Gs.');
+                            let ventaLimpia = cols[2].innerText.replace(/₲|Gs\./g, 'Gs.');
+                            
+                            let rowData = [
+                                cols[0].innerText, 
+                                metaLimpia,        
+                                ventaLimpia,       
+                                cols[3].innerText, 
+                                estadoTexto,       
+                                mGenClean,       
+                                mAyMClean         
+                            ];
+                            bodyData.push(rowData);
+                        }
+                    }
+                });
+
+                doc.autoTable({
+                    startY: 45,
+                    head: [['VENDEDOR', 'META GRAL', 'VENTA REAL', '% LOGRO', 'ESTADO', 'MARCAS GRALES.', 'ARMAS/MUNI.']],
+                    body: bodyData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [26, 44, 66], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
+                    bodyStyles: { fontSize: 7, valign: 'middle', cellPadding: 3 },
+                    alternateRowStyles: { fillColor: [247, 250, 252] },
+                    columnStyles: {
+                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 45 },
+                        1: { halign: 'right' },
+                        2: { halign: 'right', fontStyle: 'bold' },
+                        3: { halign: 'center' },
+                        4: { halign: 'center', fontStyle: 'bold' },
+                        5: { halign: 'center' },
+                        6: { halign: 'center' }
+                    },
+                    didParseCell: function(data) {
+                        // Pintamos de rojo si es "NO"
+                        if (data.section === 'body' && data.row.cells[0].colSpan === 1) { 
+                            if (data.column.index === 4 && data.cell.raw === 'NO') {
+                                data.cell.styles.textColor = [197, 48, 48];
+                            }
+                        }
+                    }
+                });
+
+                doc.save(`Control_KPIs_${currentMonthTxt.replace(/\s+/g, '_')}.pdf`);
+
+            } catch(e) {
+                alert("Error generando el PDF. Asegúrate de estar conectado a Internet.");
+                console.error(e);
+            }
         }
 
         function copiarLinkVendedor() {
@@ -630,15 +731,45 @@
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
-        // Base mínima para que arranque, TODO EL PASADO SE EXTRAE DE GITHUB MÁS ABAJO
-        const HISTORICO_METAS = {
-            "7": { name: "Julio", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5,
-                   canales: { "Salon": 595000000, "Online": 445000000, "E-commerce": 120000000, "Mayoristas": 1200000000, "Venta Externa": 50000000, "Directorio": 0, "Reparaciones": 0 },
-                   vendedoresTotales: { "Antonio De Jesus Fernandez Benitez - Mayoristas": 1200000000, "Oscar David Maldonado Yudis - Salon": 220000000, "Oscar David Noguera Oviedo - Salon": 220000000, "Sergio Daniel Ocampos Román - Salon": 150000000, "Hugo Javier González Arce - Online": 220000000, "Marcelo Evaristo Sánchez Rojas - Online": 225000000, "Diego Alberto López Rojas - Venta Externa": 50000000, "DIEGO NADIV KEMPER ZIMERLIZ - DIRECTORIO": 0, "Jorge Vidal Rodriguez Rojas - Reparaciones": 0 }
+        let HISTORICO_METAS = {
+            "1": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "2": {"diasMes": 25, "diasTranscurridos": 25, "global": 2200000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 485000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 485000000, "OSCAR DAVID MALDONADO YUDIS": 200000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 15000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "3": {"diasMes": 25, "diasTranscurridos": 25, "global": 2455000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 685000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 685000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "CESAR ALEJANDRO RAHI GERAGHTY": 50000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 145260057, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||TANFOGLIO": 25500000, "GIOVANNI EMANUEL JARA APREA|||WALTHER": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "4": {"diasMes": 25, "diasTranscurridos": 25, "global": 2455000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "BARBARA CRISTHEL MAGALI CASCO MENDOZA": 270000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 200000000, "OSCAR DAVID ZARATE VILLAMAYOR": 200000000, "HUGO JAVIER GONZALEZ ARCE": 200000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||ASG": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "OSCAR DAVID NOGUERA OVIEDO|||TSS": 2000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 1000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 121949678, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 4000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "OSCAR DAVID NOGUERA OVIEDO|||NTK": 5000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 2000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "5": {"diasMes": 25, "diasTranscurridos": 25, "global": 2300000000, "canales": {}, "vendedoresTotales": {"ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 220000000, "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000, "JHAMYL DANIEL INSFRAN NUNEZ": 15000000, "HUGO JAVIER GONZALEZ ARCE": 220000000}, "vendedorMarca": {"ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 5000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 65000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3500000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3500000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 15000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 85000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 65000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 4000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 15000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 6000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 2500000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 20000000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 5000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 2000000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 2000000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 3500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 35000000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 8000000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 8000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||RUGER": 10000000, "OSCAR DAVID MALDONADO YUDIS|||RUGER": 5000000, "OSCAR DAVID MALDONADO YUDIS|||TANFOGLIO": 25500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA": 90000000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA": 45000000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA": 45000000, "MARCELO EVARISTO SANCHEZ ROJAS|||GB": 13000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMI": 6500000, "HUGO JAVIER GONZALEZ ARCE|||IMI": 9000000}},
+            "6": {"diasMes": 22.0, "diasTranscurridos": 22.0, "global": 2310000000, "canales": {}, "vendedoresTotales": { "ANTONIO DE JESUS FERNANDEZ BENITEZ": 1100000000, "OSCAR DAVID MALDONADO YUDIS": 220000000, "OSCAR DAVID NOGUERA OVIEDO": 100000000, "SERGIO DANIEL OCAMPOS ROMAN": 100000000, "MARCELO EVARISTO SANCHEZ ROJAS": 220000000, "OSCAR DANIEL ZARATE VILLAMAYOR": 220000000, "HUGO JAVIER GONZALEZ ARCE": 220000000, "GIOVANNI EMANUEL JARA APREA": 200000000, "TOBIAS EZEQUIEL SOSA ZARACHO": 200000000 },
+                  "vendedorMarca": { "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ASG": 75000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TSS": 180000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CROSMAN": 25000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||UMAREX": 240000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||DOBERMAN": 180000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KONUS": 20000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BWC": 5500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||TRUGLO": 4000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FAB DEFENSE": 4500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||MIGUEL NIETO": 6000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NTK": 9500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||COLEMAN": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||IMALENT": 5000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||APOLO": 30000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||AITOR": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||ROCKY BOOTS": 5500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||KCI": 15000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||NITECORE": 17000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||CATERPILLAR": 3000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||SNAKE": 6500000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||FOBUS": 7000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||BERETTA MOD": 10000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||B.E. ARMOR": 14000000, "ANTONIO DE JESUS FERNANDEZ BENITEZ|||VECTOR OPTICS": 50000000, "OSCAR DAVID MALDONADO YUDIS|||ASG": 3000000, "OSCAR DAVID MALDONADO YUDIS|||TSS": 3000000, "OSCAR DAVID MALDONADO YUDIS|||CROSMAN": 4000000, "OSCAR DAVID MALDONADO YUDIS|||UMAREX": 12000000, "OSCAR DAVID MALDONADO YUDIS|||DOBERMAN": 8000000, "OSCAR DAVID MALDONADO YUDIS|||KONUS": 1000000, "OSCAR DAVID MALDONADO YUDIS|||BWC": 1000000, "OSCAR DAVID MALDONADO YUDIS|||TRUGLO": 500000, "OSCAR DAVID MALDONADO YUDIS|||FAB DEFENSE": 1500000, "OSCAR DAVID MALDONADO YUDIS|||MIGUEL NIETO": 1000000, "OSCAR DAVID MALDONADO YUDIS|||NTK": 7000000, "OSCAR DAVID MALDONADO YUDIS|||COLEMAN": 3000000, "OSCAR DAVID MALDONADO YUDIS|||IMALENT": 500000, "OSCAR DAVID MALDONADO YUDIS|||APOLO": 750000, "OSCAR DAVID MALDONADO YUDIS|||AITOR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||ROCKY BOOTS": 1150000, "OSCAR DAVID MALDONADO YUDIS|||KCI": 2000000, "OSCAR DAVID MALDONADO YUDIS|||NITECORE": 3000000, "OSCAR DAVID MALDONADO YUDIS|||CATERPILLAR": 1000000, "OSCAR DAVID MALDONADO YUDIS|||SNAKE": 1500000, "OSCAR DAVID MALDONADO YUDIS|||FOBUS": 1500000, "OSCAR DAVID MALDONADO YUDIS|||BERETTA MOD": 500000, "OSCAR DAVID MALDONADO YUDIS|||B.E. ARMOR": 4700000, "OSCAR DAVID MALDONADO YUDIS|||VECTOR OPTICS": 4500000, "OSCAR DAVID NOGUERA OVIEDO|||ASG": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||TSS": 16000000, "OSCAR DAVID NOGUERA OVIEDO|||CROSMAN": 4000000, "OSCAR DAVID NOGUERA OVIEDO|||UMAREX": 21000000, "OSCAR DAVID NOGUERA OVIEDO|||DOBERMAN": 18000000, "OSCAR DAVID NOGUERA OVIEDO|||KONUS": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||BWC": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||TRUGLO": 500000, "OSCAR DAVID NOGUERA OVIEDO|||FAB DEFENSE": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||MIGUEL NIETO": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||NTK": 7000000, "OSCAR DAVID NOGUERA OVIEDO|||COLEMAN": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||IMALENT": 500000, "OSCAR DAVID NOGUERA OVIEDO|||APOLO": 750000, "OSCAR DAVID NOGUERA OVIEDO|||AITOR": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||ROCKY BOOTS": 1150000, "OSCAR DAVID NOGUERA OVIEDO|||KCI": 2000000, "OSCAR DAVID NOGUERA OVIEDO|||NITECORE": 3000000, "OSCAR DAVID NOGUERA OVIEDO|||CATERPILLAR": 1000000, "OSCAR DAVID NOGUERA OVIEDO|||SNAKE": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||FOBUS": 1500000, "OSCAR DAVID NOGUERA OVIEDO|||BERETTA MOD": 500000, "OSCAR DAVID NOGUERA OVIEDO|||B.E. ARMOR": 4700000, "OSCAR DAVID NOGUERA OVIEDO|||VECTOR OPTICS": 4500000, "MARCELO EVARISTO SANCHEZ ROJAS|||ASG": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TSS": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||CROSMAN": 4000000, "MARCELO EVARISTO SANCHEZ ROJAS|||UMAREX": 12000000, "MARCELO EVARISTO SANCHEZ ROJAS|||DOBERMAN": 8000000, "MARCELO EVARISTO SANCHEZ ROJAS|||KONUS": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||BWC": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||TRUGLO": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||FAB DEFENSE": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||MIGUEL NIETO": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NTK": 7000000, "MARCELO EVARISTO SANCHEZ ROJAS|||COLEMAN": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||IMALENT": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||APOLO": 750000, "MARCELO EVARISTO SANCHEZ ROJAS|||AITOR": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||ROCKY BOOTS": 1150000, "MARCELO EVARISTO SANCHEZ ROJAS|||KCI": 2000000, "MARCELO EVARISTO SANCHEZ ROJAS|||NITECORE": 3000000, "MARCELO EVARISTO SANCHEZ ROJAS|||CATERPILLAR": 1000000, "MARCELO EVARISTO SANCHEZ ROJAS|||SNAKE": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||FOBUS": 1500000, "MARCELO EVARISTO SANCHEZ ROJAS|||BERETTA MOD": 500000, "MARCELO EVARISTO SANCHEZ ROJAS|||B.E. ARMOR": 4700000, "MARCELO EVARISTO SANCHEZ ROJAS|||VECTOR OPTICS": 4500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||ASG": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||TSS": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||CROSMAN": 4000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||UMAREX": 12000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||DOBERMAN": 8000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||KONUS": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||BWC": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||TRUGLO": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||FAB DEFENSE": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||MIGUEL NIETO": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||NTK": 7000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||COLEMAN": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||IMALENT": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||APOLO": 750000, "OSCAR DANIEL ZARATE VILLAMAYOR|||AITOR": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||ROCKY BOOTS": 1150000, "OSCAR DANIEL ZARATE VILLAMAYOR|||KCI": 2000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||NITECORE": 3000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||CATERPILLAR": 1000000, "OSCAR DANIEL ZARATE VILLAMAYOR|||SNAKE": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||FOBUS": 1500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||BERETTA MOD": 500000, "OSCAR DANIEL ZARATE VILLAMAYOR|||B.E. ARMOR": 4700000, "OSCAR DANIEL ZARATE VILLAMAYOR|||VECTOR OPTICS": 4500000, "HUGO JAVIER GONZALEZ ARCE|||ASG": 3000000, "HUGO JAVIER GONZALEZ ARCE|||TSS": 3000000, "HUGO JAVIER GONZALEZ ARCE|||CROSMAN": 4000000, "HUGO JAVIER GONZALEZ ARCE|||UMAREX": 12000000, "HUGO JAVIER GONZALEZ ARCE|||DOBERMAN": 8000000, "HUGO JAVIER GONZALEZ ARCE|||KONUS": 1000000, "HUGO JAVIER GONZALEZ ARCE|||BWC": 1000000, "HUGO JAVIER GONZALEZ ARCE|||TRUGLO": 500000, "HUGO JAVIER GONZALEZ ARCE|||FAB DEFENSE": 1500000, "HUGO JAVIER GONZALEZ ARCE|||MIGUEL NIETO": 1000000, "HUGO JAVIER GONZALEZ ARCE|||NTK": 7000000, "HUGO JAVIER GONZALEZ ARCE|||COLEMAN": 3000000, "HUGO JAVIER GONZALEZ ARCE|||IMALENT": 500000, "HUGO JAVIER GONZALEZ ARCE|||APOLO": 750000, "HUGO JAVIER GONZALEZ ARCE|||AITOR": 1000000, "HUGO JAVIER GONZALEZ ARCE|||ROCKY BOOTS": 1150000, "HUGO JAVIER GONZALEZ ARCE|||KCI": 2000000, "HUGO JAVIER GONZALEZ ARCE|||NITECORE": 3000000, "HUGO JAVIER GONZALEZ ARCE|||CATERPILLAR": 1000000, "HUGO JAVIER GONZALEZ ARCE|||SNAKE": 1500000, "HUGO JAVIER GONZALEZ ARCE|||FOBUS": 1500000, "HUGO JAVIER GONZALEZ ARCE|||BERETTA MOD": 500000, "HUGO JAVIER GONZALEZ ARCE|||B.E. ARMOR": 4700000, "HUGO JAVIER GONZALEZ ARCE|||VECTOR OPTICS": 4500000, "GIOVANNI EMANUEL JARA APREA|||ASG": 3000000, "GIOVANNI EMANUEL JARA APREA|||TSS": 3000000, "GIOVANNI EMANUEL JARA APREA|||CROSMAN": 4000000, "GIOVANNI EMANUEL JARA APREA|||UMAREX": 12000000, "GIOVANNI EMANUEL JARA APREA|||DOBERMAN": 8000000, "GIOVANNI EMANUEL JARA APREA|||KONUS": 1000000, "GIOVANNI EMANUEL JARA APREA|||BWC": 1000000, "GIOVANNI EMANUEL JARA APREA|||TRUGLO": 500000, "GIOVANNI EMANUEL JARA APREA|||FAB DEFENSE": 1500000, "GIOVANNI EMANUEL JARA APREA|||MIGUEL NIETO": 1000000, "GIOVANNI EMANUEL JARA APREA|||NTK": 7000000, "GIOVANNI EMANUEL JARA APREA|||COLEMAN": 3000000, "GIOVANNI EMANUEL JARA APREA|||IMALENT": 500000, "GIOVANNI EMANUEL JARA APREA|||APOLO": 750000, "GIOVANNI EMANUEL JARA APREA|||AITOR": 1000000, "GIOVANNI EMANUEL JARA APREA|||ROCKY BOOTS": 1150000, "GIOVANNI EMANUEL JARA APREA|||KCI": 2000000, "GIOVANNI EMANUEL JARA APREA|||NITECORE": 3000000, "GIOVANNI EMANUEL JARA APREA|||CATERPILLAR": 1000000, "GIOVANNI EMANUEL JARA APREA|||SNAKE": 1500000, "GIOVANNI EMANUEL JARA APREA|||FOBUS": 1500000, "GIOVANNI EMANUEL JARA APREA|||BERETTA MOD": 500000, "GIOVANNI EMANUEL JARA APREA|||B.E. ARMOR": 4700000, "GIOVANNI EMANUEL JARA APREA|||VECTOR OPTICS": 4500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ASG": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TSS": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CROSMAN": 4000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||UMAREX": 12000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||DOBERMAN": 8000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||KONUS": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||BWC": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||TRUGLO": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FAB DEFENSE": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||MIGUEL NIETO": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NTK": 7000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||COLEMAN": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||IMALENT": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||APOLO": 750000, "TOBIAS EZEQUIEL SOSA ZARACHO|||AITOR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||ROCKY BOOTS": 1150000, "TOBIAS EZEQUIEL SOSA ZARACHO|||KCI": 2000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||NITECORE": 3000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||CATERPILLAR": 1000000, "TOBIAS EZEQUIEL SOSA ZARACHO|||SNAKE": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||FOBUS": 1500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||BERETTA MOD": 500000, "TOBIAS EZEQUIEL SOSA ZARACHO|||B.E. ARMOR": 4700000, "TOBIAS EZEQUIEL SOSA ZARACHO|||VECTOR OPTICS": 4500000 }
             }
         };
 
-        let METAS_JUNIO_LIVE = JSON.parse(JSON.stringify(HISTORICO_METAS["7"]));
+        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+
+        // =========================================================================
+        // 🔥 NORMALIZADOR EXTREMO DE NOMBRES
+        // =========================================================================
+        function limpiarNombre(texto) {
+            if (!texto) return "";
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
+                        .replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "")
+                        .trim();
+        }
+
+        // =========================================================================
+        // 🔥 ALGORITMO DE FUSIÓN (El Fin de los Fantasmas)
+        // =========================================================================
+        function sonElMismoVendedor(nombreA, nombreB) {
+            if (!nombreA || !nombreB) return false;
+            let a = limpiarNombre(nombreA);
+            let b = limpiarNombre(nombreB);
+            if (a === b) return true;
+            let wordsA = a.split(/\s+/).filter(w => w.length > 2);
+            let wordsB = b.split(/\s+/).filter(w => w.length > 2);
+            if (wordsA.length > 0 && wordsB.length > 0) {
+                if (wordsA.every(w => b.includes(w))) return true;
+                if (wordsB.every(w => a.includes(w))) return true;
+            }
+            return false;
+        }
 
         function parseCSV(text) {
             let ret = [['']], i = 0, j = 0, s = true;
@@ -714,59 +845,26 @@
         }
 
         function obtenerCanalReal(vendedor, canalCSV) {
-            let vUpper = String(vendedor || "").toUpperCase().trim();
-            let cUpper = String(canalCSV || "").toUpperCase().trim();
+            let vUpper = limpiarNombre(vendedor);
+            let cUpper = limpiarNombre(canalCSV);
+
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
             if (vUpper.includes("REPARACIONES") || vUpper.includes("TALLER") || vUpper.includes("SERVICIO")) return "Reparaciones";
             if (vUpper.includes("MAYORISTAS") || vUpper.includes("MAYORISTA")) return "Mayoristas";
             if (vUpper.includes("E-COMMERCE") || vUpper.includes("ECOMMERCE")) return "E-commerce";
             if (vUpper.includes("ONLINE") || vUpper === "ONLINE") return "Online";
-            if (vUpper.includes("SALON") || vUpper.includes("SALÓN") || vUpper === "SALON") return "Salon";
-            
+            if (vUpper.includes("SALON") || vUpper === "SALON") return "Salon";
+
             if (cUpper.includes("DIRECTORIO")) return "Directorio";
             if (cUpper.includes("VENTA EXTERNA") || cUpper.includes("EXTERNA")) return "Venta Externa";
             if (cUpper.includes("REPARACIONES") || cUpper.includes("TALLER")) return "Reparaciones";
             if (cUpper.includes("MAYORISTAS") || cUpper.includes("MAYORISTA")) return "Mayoristas";
             if (cUpper.includes("E-COMMERCE") || cUpper.includes("ECOMMERCE")) return "E-commerce";
             if (cUpper.includes("ONLINE")) return "Online";
-            if (cUpper.includes("SALON") || cUpper.includes("SALÓN")) return "Salon";
+            if (cUpper.includes("SALON")) return "Salon";
+
             return canalCSV || "Salon";
-        }
-
-        function getMetaVendedor(nombreOdoo, diccionarioMetas) {
-            if(!diccionarioMetas) return 0;
-            if(diccionarioMetas[nombreOdoo]) return diccionarioMetas[nombreOdoo];
-            
-            let nameUpper = String(nombreOdoo).toUpperCase().trim();
-            let cleanNameOdoo = nameUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-
-            if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(nameUpper)) {
-                return diccionarioMetas[nombreOdoo] || diccionarioMetas[nameUpper] || 0;
-            }
-
-            let fallbackMatch = 0;
-            for (let k in diccionarioMetas) {
-                let kUpper = String(k).toUpperCase().trim();
-                if (["SALON", "ONLINE", "E-COMMERCE", "MAYORISTAS", "VENTA EXTERNA", "REPARACIONES", "DIRECTORIO"].includes(kUpper) || kUpper.includes("VARIOS")) continue; 
-                let cleanK = kUpper.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "").trim();
-                if (cleanK === cleanNameOdoo) return diccionarioMetas[k];
-                if (nameUpper.includes(kUpper) || kUpper.includes(nameUpper)) fallbackMatch = diccionarioMetas[k];
-            }
-            return fallbackMatch;
-        }
-
-        function getMetaVendedorMarca(nombreOdoo, marca, diccionarioVM) {
-            if(!diccionarioVM) return 0;
-            let query = nombreOdoo + "|||" + marca;
-            if(diccionarioVM[query]) return diccionarioVM[query];
-            let nameUpper = String(nombreOdoo).toUpperCase();
-            let marcaUpper = String(marca).toUpperCase();
-            for (let k in diccionarioVM) {
-                let parts = String(k).split('|||');
-                if (parts.length === 2 && (parts[0].toUpperCase().includes(nameUpper) || nameUpper.includes(parts[0].toUpperCase())) && parts[1].toUpperCase() === marcaUpper) return diccionarioVM[k];
-            }
-            return 0;
         }
 
         function construirDropdownMesesDinámico(mesActualLive) {
@@ -792,7 +890,12 @@
             if (!selectTrans) return;
             if (isNaN(maxDias) || maxDias <= 0) maxDias = 31;
             let html = "";
-            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : METAS_JUNIO_LIVE.diasTranscurridos;
+            
+            let currentVal = simulacionDiasTrans !== null ? simulacionDiasTrans : 
+                             ((filtrosActivos.mes && parseInt(filtrosActivos.mes) !== filtrosActivos.mesActualLive) ? 
+                             (HISTORICO_METAS[filtrosActivos.mes] ? HISTORICO_METAS[filtrosActivos.mes].diasTranscurridos : maxDias) : 
+                             METAS_LIVE.diasTranscurridos);
+                             
             for (let d = 0.5; d <= maxDias; d += 0.5) {
                 let selected = (Math.abs(d - currentVal) < 0.1) ? "selected" : "";
                 html += `<option value="${d}" ${selected}>${d.toFixed(1).replace('.', ',')}</option>`;
@@ -808,90 +911,12 @@
             }
         }
 
-        /* 
-        ========================================================================
-        🔥 MOTOR DE EXTRACCIÓN HISTÓRICA DESDE GITHUB
-        ======================================================================== 
-        */
-        async function conectarHistoricosGitHub() {
-            document.getElementById('status-banner').innerHTML = "⏳ Extrayendo historial de metas desde GitHub...";
-            
-            // Aquí agregas cualquier archivo nuevo que subas a GitHub en el futuro.
-            // Asegurate de que el link siempre sea el "Raw"
-            const urlsGithub = [
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/ENERO2026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/FEBRERO2026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MARZO%20Y%20ABRIL%202026.csv",
-                "https://raw.githubusercontent.com/TI-Camping44/ti-camping44.github.io/main/MAYO%20Y%20JUNIO%202026.csv"
-            ];
-            
-            let mesIndex = 1; // Enero
-            
-            for (let url of urlsGithub) {
-                try {
-                    let res = await fetch(url + "?cb=" + new Date().getTime());
-                    if (!res.ok) continue;
-                    let text = await res.text();
-                    
-                    // Separar el archivo por cada vez que encuentra "TABLA 1" (útil por si en 1 archivo hay 2 meses)
-                    let bloques = text.split('--- TABLA 1');
-                    for(let i = 1; i < bloques.length; i++) {
-                        let bloque = bloques[i];
-                        
-                        // Crear el mes en el sistema
-                        if(!HISTORICO_METAS[mesIndex.toString()]) {
-                            HISTORICO_METAS[mesIndex.toString()] = { name: "Mes " + mesIndex, diasMes: 25, diasTranscurridos: 25, global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
-                        }
-                        let obj = HISTORICO_METAS[mesIndex.toString()];
-                        
-                        let lineas = bloque.split('\n');
-                        let inT1 = true;
-                        let inT3 = false;
-                        
-                        for(let line of lineas) {
-                            let l = line.trim();
-                            if(l.includes('--- TABLA 2')) { inT1 = false; continue; }
-                            if(l.includes('--- TABLA 3')) { inT1 = false; inT3 = true; continue; }
-                            
-                            let p = l.split(',');
-                            
-                            // Extrae la Meta General del vendedor
-                            if(inT1 && p.length >= 4) {
-                                let vend = p[2].trim();
-                                let meta = parseInt(p[3].replace(/\./g, '')) || 0;
-                                // Omite basuras
-                                if(vend !== 'Vendedor' && vend !== '' && meta > 0 && !vend.includes("Consum. Final") && !vend.includes("Vta. On Line")) {
-                                    obj.vendedoresTotales[vend] = meta;
-                                }
-                            }
-                            
-                            // Extrae la Meta de la Marca
-                            if(inT3 && p.length >= 5) {
-                                let vend = p[1].trim();
-                                let marca = p[3].trim();
-                                let meta = parseInt(p[4].replace(/\./g, '')) || 0;
-                                if(vend !== 'Vendedor' && vend !== '' && meta > 0) {
-                                    obj.vendedorMarca[vend + '|||' + marca] = meta;
-                                }
-                            }
-                        }
-                        mesIndex++; // Pasa al siguiente mes
-                    }
-                } catch(e) { console.error("Error leyendo de GitHub:", e); }
-            }
-        }
-
+        // ========================================================================
+        // 🔥 INICIO DEL SISTEMA
+        // ========================================================================
         async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
             
-            // PRIMERO: Descargamos las bases históricas limpias de GitHub
-            await conectarHistoricosGitHub();
-            
-            // SEGUNDO: Descargamos los datos en vivo de Google Sheets
-            descargarDatosCruzadosBI();
-        }
-
-        async function descargarDatosCruzadosBI() {
             let escapeTimeout = setTimeout(() => {
                 let loader = document.getElementById('loader');
                 if (loader && loader.style.display !== 'none') {
@@ -902,6 +927,7 @@
             }, 3000);
 
             try {
+                document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
@@ -927,11 +953,13 @@
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
+                
+                // Procesamos las ventas EN VIVO
                 procesarVentasData(filasDataFormateadas);
 
                 clearTimeout(escapeTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD. Base conectada con Google Sheets y GitHub a las: ${horaStr}`);
+                actualizarBannerEstado('success', `✅ Sincronizado YTD (Metas Blindadas + Ventas en Vivo) a las: ${horaStr}`);
                 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 document.getElementById('loader').style.display = 'none';
@@ -940,15 +968,15 @@
                 clearTimeout(escapeTimeout);
                 console.error(err);
                 try { filtrarYRenderizarTodo(); } catch(e){}
-                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos.`);
+                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos de Google Sheets.`);
                 document.getElementById('loader').style.display = 'none';
             }
         }
 
         function procesarMetasConfigActuales(filas) {
-            METAS_JUNIO_LIVE.canales = {};
-            METAS_JUNIO_LIVE.vendedoresTotales = {};
-            METAS_JUNIO_LIVE.vendedorMarca = {};
+            METAS_LIVE.canales = {};
+            METAS_LIVE.vendedoresTotales = {};
+            METAS_LIVE.vendedorMarca = {};
 
             let dMesFinal = 25;
             let dTransFinal = 4.5;
@@ -966,22 +994,24 @@
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) dTransFinal = val;
                     }
-                    if (row[3] && idx === 3) METAS_JUNIO_LIVE.global = handleNum(row[3]);
+                    if (row[3] && idx === 3) METAS_LIVE.global = handleNum(row[3]);
 
                     if (row[5]) {
                         let colCanal = String(row[5]).trim();
                         let colCanalNorm = obtenerCanalReal("", colCanal);
                         if (["Salon", "Online", "E-commerce", "Mayoristas", "Venta Externa", "Directorio", "Reparaciones"].includes(colCanalNorm)) {
-                            METAS_JUNIO_LIVE.canales[colCanalNorm] = handleNum(row[6]);
+                            METAS_LIVE.canales[colCanalNorm] = handleNum(row[6]);
                         }
                     }
                     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {
-                        METAS_JUNIO_LIVE.vendedoresTotales[String(row[8]).trim()] = handleNum(row[9]);
+                        let vClean = limpiarNombre(String(row[8]));
+                        let meta = handleNum(row[9]);
+                        if(meta > 0) METAS_LIVE.vendedoresTotales[vClean] = meta;
                     }
                 });
 
-                METAS_JUNIO_LIVE.diasMes = dMesFinal;
-                METAS_JUNIO_LIVE.diasTranscurridos = dTransFinal;
+                METAS_LIVE.diasMes = dMesFinal;
+                METAS_LIVE.diasTranscurridos = dTransFinal;
 
                 if (simulacionDiasTrans === null) {
                     simulacionDiasTrans = dTransFinal;
@@ -1023,7 +1053,10 @@
                                     let marc = (filas[r][col] || "").toString().trim();
                                     let metaVal = filas[r][col+1];
                                     if (marc && !marc.startsWith("---") && !marc.startsWith("[")) {
-                                        METAS_JUNIO_LIVE.vendedorMarca[currentVend + "|||" + marc] = handleNum(metaVal);
+                                        let vClean = limpiarNombre(currentVend);
+                                        let mClean = limpiarNombre(marc);
+                                        let meta = handleNum(metaVal);
+                                        if(meta > 0) METAS_LIVE.vendedorMarca[vClean + '|||' + mClean] = meta;
                                     }
                                 }
                             }
@@ -1038,6 +1071,11 @@
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let marcasSet = new Set();
+
+            // Metemos al menú a los vendedores históricos aunque no hayan vendido nada
+            Object.keys(HISTORICO_METAS).forEach(m => {
+                Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
+            });
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
@@ -1097,7 +1135,13 @@
 
             if(selV) {
                 let optV = `<option value="">-- Todos los Vendedores --</option>`;
-                Array.from(vendedores).sort().forEach(v => { if(v) optV += `<option value="${v}">${v}</option>`; });
+                Array.from(vendedores).sort().forEach(v => { 
+                    let vClean = limpiarNombre(v);
+                    const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
+                    if(v && !BASURA.some(b => vClean === b || vClean.startsWith(b))) {
+                        optV += `<option value="${v}">${v}</option>`; 
+                    }
+                });
                 selV.innerHTML = optV;
             }
             if(selC) {
@@ -1136,22 +1180,24 @@
             document.getElementById('select-fecha').value = "";
             document.getElementById('select-marca').value = "";
             
-            simulacionDiasTrans = METAS_JUNIO_LIVE.diasTranscurridos;
+            simulacionDiasTrans = METAS_LIVE.diasTranscurridos;
             try { filtrarYRenderizarTodo(); } catch(e){}
         }
 
-        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos"];
+        const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Camping 44", "Descuentos", "BWC"];
         const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
 
         function obtenerMetasEstructuraBI() {
             let mesSelec = filtrosActivos.mes;
             let liveMonth = filtrosActivos.mesActualLive;
             
+            let defaultEmpty = { global: 0, diasMes: 25, diasTranscurridos: 25, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+
             if (mesSelec === "") { 
-                let metasYTD = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+                let metasYTD = JSON.parse(JSON.stringify(defaultEmpty));
                 for (let m = 1; m <= liveMonth; m++) {
                     let key = String(m);
-                    let mData = (m === liveMonth) ? METAS_JUNIO_LIVE : HISTORICO_METAS[key];
+                    let mData = (m === liveMonth) ? METAS_LIVE : HISTORICO_METAS[key];
                     if(!mData) continue;
                     
                     metasYTD.global += (mData.global || 0);
@@ -1166,9 +1212,9 @@
                 }
                 return metasYTD;
             } else if (parseInt(mesSelec) === liveMonth) {
-                return METAS_JUNIO_LIVE;
+                return METAS_LIVE;
             } else {
-                return HISTORICO_METAS[mesSelec] || METAS_JUNIO_LIVE;
+                return HISTORICO_METAS[mesSelec] || JSON.parse(JSON.stringify(defaultEmpty));
             }
         }
 
@@ -1182,14 +1228,12 @@
 
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
 
-            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos; 
-            let diasTotalesActivos = METAS_ACTIVAS.diasMes;
+            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos || 25; 
+            let diasTotalesActivos = METAS_ACTIVAS.diasMes || 25;
             let filtroTime = 0;
             
             if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
-                if (simulacionDiasTrans !== null) {
-                    diasTranscurridosActivos = simulacionDiasTrans;
-                }
+                if (simulacionDiasTrans !== null) { diasTranscurridosActivos = simulacionDiasTrans; }
                 poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
             
@@ -1200,11 +1244,13 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
+            // PROCESAMOS VENTAS EN VIVO DE ODOO (ÚNICA FUENTE DE VENTAS)
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
-                if (filtrosActivos.vendedor && r.vendedor !== filtrosActivos.vendedor) return;
+                
+                if (filtrosActivos.vendedor && !sonElMismoVendedor(r.vendedor, filtrosActivos.vendedor)) return;
                 if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
-                if (filtrosActivos.marca && r.marcaFinal !== filtrosActivos.marca) return;
+                if (filtrosActivos.marca && limpiarNombre(r.marcaFinal) !== limpiarNombre(filtrosActivos.marca)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
 
                 let esNC = (r.documento === "Nota de Crédito");
@@ -1243,14 +1289,37 @@
                     }
                 }
 
+                // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
                 if(r.vendedor) {
                     if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
                     if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
-                        dataFichasVend[r.vendedor].marcas[r.marcaFinal] = (dataFichasVend[r.vendedor].marcas[r.marcaFinal] || 0) + m;
+                        let mClean = limpiarNombre(r.marcaFinal);
+                        dataFichasVend[r.vendedor].marcas[mClean] = (dataFichasVend[r.vendedor].marcas[mClean] || 0) + m;
                     }
                 }
             });
+
+            // EL SECRETO PARA QUE TODOS APAREZCAN AUNQUE VENDAN 0:
+            if (METAS_ACTIVAS && METAS_ACTIVAS.vendedoresTotales) {
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(vMeta => {
+                    let found = false;
+                    Object.keys(dataFichasVend).forEach(vReal => {
+                        if (sonElMismoVendedor(vMeta, vReal)) found = true;
+                    });
+                    
+                    if (!found) {
+                        let guessedCanal = "Salon";
+                        if (vMeta.includes("MAYORISTA")) guessedCanal = "Mayoristas";
+                        else if (vMeta.includes("ONLINE")) guessedCanal = "Online";
+                        else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
+                        else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
+                        
+                        // Los inyectamos para que se vean sus 0
+                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, nc: 0, bruto: 0 };
+                    }
+                });
+            }
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
           } catch(e) {
@@ -1267,16 +1336,33 @@
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
             if (filtrosActivos.vendedor && filtrosActivos.marca) {
-                objetivoFiltrado = getMetaVendedorMarca(filtrosActivos.vendedor, filtrosActivos.marca, METAS_ACTIVAS.vendedorMarca);
+                let mF = 0;
+                let marcaUpper = limpiarNombre(filtrosActivos.marca);
+                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length === 2 && limpiarNombre(parts[1]) === marcaUpper) {
+                        if (sonElMismoVendedor(parts[0], filtrosActivos.vendedor)) {
+                            mF += METAS_ACTIVAS.vendedorMarca[k];
+                        }
+                    }
+                });
+                objetivoFiltrado = mF;
             } else if (filtrosActivos.vendedor) {
-                objetivoFiltrado = getMetaVendedor(filtrosActivos.vendedor, METAS_ACTIVAS.vendedoresTotales);
+                let foundMeta = 0;
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                    if (sonElMismoVendedor(k, filtrosActivos.vendedor)) {
+                        foundMeta = METAS_ACTIVAS.vendedoresTotales[k];
+                    }
+                });
+                objetivoFiltrado = foundMeta;
             } else if (filtrosActivos.canal) {
                 objetivoFiltrado = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[filtrosActivos.canal]) ? METAS_ACTIVAS.canales[filtrosActivos.canal] : 0;
             } else if (filtrosActivos.marca) {
+                let mClean = limpiarNombre(filtrosActivos.marca);
                 let sumM = 0;
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        if(k.toUpperCase().endsWith("|||" + filtrosActivos.marca.toUpperCase())) sumM += METAS_ACTIVAS.vendedorMarca[k];
+                        if(k.toUpperCase().endsWith("|||" + mClean)) sumM += METAS_ACTIVAS.vendedorMarca[k];
                     });
                 }
                 objetivoFiltrado = sumM;
@@ -1382,10 +1468,15 @@
 
                 let subNet = 0, subNC = 0, subEsp = 0, subObj = 0;
                 
+                // Mostrar vendedores reales
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
-                        let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales); 
+                        let obj = 0;
+                        Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                            if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                        });
+
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
@@ -1398,6 +1489,27 @@
                         else hCons += rowHtml;
                     });
                 }
+                
+                // Mostrar vendedores con meta pero 0 ventas
+                Object.keys(dataFichasVend).forEach(v => {
+                    if (dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
+                        let obj = 0;
+                        Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                            if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                        });
+                        if (obj > 0) {
+                            let esp = Math.round((obj / dMes) * dTr);
+                            subEsp += esp; subObj += obj;
+                            let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ 0</td><td class="text-right num-negativo">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
+                            if (canal === "E-commerce") hEcomV += rowHtml; 
+                            else if (canal === "Mayoristas") hMayV += rowHtml; 
+                            else if (canal === "Venta Externa") hExtV += rowHtml; 
+                            else if (canal === "Directorio") hDirV += rowHtml; 
+                            else if (canal === "Reparaciones") hRepV += rowHtml; 
+                            else hCons += rowHtml;
+                        }
+                    }
+                });
 
                 let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                 if (canal === "E-commerce") hEcomV += totalHtml; 
@@ -1416,22 +1528,24 @@
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
-            let hTablaBonos = "";
+            let bonosDataByCanal = { "Salon": [], "Online": [], "Venta Externa": [], "Directorio": [], "E-commerce": [], "Mayoristas": [], "Reparaciones": [] };
 
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
                 if(!vData) return;
 
                 let marcasUnicas = new Set();
-                Object.keys(vData.marcas).forEach(m => marcasUnicas.add(m));
                 
+                // Las marcas que vendió en el Google Sheet
+                Object.keys(vData.marcas).forEach(m => marcasUnicas.add(limpiarNombre(m)));
+                
+                // Las marcas que tiene asignadas como meta en el histórico blindado
                 if (METAS_ACTIVAS.vendedorMarca) {
-                    let vNameUpper = String(v).toUpperCase();
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
-                        if (parts.length === 2 && (parts[0].toUpperCase().includes(vNameUpper) || vNameUpper.includes(parts[0].toUpperCase()))) {
-                            if (METAS_ACTIVAS.vendedorMarca[k] > 0) {
-                                marcasUnicas.add(parts[1]); 
+                        if (parts.length === 2 && METAS_ACTIVAS.vendedorMarca[k] > 0) {
+                            if (sonElMismoVendedor(parts[0], v)) {
+                                marcasUnicas.add(limpiarNombre(parts[1])); 
                             }
                         }
                     });
@@ -1439,30 +1553,44 @@
 
                 let mRows = "", aRows = "", rRows = "";
                 let subMV = 0, subAV = 0, subRV = 0;
-                let marcasAsignadas = 0;
-                let marcasAlcanzadas = 0;
+                
+                let marcasGenAsig = 0, marcasGenAlc = 0;
+                let aymAsig = 0, aymAlc = 0;
 
-                Array.from(marcasUnicas).sort().forEach(m => {
-                    let val = vData.marcas[m] || 0;
-                    let mAsig = getMetaVendedorMarca(v, m, METAS_ACTIVAS.vendedorMarca);
+                Array.from(marcasUnicas).sort().forEach(mClean => {
+                    let val = vData.marcas[mClean] || 0; // Usar el nombre limpio
+                    
+                    let mAsig = 0;
+                    for (let k in METAS_ACTIVAS.vendedorMarca) {
+                        let parts = String(k).split('|||');
+                        if (parts.length === 2 && limpiarNombre(parts[1]) === mClean && sonElMismoVendedor(parts[0], v)) {
+                            mAsig = METAS_ACTIVAS.vendedorMarca[k];
+                            break;
+                        }
+                    }
                     
                     let rowClass = "";
                     let checkMark = "";
+                    let isWeapon = LISTA_ARMAS.some(la => limpiarNombre(la) === mClean);
+                    
                     if (mAsig > 0) {
-                        marcasAsignadas++;
-                        if (val >= mAsig) {
-                            marcasAlcanzadas++;
-                            rowClass = "row-meta-lograda";
-                            checkMark = " ✅";
+                        if (isWeapon) {
+                            aymAsig++;
+                            if (val >= mAsig) { aymAlc++; rowClass = "row-meta-lograda"; checkMark = " ✅"; }
+                        } else {
+                            marcasGenAsig++;
+                            if (val >= mAsig) { marcasGenAlc++; rowClass = "row-meta-lograda"; checkMark = " ✅"; }
                         }
                     }
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
-                    let row = `<tr class="${rowClass}"><td>${m}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let mUpper = String(m).toUpperCase();
-                    let isMainBrand = LISTA_MARCAS.some(lm => String(lm).toUpperCase() === mUpper);
-                    let isWeapon = LISTA_ARMAS.some(la => String(la).toUpperCase() === mUpper);
+                    // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
+                    let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
+                    
+                    let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                    
+                    let isMainBrand = LISTA_MARCAS.some(lm => limpiarNombre(lm) === mClean);
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1470,101 +1598,88 @@
                 });
 
                 let net = vData.bruto + vData.nc;
-                let obj = getMetaVendedor(v, METAS_ACTIVAS.vendedoresTotales);
+                
+                let obj = 0;
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                    if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                });
+
                 let esp = Math.round((obj / dMes) * dTr);
                 let dif = net - esp;
                 let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
 
-                let pctMarcas = marcasAsignadas > 0 ? ((marcasAlcanzadas / marcasAsignadas) * 100).toFixed(0) + "%" : "0%";
+                let totalMarcasAsig = marcasGenAsig + aymAsig;
+                let totalMarcasAlc = marcasGenAlc + aymAlc;
+
+                let pctMarcas = totalMarcasAsig > 0 ? ((totalMarcasAlc / totalMarcasAsig) * 100).toFixed(0) + "%" : "0%";
                 let pctAlcanzado = esp > 0 ? ((net/esp)*100).toFixed(0) : 0;
                 let clsAlcanzado = pctAlcanzado >= 100 ? 'num-positivo' : 'num-negativo';
                 let pctProy = obj > 0 ? ((proy/obj)*100).toFixed(0) : 0;
                 let clsProy = pctProy >= 100 ? 'num-positivo' : 'num-negativo';
 
                 // ==========================================
-                // LÓGICA DE BONOS (FILTRO + REGLAS DE ESCALAS)
+                // LÓGICA DE BONOS (RENOVADA Y AGRUPADA)
                 // ==========================================
-                let nUpper = String(v).toUpperCase();
+                let nUpper = limpiarNombre(v);
                 
-                // 🔥 FILTRO INTELIGENTE: Ocultamos a los vendedores fantasma y sin metas de la tabla de bonos
-                let ocultarDeBonos = (nUpper === "SALON" || nUpper === "ONLINE" || nUpper.includes("VARIOS") || nUpper.includes("SIN VENDEDOR") || nUpper === "MAYORISTAS" || nUpper === "E-COMMERCE" || (obj === 0 && net === 0));
-
-                if (!ocultarDeBonos) {
-                    let escalaRol = "Vendedor Salón / Online";
-                    let premios = [350000, 700000, 1400000]; 
-
-                    if (nUpper.includes("GERENTE") || nUpper.includes("GERENCIA")) {
-                        escalaRol = "Gerente"; premios = [2000000, 4000000, 8000000];
-                    } else if (nUpper.includes("SUPERVISOR")) {
-                        escalaRol = "Supervisor Online/Mayorista"; premios = [450000, 900000, 1800000];
-                    } else if (nUpper.includes("JEFE")) {
-                        escalaRol = "Jefe Consumidor Final"; premios = [800000, 1600000, 3000000];
-                    } else if (nUpper.includes("MAYORISTA")) {
-                        escalaRol = "Vendedores Mayoristas"; premios = [900000, 1800000, 3600000];
-                    }
-
+                let isBasura = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE", "SALON", "MAYORISTA", "DIRECTORIO", "REPARACIONES", "EXTERNA", "E-COMMERCE"].some(b => nUpper === b || nUpper.startsWith(b));
+                let isEmpty = (obj === 0 && net === 0 && totalMarcasAsig === 0);
+                
+                if (!isBasura && !isEmpty) {
                     let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
                     let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
 
-                    let montoBonoFinal = 0;
-                    if (logroMeta && marcasAsignadas > 0) {
-                        if (marcasAlcanzadas >= 16) montoBonoFinal = premios[2];
-                        else if (marcasAlcanzadas >= 13) montoBonoFinal = premios[1];
-                        else if (marcasAlcanzadas >= 10) montoBonoFinal = premios[0];
-                    }
-
-                    let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO (G. 0)</span>`;
+                    let badgeMeta = logroMeta ? `<span class="badge badge-success">✅ SÍ ALCANZÓ</span>` : `<span class="badge badge-pending">❌ NO</span>`;
                     
-                    // 🔥 LIMPIEZA DE "0 DE 0": Si no tiene marcas asignadas, se ve limpio y profesional.
-                    let txtMarcas = "";
-                    if (marcasAsignadas === 0) {
-                        txtMarcas = `<span style="color:#a0aec0; font-size:10px;">- Sin marcas asignadas -</span>`;
-                    } else {
-                        txtMarcas = `<span class="badge badge-brand">${marcasAlcanzadas} de ${marcasAsignadas} activas</span>`;
-                    }
+                    let txtMGen = marcasGenAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${marcasGenAlc} de ${marcasGenAsig}</span>`;
+                    let txtAyM = aymAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${aymAlc} de ${aymAsig}</span>`;
 
-                    let txtBono = montoBonoFinal > 0 ? `<strong style="color:#22543d; background:#c6f6d5; padding:4px 8px; border-radius:4px; font-size:11.5px;">₲ ${montoBonoFinal.toLocaleString('es-PY')}</strong>` : `<strong style="color:#742a2a; font-size:11.5px;">₲ 0</strong>`;
-
-                    hTablaBonos += `
+                    let rowHtmlBonos = `
                         <tr>
-                            <td><strong>${v}</strong></td>
-                            <td>${vData.canal || "General"}</td>
-                            <td style="color:#2b7a78; font-weight:bold; font-size:10px;">${escalaRol}</td>
+                            <td class="text-left"><strong>${v}</strong></td>
                             <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
                             <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
                             <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11.5px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
                             <td class="text-center">${badgeMeta}</td>
-                            <td class="text-center">${txtMarcas}</td>
-                            <td class="text-right">${txtBono}</td>
+                            <td class="text-center">${txtMGen}</td>
+                            <td class="text-center">${txtAyM}</td>
                         </tr>
                     `;
+                    
+                    let canalAsignado = vData.canal || "Salon";
+                    if (bonosDataByCanal[canalAsignado]) {
+                        bonosDataByCanal[canalAsignado].push(rowHtmlBonos);
+                    } else {
+                        bonosDataByCanal["Salon"].push(rowHtmlBonos);
+                    }
                 }
 
-                // CONSTRUCCIÓN FICHA VENDEDOR
                 let fichaHtml = `
                 <div class="ficha-vendedor">
                     <div class="ficha-header">▶ ${v}</div>
-                    <table class="ficha-table">
-                        <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
-                        <tbody>
-                            <tr><td colspan="4" class="ficha-section">[ MARCAS ]</td></tr>${mRows}
-                            <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${subMV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                            <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows}
-                            <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                            <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows}
-                            <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${subRV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                            <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
-                            
-                            <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
-                            <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                            <tr class="ficha-kpi-normal"><td>Cantidad de Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${marcasAsignadas}</td></tr>
-                            <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Marcas Alcanzadas</td><td colspan="2" class="text-right ${marcasAlcanzadas > 0 ? 'num-positivo' : 'num-negativo'}">${marcasAlcanzadas}</td><td class="text-center ${marcasAlcanzadas > 0 ? 'num-positivo' : 'num-negativo'}">${pctMarcas}</td></tr>
-                            <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
-                        </tbody>
-                    </table>
+                    <div style="overflow-x:auto;">
+                        <table class="ficha-table">
+                            <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
+                            <tbody>
+                                <tr><td colspan="4" class="ficha-section">[ MARCAS GRALES. ]</td></tr>${mRows}
+                                <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${subMV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                                <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows}
+                                <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                                <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows}
+                                <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${subRV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                                <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
+                                
+                                <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${totalMarcasAsig}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${totalMarcasAlc > 0 ? 'num-positivo' : 'num-negativo'}">${totalMarcasAlc}</td><td class="text-center">-</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>`;
 
                 let canalReal = vData.canal || "";
@@ -1594,7 +1709,16 @@
             document.getElementById('grid-fichas-directorio').innerHTML = hFichasDir;
             document.getElementById('grid-fichas-reparaciones').innerHTML = hFichasRep;
             
-            document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonos;
+            // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
+            let hTablaBonosFinal = "";
+            let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
+            canalesSegmentosBonos.forEach(c => {
+                if (bonosDataByCanal[c] && bonosDataByCanal[c].length > 0) {
+                    hTablaBonosFinal += `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${c.toUpperCase()} ---</td></tr>`;
+                    hTablaBonosFinal += bonosDataByCanal[c].join("");
+                }
+            });
+            document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonosFinal;
 
             document.getElementById('ecommerce-lista').innerHTML = `
                 <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
@@ -1607,9 +1731,10 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
-            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td class="${v===0?'bg-zero':''}">${m}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td class="${v===0?'bg-zero':''}">${a}</td><td class="text-right ${v===0?'bg-zero':''}">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right">${v!==0?'₲ '+v.toLocaleString('es-PY'):0}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
+            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
+            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             try {
                 if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
