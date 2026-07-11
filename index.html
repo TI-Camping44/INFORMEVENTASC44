@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
+    <!-- Gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Exportación PDF Profesional -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Exportación EXCEL Real -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* REGLA DE ORO RESPONSIVA */
@@ -120,7 +123,6 @@
             .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
             .sidebar h2 { display: none; }
             .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
-            
             .main-content { padding: 10px; width: 100%; overflow: visible; }
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
@@ -128,16 +130,12 @@
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
-            
             .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
             .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
-            
             .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
             .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
-            table.excel-table { min-width: 700px; }
         }
 
-        /* Oculta la impresión por defecto del navegador */
         @media print { body { display: none; } }
     </style>
 </head>
@@ -145,7 +143,7 @@
 
     <div id="loader" class="loading-screen">
         <div class="spinner"></div>
-        <div id="loader-text">Sincronizando Base de Datos YTD e Historial de GitHub...</div>
+        <div id="loader-text">Cargando Base Operativa Blindada...</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
@@ -208,6 +206,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA GENERAL -->
         <div id="tab-general" class="tab-content active">
             <div class="excel-container">
                 <div class="excel-title">Sobre el Objetivo General</div>
@@ -285,6 +284,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA CONSUMIDOR FINAL -->
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
@@ -317,6 +317,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA VENTA EXTERNA -->
         <div id="tab-externa" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
@@ -344,6 +345,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DIRECTORIO -->
         <div id="tab-directorio" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
@@ -371,6 +373,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA E-COMMERCE -->
         <div id="tab-ecommerce" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
@@ -411,6 +414,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MAYORISTAS -->
         <div id="tab-mayoristas" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
@@ -438,6 +442,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA REPARACIONES -->
         <div id="tab-reparaciones" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
@@ -465,6 +470,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA DE BONOS -->
         <div id="tab-bonos" class="tab-content">
             <div class="excel-container" style="border: 2px solid #dd6b20;">
                 <div class="excel-title" style="background: #dd6b20;">
@@ -496,6 +502,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA NOTAS DE CRÉDITO -->
         <div id="tab-nc" class="tab-content">
             <div class="excel-container">
                 <div class="excel-title">📉 ANÁLISIS DE NOTAS DE CRÉDITO (DEVOLUCIONES)</div>
@@ -531,6 +538,7 @@
             </div>
         </div>
 
+        <!-- PESTAÑA MARCAS -->
         <div id="tab-marcas" class="tab-content">
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -635,7 +643,7 @@
                 
                 doc.setTextColor(221, 107, 32); 
                 doc.setFontSize(10);
-                doc.text(`Periodo Evaluado: ${currentMonthTxt}`, 14, 26);
+                doc.text(`Período Evaluado: ${currentMonthTxt}`, 14, 26);
                 
                 // Regla sin tildes para no corromper la fuente
                 doc.setTextColor(123, 52, 30);
@@ -736,6 +744,8 @@
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
+        let METAS_LIVE = { name: "Actual", diasMes: 25.0, global: 2410000000, diasTranscurridos: 5.5, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+
         // =========================================================================
         // 🔥 LISTAS DE CATEGORIZACIÓN (ACTUALIZADAS CON ARMAS Y MUNICIONES)
         // =========================================================================
@@ -745,7 +755,7 @@
         // =========================================================================
         // 🔥 HISTORIAL DE METAS DESCOMPRIMIDO, FULL, SIN FALTAR UNA COMA
         // =========================================================================
-        let HISTORICO_METAS = {
+        const HISTORICO_METAS = {
             "1": {
                 "diasMes": 25,
                 "diasTranscurridos": 25,
@@ -1410,7 +1420,7 @@
             }
         };
 
-        // Recalculamos globales del histórico (Respaldo inteligente de metas)
+        // Recalculamos los globales del histórico
         for(let m in HISTORICO_METAS){
             let g = 0; let c = {"Salon":0,"Online":0,"Mayoristas":0,"E-commerce":0,"Venta Externa":0,"Directorio":0,"Reparaciones":0};
             for(let v in HISTORICO_METAS[m].vendedoresTotales){
@@ -1494,7 +1504,7 @@
                 diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
             }
 
-            // PROCESAMOS VENTAS EN VIVO DE ODOO (ÚNICA FUENTE DE VENTAS, CERO DUPLICACIONES)
+            // PROCESAMOS VENTAS EN VIVO DE ODOO
             lineasDeDatosGlobales.forEach(r => {
                 if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
                 
@@ -1562,7 +1572,7 @@
                         if (!found) {
                             let guessedCanal = "Salon";
                             if (vMeta.includes("MAYORISTA") || vMeta.includes("FERNANDEZ") || vMeta.includes("CASCO")) guessedCanal = "Mayoristas";
-                            else if (vMeta.includes("ONLINE") || vMeta.includes("GONZALEZ ARCE") || vMeta.includes("CABRERA")) guessedCanal = "Online";
+                            else if (vMeta.includes("ONLINE") || vMeta.includes("GONZALEZ ARCE") || vMeta.includes("CABRERA") || vMeta.includes("SANCHEZ") || vMeta.includes("ZARATE") || vMeta.includes("INSFRAN")) guessedCanal = "Online";
                             else if (vMeta.includes("COMMERCE")) guessedCanal = "E-commerce";
                             else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                             
@@ -1743,6 +1753,7 @@
                     });
                 }
                 
+                // Mostrar vendedores con meta pero 0 ventas
                 Object.keys(dataFichasVend).forEach(v => {
                     if (esVendedorReal(v) && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
                         let obj = 0;
@@ -1874,7 +1885,7 @@
                 // ==========================================
                 let isEmpty = (obj === 0 && net === 0 && marcasGenAsig === 0 && aymAsig === 0);
                 
-                if (!isEmpty) {
+                if (!isEmpty && esVendedorReal(v)) {
                     let pctMesBono = obj > 0 ? ((net/obj)*100) : 0;
                     let logroMeta = (net >= obj && obj > 0) || (pctMesBono >= 100);
 
@@ -1980,6 +1991,7 @@
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
+            // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
             let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
