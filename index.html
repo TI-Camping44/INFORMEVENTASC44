@@ -76,6 +76,10 @@
         /* Las tablas de 2 columnas (Notas de Crédito, Marcas y Líneas) viven en columnas angostas:
            no deben forzar 650px de ancho, si no la 2da columna (montos) queda cortada a la derecha. */
         .three-column-grid table.excel-table { min-width: 0; }
+        /* Los nombres largos (vendedor/cliente) se parten en 2 líneas para no empujar la tabla y
+           cortar la columna de montos; los montos (text-right) siempre en una sola línea. */
+        .three-column-grid table.excel-table td { white-space: normal; word-break: break-word; }
+        .three-column-grid table.excel-table td.text-right { white-space: nowrap; }
         table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 10px 12px; border: 1px solid var(--gray-border); text-align: left; }
         table.excel-table td { padding: 8px 12px; border: 1px solid var(--gray-border); white-space: nowrap; vertical-align: middle; }
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; font-size: 12px; padding: 10px 12px; letter-spacing: 0.5px; }
