@@ -73,6 +73,9 @@
         .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
         table.excel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 650px; }
+        /* Las tablas de 2 columnas (Notas de Crédito, Marcas y Líneas) viven en columnas angostas:
+           no deben forzar 650px de ancho, si no la 2da columna (montos) queda cortada a la derecha. */
+        .three-column-grid table.excel-table { min-width: 0; }
         table.excel-table th { background: #edf2f7; color: var(--text-dark); font-weight: bold; padding: 10px 12px; border: 1px solid var(--gray-border); text-align: left; }
         table.excel-table td { padding: 8px 12px; border: 1px solid var(--gray-border); white-space: nowrap; vertical-align: middle; }
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; font-size: 12px; padding: 10px 12px; letter-spacing: 0.5px; }
