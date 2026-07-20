@@ -87,12 +87,13 @@
         .badge-pending { background-color: #fed7d7; color: #742a2a; border: 1px solid #feb2b2; }
         .badge-brand { background-color: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; }
 
-        .fichas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; margin-top: 10px; width: 100%; }
+        .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; margin-top: 10px; width: 100%; }
         .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 10.5px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; }
         .ficha-table { width: 100%; border-collapse: collapse; min-width: 100%; }
         .ficha-table th { background: #f8fafc; padding: 6px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 10.5px;}
-        .ficha-table td { padding: 5px 8px; border-bottom: 1px dashed #e2e8f0; } 
+        .ficha-table td { padding: 5px 6px; border-bottom: 1px dashed #e2e8f0; }
+        .ficha-table td.text-right, .ficha-table th.text-right { white-space: nowrap; }
         
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
         .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 5px 8px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
@@ -241,26 +242,35 @@
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 PARTICIPACIÓN DEL CANAL</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DEL CANAL EN BASE AL OBJETIVO GENERAL DEL MES</span>
                     <div style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="grid-1-2">
-                <div class="excel-container">
-                    <div class="excel-title">📅 RESUMEN DE VENTAS POR DÍA</div>
-                    <div class="table-responsive-wrapper">
-                        <table class="excel-table">
-                            <thead>
-                                <tr><th>Fecha</th><th class="text-right">Venta del Día</th><th class="text-right">Acumulado Período</th></tr>
-                            </thead>
-                            <tbody id="grid-ventas-diarias"></tbody>
-                        </table>
-                    </div>
+            <div class="excel-container">
+                <div class="excel-title">📋 RESUMEN CONSOLIDADO POR CANAL Y VENDEDOR</div>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor</th>
+                                <th class="text-right">Ventas Totales</th>
+                                <th class="text-right">Hoy deberías estar en</th>
+                                <th class="text-right">% Logrado</th>
+                                <th class="text-right">Objetivo Mes</th>
+                                <th class="text-right">% Logrado Mes</th>
+                                <th class="text-right">Proyección</th>
+                                <th class="text-right">% Proyección</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-resumen-consolidado"></tbody>
+                    </table>
                 </div>
+            </div>
 
+            <div class="grid-1-2">
                 <div class="excel-container">
                     <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
                     <div class="table-responsive-wrapper" style="margin-bottom: 20px;">
@@ -523,6 +533,15 @@
                         </div>
                     </div>
                     <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
+                        <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Por Vendedor Responsable</span>
+                        <div class="table-responsive-wrapper">
+                            <table class="excel-table">
+                                <thead><tr><th>Vendedor</th><th class="text-right">Monto NC</th></tr></thead>
+                                <tbody id="nc-por-vendedor"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="excel-container" style="margin-bottom:0; box-shadow:none;">
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Cronología Completa</span>
                         <div class="table-responsive-wrapper">
                             <table class="excel-table">
@@ -541,7 +560,7 @@
                     <div class="excel-title">MARCAS PRINCIPALES</div>
                     <div class="table-responsive-wrapper">
                         <table class="excel-table">
-                            <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th><th class="text-right">Objetivo</th><th class="text-right">% Logrado</th></tr></thead>
                             <tbody id="marcas-lista"></tbody>
                             <tfoot id="marcas-footer"></tfoot>
                         </table>
@@ -551,7 +570,7 @@
                     <div class="excel-title">ARMAS Y MUNICIONES</div>
                     <div class="table-responsive-wrapper">
                         <table class="excel-table">
-                            <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th><th class="text-right">Objetivo</th><th class="text-right">% Logrado</th></tr></thead>
                             <tbody id="armas-lista"></tbody>
                             <tfoot id="armas-footer"></tfoot>
                         </table>
@@ -579,6 +598,17 @@
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
+        }
+
+        // Drill-down: despliega u oculta los productos de una marca dentro de una ficha.
+        function togglePd(uid, el) {
+            var rows = document.getElementsByClassName(uid);
+            var show = null;
+            for (var i = 0; i < rows.length; i++) {
+                if (show === null) show = (rows[i].style.display === 'none');
+                rows[i].style.display = show ? 'table-row' : 'none';
+            }
+            if (el) { var c = el.querySelector('.pd-caret'); if (c) c.textContent = show ? '▾' : '▸'; }
         }
 
         // =========================================================================
@@ -734,6 +764,7 @@
         var chartPie = null;
 
         let lineasDeDatosGlobales = [];
+        let idxProductoGlobal = -1; // índice de la columna "Producto" en DATA (drill-down por marca)
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
@@ -1131,14 +1162,28 @@
                 Object.keys(HISTORICO_METAS[m].vendedoresTotales).forEach(v => vendedoresSet.add(v));
             });
 
+            // Detección por NOMBRE de la columna Producto y Categoría (para el drill-down por marca).
+            // Se busca en la fila de títulos, así funciona sin importar la posición de la columna.
+            idxProductoGlobal = -1;
+            let idxCategoria = -1;
+            if (filas[0]) {
+                filas[0].forEach((h, idx) => {
+                    let hn = limpiarNombre(h);
+                    if (idxProductoGlobal === -1 && hn === "PRODUCTO") idxProductoGlobal = idx;
+                    if (idxCategoria === -1 && hn.startsWith("CATEGORIA")) idxCategoria = idx;
+                });
+            }
+
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
-                if (!r || r.length < 31 || r[1] === "") continue; 
+                if (!r || r.length < 31 || r[1] === "") continue;
 
                 let cNormalizado = obtenerCanalReal(r[17], r[18]);
                 let d = {
-                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14], 
-                    unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30])
+                    fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
+                    unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30]),
+                    producto: (idxProductoGlobal >= 0 ? (r[idxProductoGlobal] || "") : ""),
+                    categoria: (idxCategoria >= 0 ? (r[idxCategoria] || "") : "")
                 };
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -1276,8 +1321,10 @@
           try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
-            let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {};
+            let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
+            let acumMarcaObj = {}; // objetivo por clave de marca (para pestaña Marcas y Líneas)
+            let ecomPorCliente = {}; // e-commerce: ventas y marcas agrupadas por cliente
             let dataFichasVend = {};
 
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
@@ -1314,6 +1361,7 @@
                     data.nc += m;
                     acumFechasNC[r.fecha] = (acumFechasNC[r.fecha] || 0) + m;
                     acumClientesNC[r.cliente] = (acumClientesNC[r.cliente] || 0) + m;
+                    if(r.vendedor) acumVendedorNC[r.vendedor] = (acumVendedorNC[r.vendedor] || 0) + m;
                     if(!acumCanales[r.canal]) acumCanales[r.canal] = { bruto: 0, nc: 0, neta: 0 };
                     acumCanales[r.canal].nc += m;
                 } else {
@@ -1337,21 +1385,36 @@
                     if (String(r.cliente).toUpperCase().includes("TUPI")) {
                         if (esNC) ncEco.TUPI += m; else brutoEco.TUPI += m;
                     } else if (String(r.cliente).toUpperCase().includes("PORTER")) {
-                        if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m; 
+                        if (esNC) ncEco.PORTER += m; else brutoEco.PORTER += m;
                     } else {
                         if (esNC) ncEco.OTROS += m; else brutoEco.OTROS += m;
+                    }
+
+                    // Item 7: agrupamos e-commerce POR CLIENTE (ventas, NC y marcas de cada cliente)
+                    let cliKey = r.cliente || "SIN CLIENTE";
+                    if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {} };
+                    if (esNC) ecomPorCliente[cliKey].nc += m; else ecomPorCliente[cliKey].bruto += m;
+                    if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
+                        let mc = limpiarNombre(r.marcaFinal);
+                        ecomPorCliente[cliKey].marcas[mc] = (ecomPorCliente[cliKey].marcas[mc] || 0) + m;
                     }
                 }
 
                 // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
                 if(r.vendedor) {
-                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0, canalesBruto: {} };
+                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, productos: {}, nc: 0, bruto: 0, canalesBruto: {} };
                     // Acumulamos venta bruta por canal para luego elegir el canal dominante del vendedor.
                     if(r.canal && !esNC) dataFichasVend[r.vendedor].canalesBruto[r.canal] = (dataFichasVend[r.vendedor].canalesBruto[r.canal] || 0) + m;
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
                     if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
                         let mClean = limpiarNombre(r.marcaFinal);
                         dataFichasVend[r.vendedor].marcas[mClean] = (dataFichasVend[r.vendedor].marcas[mClean] || 0) + m;
+                        // Drill-down: acumulamos venta por producto dentro de cada marca del vendedor.
+                        if (r.producto) {
+                            if (!dataFichasVend[r.vendedor].productos[mClean]) dataFichasVend[r.vendedor].productos[mClean] = {};
+                            let pName = String(r.producto).replace(/\s+/g, ' ').trim();
+                            dataFichasVend[r.vendedor].productos[mClean][pName] = (dataFichasVend[r.vendedor].productos[mClean][pName] || 0) + m;
+                        }
                     }
                 }
             });
@@ -1383,18 +1446,20 @@
                         else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                         
                         // Los inyectamos para que se vean sus 0
-                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, nc: 0, bruto: 0 };
+                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, productos: {}, nc: 0, bruto: 0 };
                     }
                 });
             }
 
-            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos);
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente);
           } catch(e) {
               console.error("FATAL ERROR IN RENDER:", e);
           }
         }
 
-        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo) {
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo, acumVendedorNC, ecomPorCliente) {
+            acumVendedorNC = acumVendedorNC || {};
+            ecomPorCliente = ecomPorCliente || {};
             let dMes = parseFloat(dMesActivo);
             let dTr = parseFloat(dTrActivo); 
 
@@ -1508,7 +1573,8 @@
                 arrValoresRealAcumulado.push(acumuladoDiarioSuma);
                 arrValoresEsperadoAcumulado.push(Math.round(acumuladoEsperadoSuma));
             });
-            document.getElementById('grid-ventas-diarias').innerHTML = hVentasDiarias;
+            let elVentasDiarias = document.getElementById('grid-ventas-diarias');
+            if (elVentasDiarias) elVentasDiarias.innerHTML = hVentasDiarias;
 
             let arrCanalesLabels = [];
             let arrCanalesData = [];
@@ -1597,8 +1663,55 @@
             document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
             document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
 
+            // ============================================================
+            // Item 2: TABLA CONSOLIDADA POR CANAL Y VENDEDOR (debajo de los gráficos)
+            // ============================================================
+            (function construirConsolidado(){
+                let hCon = "";
+                let granNet = 0, granEsp = 0, granObj = 0, granProy = 0;
+                canalesSegmentos.forEach(canal => {
+                    let filas = [];
+                    if (acumVendPorCanal[canal]) {
+                        Object.keys(acumVendPorCanal[canal]).forEach(v => {
+                            let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
+                            let obj = 0;
+                            Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => { if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k]; });
+                            filas.push({ v: v, net: net, obj: obj });
+                        });
+                    }
+                    Object.keys(dataFichasVend).forEach(v => {
+                        let yaListado = acumVendPorCanal[canal] && acumVendPorCanal[canal][v];
+                        if (!yaListado && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
+                            let obj = 0;
+                            Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => { if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k]; });
+                            if (obj > 0) filas.push({ v: v, net: 0, obj: obj });
+                        }
+                    });
+                    if (filas.length === 0) return;
+
+                    hCon += `<tr class="header-segmento"><td colspan="8">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
+                    let sNet = 0, sEsp = 0, sObj = 0, sProy = 0;
+                    filas.sort((a, b) => a.v.localeCompare(b.v)).forEach(f => {
+                        let esp = Math.round((f.obj / dMes) * dTr);
+                        let proy = Math.round(dTr > 0 ? (f.net / dTr) * dMes : 0);
+                        sNet += f.net; sEsp += esp; sObj += f.obj; sProy += proy;
+                        let pctH = esp > 0 ? ((f.net / esp) * 100).toFixed(0) : '0';
+                        let pctM = f.obj > 0 ? ((f.net / f.obj) * 100).toFixed(0) : '0';
+                        let pctP = f.obj > 0 ? ((proy / f.obj) * 100).toFixed(0) : '0';
+                        hCon += `<tr><td>${escapeHtml(f.v)}</td><td class="text-right">₲ ${f.net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctH)>=100?'num-positivo':'num-negativo'}">${pctH}%</td><td class="text-right">₲ ${f.obj.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctM)>=100?'num-positivo':'num-negativo'}">${pctM}%</td><td class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctP)>=100?'num-positivo':'num-negativo'}">${pctP}%</td></tr>`;
+                    });
+                    granNet += sNet; granEsp += sEsp; granObj += sObj; granProy += sProy;
+                    let partic = data.neta !== 0 ? ((sNet / data.neta) * 100).toFixed(1) : '0';
+                    hCon += `<tr class="total-segmento"><td>Total ${canal} (${partic}% del total)</td><td class="text-right">₲ ${sNet.toLocaleString('es-PY')}</td><td class="text-right">₲ ${sEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sEsp>0?((sNet/sEsp)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sNet/sObj)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sProy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sProy/sObj)*100).toFixed(0):'0'}%</td></tr>`;
+                });
+                hCon += `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">TOTAL GENERAL</td><td class="text-right" style="color:#fff;">₲ ${granNet.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${granEsp.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granEsp>0?((granNet/granEsp)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granObj.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granNet/granObj)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granProy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granProy/granObj)*100).toFixed(0):'0'}%</td></tr>`;
+                let elCon = document.getElementById('grid-resumen-consolidado');
+                if (elCon) elCon.innerHTML = hCon;
+            })();
+
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let bonosDataByCanal = { "Salon": [], "Online": [], "Venta Externa": [], "Directorio": [], "E-commerce": [], "Mayoristas": [], "Reparaciones": [] };
+            let __pdSeq = 0; // secuencia para grupos de drill-down (producto por marca)
 
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
@@ -1623,7 +1736,8 @@
 
                 let mRows = "", aRows = "", rRows = "";
                 let subMV = 0, subAV = 0, subRV = 0;
-                
+                let subMObj = 0, subAObj = 0; // objetivo por bloque (Marcas / A&M)
+
                 let marcasGenAsig = 0, marcasGenAlc = 0;
                 let aymAsig = 0, aymAlc = 0;
 
@@ -1657,13 +1771,25 @@
                     
                     // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
                     let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
-                    
-                    let row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
-                    
+
+                    // Drill-down: productos vendidos de esta marca por este vendedor
+                    let prodMap = (vData.productos && vData.productos[mClean]) ? vData.productos[mClean] : {};
+                    let prodKeys = Object.keys(prodMap).filter(p => prodMap[p] > 0).sort((a,b)=>prodMap[b]-prodMap[a]);
+                    let row;
+                    if (prodKeys.length > 0) {
+                        let uid = 'pd' + (++__pdSeq);
+                        row = `<tr class="${rowClass}" style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                        prodKeys.forEach(p => {
+                            row += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${prodMap[p].toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>`;
+                        });
+                    } else {
+                        row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                    }
+
                     let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mClean));
 
-                    if (isMainBrand) { mRows += row; subMV += val; } 
-                    else if (isWeapon) { aRows += row; subAV += val; } 
+                    if (isMainBrand) { mRows += row; subMV += val; subMObj += mAsig; }
+                    else if (isWeapon) { aRows += row; subAV += val; subAObj += mAsig; }
                     else { rRows += row; subRV += val; }
                 });
 
@@ -1724,6 +1850,16 @@
                     }
                 }
 
+                // KPIs por bloque (Marcas y A&M) — item 5 del PDF
+                let espM = Math.round((subMObj / dMes) * dTr);
+                let pctAlcM = espM > 0 ? ((subMV / espM) * 100).toFixed(0) : '0';
+                let proyM = Math.round(dTr > 0 ? (subMV / dTr) * dMes : 0);
+                let pctProyM = subMObj > 0 ? ((proyM / subMObj) * 100).toFixed(0) : '0';
+                let espA = Math.round((subAObj / dMes) * dTr);
+                let pctAlcA = espA > 0 ? ((subAV / espA) * 100).toFixed(0) : '0';
+                let proyA = Math.round(dTr > 0 ? (subAV / dTr) * dMes : 0);
+                let pctProyA = subAObj > 0 ? ((proyA / subAObj) * 100).toFixed(0) : '0';
+
                 let fichaHtml = `
                 <div class="ficha-vendedor">
                     <div class="ficha-header">▶ ${escapeHtml(v)}</div>
@@ -1732,20 +1868,27 @@
                             <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
                             <tbody>
                                 <tr><td colspan="4" class="ficha-section">[ MARCAS GRALES. ]</td></tr>${mRows}
-                                <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${subMV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
+                                <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${subMV.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subMObj.toLocaleString('es-PY')}</td><td class="text-center">${subMObj>0?((subMV/subMObj)*100).toFixed(0)+'%':'-'}</td></tr>
+                                <tr><td colspan="4" class="ficha-kpi-header">— KPIs MARCAS —</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${espM.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${Number(pctAlcM)>=100?'num-positivo':'num-negativo'}">${pctAlcM}%</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Marcas Asignadas / Alcanzadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${marcasGenAlc} de ${marcasGenAsig}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proyM.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctProyM)>=100?'num-positivo':'num-negativo'}">${pctProyM}%</td></tr>
+
                                 <tr><td colspan="4" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows}
-                                <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                                <tr><td colspan="4" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows}
-                                <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${subRV.toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>
-                                <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
-                                
-                                <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
+                                <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${subAV.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subAObj.toLocaleString('es-PY')}</td><td class="text-center">${subAObj>0?((subAV/subAObj)*100).toFixed(0)+'%':'-'}</td></tr>
+                                <tr><td colspan="4" class="ficha-kpi-header">— KPIs ARMAS Y MUNICIONES —</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${espA.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${Number(pctAlcA)>=100?'num-positivo':'num-negativo'}">${pctAlcA}%</td></tr>
+                                <tr class="ficha-kpi-normal"><td>A&M Asignadas / Alcanzadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${aymAlc} de ${aymAsig}</td></tr>
+                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proyA.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctProyA)>=100?'num-positivo':'num-negativo'}">${pctProyA}%</td></tr>
+
+                                <tr><td colspan="4" class="ficha-kpi-header" style="background:#1a2c42;">--- TOTAL GENERAL Y KPIs ---</td></tr>
+                                <tr class="ficha-total-final"><td>TOTAL GENERAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                                 <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right ${claseNC(vData.nc)}">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Total Marcas Asignadas</td><td colspan="3" class="text-right" style="font-weight:bold;">${totalMarcasAsig}</td></tr>
-                                <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total Marcas Alcanzadas</td><td colspan="2" class="text-right ${totalMarcasAlc > 0 ? 'num-positivo' : 'num-negativo'}">${totalMarcasAlc}</td><td class="text-center">-</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Proyección Lineal Venta a Fin de Mes</td><td colspan="2" class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${clsProy}">${pctProy}%</td></tr>
                             </tbody>
                         </table>
@@ -1790,16 +1933,58 @@
             });
             document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonosFinal;
 
-            document.getElementById('ecommerce-lista').innerHTML = `
-                <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.TUPI)}">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
-                <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.PORTER)}">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
-                <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.OTROS)}">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
-                <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)}">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
-            `;
+            // Item 7: E-commerce POR CLIENTE + objetivo POR CANAL (no por cliente) + total de marcas por cliente
+            let ecomObjCanal = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales["E-commerce"]) ? METAS_ACTIVAS.canales["E-commerce"] : 0;
+            let ecomEsp = Math.round((ecomObjCanal / dMes) * dTr);
+            let clientesEcom = Object.keys(ecomPorCliente).sort((a,b)=> (ecomPorCliente[b].bruto+ecomPorCliente[b].nc) - (ecomPorCliente[a].bruto+ecomPorCliente[a].nc));
+            let hEcoList = "", totBrutoE = 0, totNcE = 0;
+            clientesEcom.forEach(cli => {
+                let d = ecomPorCliente[cli];
+                let neta = d.bruto + d.nc;
+                totBrutoE += d.bruto; totNcE += d.nc;
+                hEcoList += `<tr><td><strong>${escapeHtml(cli)}</strong></td><td class="text-right">₲ ${d.bruto.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(d.nc)}">₲ ${d.nc.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${neta.toLocaleString('es-PY')}</td></tr>`;
+            });
+            let totNetaE = totBrutoE + totNcE;
+            if (!hEcoList) hEcoList = `<tr><td colspan="4" class="text-center num-cero">Sin ventas de e-commerce en el período</td></tr>`;
+            hEcoList += `<tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${totBrutoE.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(totNcE)}">₲ ${totNcE.toLocaleString('es-PY')}</td><td class="text-right">₲ ${totNetaE.toLocaleString('es-PY')}</td></tr>`;
+            hEcoList += `<tr class="total-segmento" style="background:#f0fff4;"><td>🎯 OBJETIVO DEL CANAL (no por cliente)</td><td class="text-right">Esperado hoy: ₲ ${ecomEsp.toLocaleString('es-PY')}</td><td class="text-right">Objetivo mes: ₲ ${ecomObjCanal.toLocaleString('es-PY')}</td><td class="text-center ${ecomObjCanal>0 && (totNetaE/ecomObjCanal)>=1 ?'num-positivo':'num-negativo'}">% Logrado: ${ecomObjCanal>0?((totNetaE/ecomObjCanal)*100).toFixed(0):'0'}%</td></tr>`;
+            document.getElementById('ecommerce-lista').innerHTML = hEcoList;
+
+            // Slides POR CLIENTE con el detalle y total de marcas dentro de cada slide
+            let hCliSlides = "";
+            clientesEcom.forEach(cli => {
+                let d = ecomPorCliente[cli];
+                let mRows = "", aRows = "", rRows = "", sM = 0, sA = 0, sR = 0, nMarcas = 0;
+                Object.keys(d.marcas).sort().forEach(mc => {
+                    let val = d.marcas[mc]; if (val <= 0) return; nMarcas++;
+                    let display = mc.charAt(0) + mc.slice(1).toLowerCase();
+                    let row = `<tr><td>${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                    if (LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mc))) { mRows += row; sM += val; }
+                    else if (LISTA_ARMAS.some(la => claveMarca(la) === claveMarca(mc))) { aRows += row; sA += val; }
+                    else { rRows += row; sR += val; }
+                });
+                let neta = d.bruto + d.nc;
+                hCliSlides += `<div class="ficha-vendedor"><div class="ficha-header">▶ ${escapeHtml(cli)}</div><div style="overflow-x:auto;"><table class="ficha-table"><thead><tr><th>Marca</th><th class="text-right">Ventas</th></tr></thead><tbody>
+                    <tr><td colspan="2" class="ficha-section">[ MARCAS GRALES. ]</td></tr>${mRows || '<tr><td colspan="2" class="num-cero">—</td></tr>'}
+                    <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${sM.toLocaleString('es-PY')}</td></tr>
+                    <tr><td colspan="2" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows || '<tr><td colspan="2" class="num-cero">—</td></tr>'}
+                    <tr class="ficha-subtotal"><td>Subtotal A&M</td><td class="text-right">₲ ${sA.toLocaleString('es-PY')}</td></tr>
+                    <tr><td colspan="2" class="ficha-section">[ RESTO DE MARCAS ]</td></tr>${rRows || '<tr><td colspan="2" class="num-cero">—</td></tr>'}
+                    <tr class="ficha-subtotal"><td>Subtotal Resto</td><td class="text-right">₲ ${sR.toLocaleString('es-PY')}</td></tr>
+                    <tr class="ficha-total-final"><td>TOTAL NETA</td><td class="text-right">₲ ${neta.toLocaleString('es-PY')}</td></tr>
+                    <tr class="ficha-kpi-normal"><td>Notas de Crédito</td><td class="text-right ${claseNC(d.nc)}">₲ ${d.nc.toLocaleString('es-PY')}</td></tr>
+                    <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Total de Marcas vendidas</td><td class="text-right num-positivo">${nMarcas}</td></tr>
+                </tbody></table></div></div>`;
+            });
+            let elFEco = document.getElementById('grid-fichas-ecommerce');
+            if (elFEco) elFEco.innerHTML = hCliSlides || `<div style="padding:15px;color:#a0aec0;">Sin ventas de e-commerce en el período.</div>`;
 
             let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
+            // Item 6: NC por vendedor responsable (ordenado por mayor devolución)
+            let elNcVend = document.getElementById('nc-por-vendedor');
+            if (elNcVend) { let hNcV = ""; Object.keys(acumVendedorNC).sort((a,b)=>acumVendedorNC[a]-acumVendedorNC[b]).forEach(v => { hNcV += `<tr><td>${escapeHtml(v)}</td><td class="text-right num-negativo">₲ ${acumVendedorNC[v].toLocaleString('es-PY')}</td></tr>`; }); elNcVend.innerHTML = hNcV || `<tr><td colspan="2" class="text-center num-cero">Sin devoluciones en el período</td></tr>`; }
             
             // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             // Agrupamos las ventas por clave de marca (tolerante a puntos/símbolos) para clasificar bien.
@@ -1808,8 +1993,33 @@
             let clavesMarcas = LISTA_MARCAS.map(m => claveMarca(m));
             let clavesArmas = LISTA_ARMAS.map(a => claveMarca(a));
 
-            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumPorClave[claveMarca(m)]||0; vM+=v; hM += `<tr><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumPorClave[claveMarca(a)]||0; vA+=v; hA += `<tr><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            // Item 3: objetivo por clave de marca = suma de metas por vendedor-marca (tolerante a símbolos).
+            let objPorClaveMarca = {};
+            if (METAS_ACTIVAS.vendedorMarca) {
+                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length === 2) {
+                        let ck = claveMarca(parts[1]);
+                        objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS.vendedorMarca[k];
+                    }
+                });
+            }
+            // Si hay filtro de vendedor, el objetivo de marca debe ser el de ese vendedor únicamente.
+            if (filtrosActivos.vendedor && METAS_ACTIVAS.vendedorMarca) {
+                objPorClaveMarca = {};
+                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length === 2 && sonElMismoVendedor(parts[0], filtrosActivos.vendedor)) {
+                        let ck = claveMarca(parts[1]);
+                        objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS.vendedorMarca[k];
+                    }
+                });
+            }
+            let celObj = (obj) => `<td class="text-right" style="color:${obj>0?'#4a5568':'#a0aec0'}">₲ ${obj.toLocaleString('es-PY')}</td>`;
+            let celPct = (v,obj) => { let p = obj>0?((v/obj)*100):0; return `<td class="text-center ${p>=100?'num-positivo':(obj>0?'num-negativo':'num-cero')}">${obj>0?p.toFixed(0)+'%':'-'}</td>`; };
+
+            let hM = ""; let vM = 0; let oM = 0; LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck]||0; let obj = objPorClaveMarca[ck]||0; vM+=v; oM+=obj; hM += `<tr><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v,obj)}</tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM>0?((vM/oM)*100).toFixed(0)+'%':'-'}</td></tr>`;
+            let hA = ""; let vA = 0; let oA = 0; LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck]||0; let obj = objPorClaveMarca[ck]||0; vA+=v; oA+=obj; hA += `<tr><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v,obj)}</tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA>0?((vA/oA)*100).toFixed(0)+'%':'-'}</td></tr>`;
             let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { let ck = claveMarca(r); if(!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             try {
