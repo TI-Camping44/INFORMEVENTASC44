@@ -14,7 +14,7 @@
         html, body { width: 100%; max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
 
         :root {
-            --bg-app: #f4f7f6; --navy-main: #1a2c42; --navy-light: #2c4a6b; --teal-accent: #2b7a78;
+            --bg-app: #f4f7f6; --navy-main: #1c3d5a; --navy-light: #2e5c94; --teal-accent: #2b6cb0;
             --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
@@ -264,8 +264,10 @@
                                 <th>Vendedor</th>
                                 <th class="text-right">Ventas Totales</th>
                                 <th class="text-right">Hoy deberías estar en</th>
+                                <th class="text-right">Dif. vs Hoy</th>
                                 <th class="text-right">% Logrado</th>
                                 <th class="text-right">Objetivo Mes</th>
+                                <th class="text-right">Falta p/ Objetivo</th>
                                 <th class="text-right">% Logrado Mes</th>
                                 <th class="text-right">Proyección</th>
                                 <th class="text-right">% Proyección</th>
@@ -1858,22 +1860,26 @@
                     });
                     if (filas.length === 0) return;
 
-                    hCon += `<tr class="header-segmento"><td colspan="8">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
+                    hCon += `<tr class="header-segmento"><td colspan="10">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
                     let sNet = 0, sEsp = 0, sObj = 0, sProy = 0;
                     filas.sort((a, b) => a.v.localeCompare(b.v)).forEach(f => {
                         let esp = Math.round((f.obj / dMes) * dTr);
                         let proy = Math.round(dTr > 0 ? (f.net / dTr) * dMes : 0);
+                        let difHoy = f.net - esp;
+                        let falta = f.obj - f.net;
                         sNet += f.net; sEsp += esp; sObj += f.obj; sProy += proy;
                         let pctH = esp > 0 ? ((f.net / esp) * 100).toFixed(0) : '0';
                         let pctM = f.obj > 0 ? ((f.net / f.obj) * 100).toFixed(0) : '0';
                         let pctP = f.obj > 0 ? ((proy / f.obj) * 100).toFixed(0) : '0';
-                        hCon += `<tr><td>${escapeHtml(f.v)}</td><td class="text-right">₲ ${f.net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctH)>=100?'num-positivo':'num-negativo'}">${pctH}%</td><td class="text-right">₲ ${f.obj.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctM)>=100?'num-positivo':'num-negativo'}">${pctM}%</td><td class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctP)>=100?'num-positivo':'num-negativo'}">${pctP}%</td></tr>`;
+                        hCon += `<tr><td>${escapeHtml(f.v)}</td><td class="text-right">₲ ${f.net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-right ${difHoy>=0?'num-positivo':'num-negativo'}">₲ ${difHoy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctH)>=100?'num-positivo':'num-negativo'}">${pctH}%</td><td class="text-right">₲ ${f.obj.toLocaleString('es-PY')}</td><td class="text-right ${falta<=0?'num-positivo':'num-negativo'}">₲ ${falta.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctM)>=100?'num-positivo':'num-negativo'}">${pctM}%</td><td class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctP)>=100?'num-positivo':'num-negativo'}">${pctP}%</td></tr>`;
                     });
                     granNet += sNet; granEsp += sEsp; granObj += sObj; granProy += sProy;
                     let partic = data.neta !== 0 ? ((sNet / data.neta) * 100).toFixed(1) : '0';
-                    hCon += `<tr class="total-segmento"><td>Total ${canal} (${partic}% del total)</td><td class="text-right">₲ ${sNet.toLocaleString('es-PY')}</td><td class="text-right">₲ ${sEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sEsp>0?((sNet/sEsp)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sNet/sObj)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sProy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sProy/sObj)*100).toFixed(0):'0'}%</td></tr>`;
+                    let sDifHoy = sNet - sEsp, sFalta = sObj - sNet;
+                    hCon += `<tr class="total-segmento"><td>Total ${canal} (${partic}% del total)</td><td class="text-right">₲ ${sNet.toLocaleString('es-PY')}</td><td class="text-right">₲ ${sEsp.toLocaleString('es-PY')}</td><td class="text-right ${sDifHoy>=0?'num-positivo':'num-negativo'}">₲ ${sDifHoy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sEsp>0?((sNet/sEsp)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sObj.toLocaleString('es-PY')}</td><td class="text-right ${sFalta<=0?'num-positivo':'num-negativo'}">₲ ${sFalta.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sNet/sObj)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sProy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sProy/sObj)*100).toFixed(0):'0'}%</td></tr>`;
                 });
-                hCon += `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">TOTAL GENERAL</td><td class="text-right" style="color:#fff;">₲ ${granNet.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${granEsp.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granEsp>0?((granNet/granEsp)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granObj.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granNet/granObj)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granProy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granProy/granObj)*100).toFixed(0):'0'}%</td></tr>`;
+                let gDifHoy = granNet - granEsp, gFalta = granObj - granNet;
+                hCon += `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">TOTAL GENERAL</td><td class="text-right" style="color:#fff;">₲ ${granNet.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${granEsp.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${gDifHoy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granEsp>0?((granNet/granEsp)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granObj.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${gFalta.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granNet/granObj)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granProy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granProy/granObj)*100).toFixed(0):'0'}%</td></tr>`;
                 let elCon = document.getElementById('grid-resumen-consolidado');
                 if (elCon) elCon.innerHTML = hCon;
             })();
