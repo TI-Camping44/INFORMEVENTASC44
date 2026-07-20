@@ -169,6 +169,7 @@
         <div class="menu-item" onclick="switchTab('tab-reparaciones', this)">🔧 Reparaciones</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
         <div class="menu-item" onclick="switchTab('tab-marcas', this)">⚔️ Marcas y Líneas</div>
+        <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
         <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
         <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
     </div>
@@ -481,6 +482,57 @@
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO - REPARACIONES</h3>
                 <div class="fichas-grid" id="grid-fichas-reparaciones"></div>
+            </div>
+        </div>
+
+        <div id="tab-anual" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">📈 VENTAS POR MARCA 2026 — SEGUIMIENTO ANUAL (YTD)</div>
+                <div style="padding: 12px 15px; background: #f0fff4; border: 1px solid #c6f6d5; margin-bottom: 15px; font-size: 11.5px; color: #22543d; border-radius: 6px; border-left: 5px solid #38a169;">
+                    <strong>ℹ️ Cómo leerlo:</strong> la <strong>Venta Acumulada</strong> es del año (YTD, se calcula sola del DATA). El <strong>Objetivo Año</strong> y el <strong>Objetivo Acumulado</strong> vienen de la planilla (config editable). <strong>Proy. a Dic</strong> = venta ÷ (mes actual ÷ 12). <strong>Debería estar</strong> = mes actual ÷ 12.
+                </div>
+                <h3 style="margin:10px 0; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🎯 MARCAS PRINCIPALES</h3>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Marca</th>
+                                <th class="text-right">Venta Acum. (YTD)</th>
+                                <th class="text-right">Objetivo Año</th>
+                                <th class="text-center">% Logrado</th>
+                                <th class="text-right">Obj. Acumulado</th>
+                                <th class="text-right">Diferencia</th>
+                                <th class="text-right">Faltante p/ Objetivo</th>
+                                <th class="text-right">Proy. a Dic</th>
+                                <th class="text-center">% Proy.</th>
+                                <th class="text-center">Debería estar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-anual-marcas"></tbody>
+                        <tfoot id="foot-anual-marcas"></tfoot>
+                    </table>
+                </div>
+                <h3 style="margin:20px 0 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔫 ARMAS Y MUNICIONES</h3>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Línea / Calibre</th>
+                                <th class="text-right">Venta Acum. (YTD)</th>
+                                <th class="text-right">Objetivo Año</th>
+                                <th class="text-center">% Logrado</th>
+                                <th class="text-right">Obj. Acumulado</th>
+                                <th class="text-right">Diferencia</th>
+                                <th class="text-right">Faltante p/ Objetivo</th>
+                                <th class="text-right">Proy. a Dic</th>
+                                <th class="text-center">% Proy.</th>
+                                <th class="text-center">Debería estar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-anual-aym"></tbody>
+                        <tfoot id="foot-anual-aym"></tfoot>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -1345,6 +1397,62 @@
             { canal: "Mayoristas", nombre: "Nelson Rizzi",                  objAno: 8750000000, objMarcas: 3710000000 }
         ];
 
+        // =========================================================================
+        // 📈 OBJETIVO ANUAL POR MARCA (editable) — sacados de las hojas "Marcas" y "A&M"
+        // del Excel. objAno = objetivo del año; objAcum = objetivo acumulado a la fecha de corte.
+        // La venta acumulada (YTD) se calcula sola del DATA.
+        // =========================================================================
+        const OBJ_MARCAS_ANUAL = {
+            "ASG": { objAno: 400000000, objAcum: 415000000 },
+            "TSS": { objAno: 1400000000, objAcum: 1223000000 },
+            "Crosman": { objAno: 350000000, objAcum: 347500000 },
+            "Umarex": { objAno: 2600000000, objAcum: 1874000000 },
+            "Doberman": { objAno: 1200000000, objAcum: 1506000000 },
+            "Konus": { objAno: 250000000, objAcum: 186000000 },
+            "GSM": { objAno: 120000000, objAcum: 99000000 },
+            "Truglo": { objAno: 35000000, objAcum: 62750000 },
+            "Fab Defense": { objAno: 500000000, objAcum: 106500000 },
+            "Miguel Nieto": { objAno: 75000000, objAcum: 97500000 },
+            "NTK": { objAno: 650000000, objAcum: 382000000 },
+            "Coleman": { objAno: 150000000, objAcum: 152500000 },
+            "Imalent": { objAno: 25000000, objAcum: 57000000 },
+            "Apolo": { objAno: 550000000, objAcum: 264250000 },
+            "Aitor": { objAno: 40000000, objAcum: 70000000 },
+            "Rocky Boots": { objAno: 40000000, objAcum: 102450000 },
+            "KCI": { objAno: 300000000, objAcum: 195500000 },
+            "Nitecore": { objAno: 300000000, objAcum: 298500000 },
+            "Caterpillar": { objAno: 100000000, objAcum: 83500000 },
+            "Polymer": { objAno: 10000000, objAcum: 0 },
+            "Snake": { objAno: 250000000, objAcum: 156000000 },
+            "Fobus": { objAno: 190000000, objAcum: 105000000 },
+            "Beretta Mod": { objAno: 125000000, objAcum: 75000000 },
+            "B.E. Armor": { objAno: 35000000, objAcum: 271900000 },
+            "Vector Optics": { objAno: 375000000, objAcum: 578000000 }
+        };
+        const OBJ_AYM_ANUAL = {
+            "Mendoza": { objAno: 1084000000, objAcum: 282500000 },
+            "Boito": { objAno: 539500000, objAcum: 175200000 },
+            "Derya": { objAno: 3250000000, objAcum: 990000000 },
+            "Armed": { objAno: 35000000, objAcum: 160000000 },
+            "Tinck": { objAno: 2320000000, objAcum: 1580000000 },
+            "Emtan": { objAno: 0, objAcum: 0 },
+            "Rexio": { objAno: 30000000, objAcum: 118000000 },
+            "Ruger": { objAno: 150000000, objAcum: 302000000 },
+            "Tanfoglio": { objAno: 372000000, objAcum: 1361000000 },
+            "Walther": { objAno: 642500000, objAcum: 522000000 },
+            "AHSS": { objAno: 0, objAcum: 0 },
+            "KOR": { objAno: 2482000000, objAcum: 0 },
+            "Beretta": { objAno: 2547000000, objAcum: 2340000000 },
+            "Rock Island": { objAno: 558000000, objAcum: 0 },
+            "GB": { objAno: 2811500000, objAcum: 1164000000 },
+            "Saga": { objAno: 3215000000, objAcum: 674000000 },
+            "Sellier & Bellot": { objAno: 3184000000, objAcum: 1830000000 },
+            "Armscor": { objAno: 143000000, objAcum: 108000000 },
+            "IMI": { objAno: 909500000, objAcum: 642000000 },
+            "Golden Eagle": { objAno: 1272500000, objAcum: 228000000 },
+            "Federal": { objAno: 120000000, objAcum: 197000000 }
+        };
+
         function obtenerMetasEstructuraBI() {
             let mesSelec = filtrosActivos.mes;
             let liveMonth = filtrosActivos.mesActualLive;
@@ -1512,6 +1620,7 @@
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente);
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
+            try { renderAnual(); } catch(e) { console.error("Error anual", e); }
           } catch(e) {
               console.error("FATAL ERROR IN RENDER:", e);
           }
@@ -2200,6 +2309,71 @@
                 });
             });
             el.innerHTML = html || `<tr><td colspan="11" class="text-center num-cero">Sin datos para el ranking.</td></tr>`;
+        }
+
+        // =========================================================================
+        // 📈 SEGUIMIENTO ANUAL POR MARCA (Marcas y A&M) — venta YTD del DATA + objetivos config.
+        // =========================================================================
+        function renderAnual() {
+            let elM = document.getElementById('grid-anual-marcas');
+            let elA = document.getElementById('grid-anual-aym');
+            if (!elM || !elA) return;
+
+            let ventaYTD = {};
+            lineasDeDatosGlobales.forEach(r => {
+                if (!r.marcaFinal) return;
+                let ck = claveMarca(r.marcaFinal);
+                ventaYTD[ck] = (ventaYTD[ck] || 0) + r.totalGs;
+            });
+            let mesActual = filtrosActivos.mesActualLive || 7;
+            let fracAno = mesActual / 12;
+            const G = x => '₲ ' + Math.round(x).toLocaleString('es-PY');
+            const P = x => (x * 100).toFixed(0) + '%';
+
+            function construir(config) {
+                let html = "", tV = 0, tOA = 0, tOAc = 0, tProy = 0;
+                Object.keys(config).forEach(marca => {
+                    let cfg = config[marca];
+                    let venta = ventaYTD[claveMarca(marca)] || 0;
+                    let objAno = cfg.objAno, objAcum = cfg.objAcum;
+                    let pctLog = objAno > 0 ? venta / objAno : 0;
+                    let dif = venta - objAcum;
+                    let faltante = objAno - venta;
+                    let proy = fracAno > 0 ? venta / fracAno : 0;
+                    let pctProy = objAno > 0 ? proy / objAno : 0;
+                    tV += venta; tOA += objAno; tOAc += objAcum; tProy += proy;
+                    html += `<tr>
+                        <td><strong>${escapeHtml(marca)}</strong></td>
+                        <td class="text-right" style="font-weight:bold;">${G(venta)}</td>
+                        <td class="text-right">${objAno > 0 ? G(objAno) : '-'}</td>
+                        <td class="text-center ${pctLog >= 1 ? 'num-positivo' : 'num-negativo'}">${objAno > 0 ? P(pctLog) : '-'}</td>
+                        <td class="text-right">${objAcum > 0 ? G(objAcum) : '-'}</td>
+                        <td class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">${G(dif)}</td>
+                        <td class="text-right ${faltante <= 0 ? 'num-positivo' : 'num-negativo'}">${objAno > 0 ? G(faltante) : '-'}</td>
+                        <td class="text-right">${G(proy)}</td>
+                        <td class="text-center ${pctProy >= 1 ? 'num-positivo' : 'num-negativo'}">${objAno > 0 ? P(pctProy) : '-'}</td>
+                        <td class="text-center num-cero">${P(fracAno)}</td>
+                    </tr>`;
+                });
+                let footPct = tOA > 0 ? tV / tOA : 0;
+                let footProyPct = tOA > 0 ? tProy / tOA : 0;
+                let foot = `<tr class="total-segmento">
+                    <td>TOTAL</td>
+                    <td class="text-right">${G(tV)}</td>
+                    <td class="text-right">${G(tOA)}</td>
+                    <td class="text-center ${footPct >= 1 ? 'num-positivo' : 'num-negativo'}">${P(footPct)}</td>
+                    <td class="text-right">${G(tOAc)}</td>
+                    <td class="text-right ${(tV - tOAc) >= 0 ? 'num-positivo' : 'num-negativo'}">${G(tV - tOAc)}</td>
+                    <td class="text-right">${G(tOA - tV)}</td>
+                    <td class="text-right">${G(tProy)}</td>
+                    <td class="text-center ${footProyPct >= 1 ? 'num-positivo' : 'num-negativo'}">${P(footProyPct)}</td>
+                    <td class="text-center num-cero">${P(fracAno)}</td>
+                </tr>`;
+                return { html, foot };
+            }
+            let m = construir(OBJ_MARCAS_ANUAL), a = construir(OBJ_AYM_ANUAL);
+            elM.innerHTML = m.html; document.getElementById('foot-anual-marcas').innerHTML = m.foot;
+            elA.innerHTML = a.html; document.getElementById('foot-anual-aym').innerHTML = a.foot;
         }
 
         iniciarSincronizacion();
