@@ -18,6 +18,7 @@
             --red-alert: #e53e3e; --green-success: #38a169; --gray-border: #e2e8f0; --gray-bg: #edf2f7;
             --text-dark: #2d3748; --text-muted: #718096; --bg-zero: #fed7d7;
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
+            --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
             --row-success-bg: #e6fffa;
         }
 
@@ -100,6 +101,7 @@
         .text-center { text-align: center; }
         .text-left { text-align: left; }
         .num-negativo { color: var(--red-alert) !important; font-weight: bold; }
+        .num-cero { color: #a0aec0 !important; font-weight: normal; }
         .num-positivo { color: var(--green-success) !important; font-weight: bold; }
         
         .charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 25px; width: 100%; }
@@ -580,6 +582,7 @@
         // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
         // =========================================================================
         function exportarBonosExcel() {
+            if (typeof XLSX === 'undefined') { alert("⚠️ No se pudo cargar la librería de Excel (XLSX). Verificá tu conexión a Internet e intentá de nuevo."); return; }
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
             let table = document.getElementById("tabla-exportar-bonos");
             let rows = table.querySelectorAll("tbody tr");
@@ -615,6 +618,7 @@
         // 🔥 GENERADOR PROFESIONAL DE PDF (JSPDF + AUTOTABLE)
         // =========================================================================
         function exportarBonosPDF() {
+            if (!(window.jspdf && window.jspdf.jsPDF)) { alert("⚠️ No se pudo cargar la librería de PDF (jsPDF). Verificá tu conexión a Internet e intentá de nuevo."); return; }
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4'); // A4 Vertical
@@ -754,6 +758,26 @@
                         .trim();
         }
 
+        // Clave de marca tolerante a puntos, símbolos y espacios ("B.E. ARMOR" == "B.E Armor",
+        // "Sellier & Bellot" == "SELLIER BELLOT"). Se usa solo para clasificar marcas.
+        function claveMarca(texto) {
+            return limpiarNombre(texto).replace(/[^A-Z0-9]/g, "");
+        }
+
+        // Escapa texto que se inyecta con innerHTML (nombres de vendedor/cliente/marca del Sheet)
+        // para evitar que un carácter como <, > o & rompa la tabla.
+        function escapeHtml(texto) {
+            if (texto === null || texto === undefined) return "";
+            return String(texto).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[ch]);
+        }
+
+        // Devuelve la clase para montos de Notas de Crédito: rojo si hay devolución, gris si es 0.
+        function claseNC(val) {
+            return (val && val !== 0) ? 'num-negativo' : 'num-cero';
+        }
+
         // =========================================================================
         // 🔥 ALGORITMO DE FUSIÓN (El Fin de los Fantasmas)
         // =========================================================================
@@ -762,11 +786,22 @@
             let a = limpiarNombre(nombreA);
             let b = limpiarNombre(nombreB);
             if (a === b) return true;
+
+            // Comparación por PALABRAS COMPLETAS (no substring, para no confundir "SOSA" con "SOSARO").
             let wordsA = a.split(/\s+/).filter(w => w.length > 2);
             let wordsB = b.split(/\s+/).filter(w => w.length > 2);
-            if (wordsA.length > 0 && wordsB.length > 0) {
-                if (wordsA.every(w => b.includes(w))) return true;
-                if (wordsB.every(w => a.includes(w))) return true;
+            if (wordsA.length === 0 || wordsB.length === 0) return false;
+
+            let setA = new Set(wordsA);
+            let setB = new Set(wordsB);
+            let aEsSubconjunto = wordsA.every(w => setB.has(w));
+            let bEsSubconjunto = wordsB.every(w => setA.has(w));
+
+            // Aceptamos solo si uno es subconjunto del otro (ej: "Antonio Fernandez" ⊂ "Antonio De Jesus
+            // Fernandez Benitez") Y comparten al menos 2 palabras, para evitar colisiones por un único
+            // nombre o apellido común (ej: dos "Oscar David ...").
+            if (aEsSubconjunto || bEsSubconjunto) {
+                return Math.min(wordsA.length, wordsB.length) >= 2;
             }
             return false;
         }
@@ -916,22 +951,24 @@
         // ========================================================================
         async function iniciarSincronizacion() {
             document.getElementById('loader').style.display = 'flex';
-            
-            let escapeTimeout = setTimeout(() => {
-                let loader = document.getElementById('loader');
-                if (loader && loader.style.display !== 'none') {
-                    try { filtrarYRenderizarTodo(); } catch(e){}
-                    loader.style.display = 'none';
-                    actualizarBannerEstado('success', `✅ Interfaz local cargada exitosamente.`);
-                }
-            }, 3000);
+            verificarLibreriasCDN();
+
+            // Aviso "suave": si tarda, solo actualizamos el texto del loader (NO renderizamos datos vacíos).
+            let slowNotice = setTimeout(() => {
+                let lt = document.getElementById('loader-text');
+                if (lt) lt.innerText = "La conexión está lenta, seguimos esperando a Google Sheets...";
+            }, 4000);
+
+            // Timeout real de red: si el Sheet no responde en 20s, abortamos y caemos al manejador de error.
+            let controller = new AbortController();
+            let networkTimeout = setTimeout(() => controller.abort(), 20000);
 
             try {
                 document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
                 const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
 
-                const [resConfig, resData] = await Promise.all([fetch(urlConfig), fetch(urlData)]);
+                const [resConfig, resData] = await Promise.all([fetch(urlConfig, { signal: controller.signal }), fetch(urlData, { signal: controller.signal })]);
                 if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
 
                 const txtConfig = await resConfig.text();
@@ -957,7 +994,7 @@
                 // Procesamos las ventas EN VIVO
                 procesarVentasData(filasDataFormateadas);
 
-                clearTimeout(escapeTimeout);
+                clearTimeout(slowNotice); clearTimeout(networkTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 actualizarBannerEstado('success', `✅ Sincronizado YTD (Metas Blindadas + Ventas en Vivo) a las: ${horaStr}`);
                 
@@ -965,11 +1002,25 @@
                 document.getElementById('loader').style.display = 'none';
 
             } catch (err) {
-                clearTimeout(escapeTimeout);
+                clearTimeout(slowNotice); clearTimeout(networkTimeout);
                 console.error(err);
                 try { filtrarYRenderizarTodo(); } catch(e){}
-                actualizarBannerEstado('error', `⚠️ Error al leer datos remotos de Google Sheets.`);
+                let msg = (err && err.name === 'AbortError')
+                    ? `⚠️ Google Sheets no respondió a tiempo (timeout de 20s). Revisá tu conexión y tocá "Actualizar Base".`
+                    : `⚠️ Error al leer datos remotos de Google Sheets. Tocá "Actualizar Base" para reintentar.`;
+                actualizarBannerEstado('error', msg);
                 document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        // Bug 6: avisar si alguna librería de CDN no cargó (sin internet las exportaciones/gráficos fallan).
+        function verificarLibreriasCDN() {
+            let faltantes = [];
+            if (typeof Chart === 'undefined') faltantes.push('Chart.js (gráficos)');
+            if (!(window.jspdf && window.jspdf.jsPDF)) faltantes.push('jsPDF (export PDF)');
+            if (typeof XLSX === 'undefined') faltantes.push('XLSX (export Excel)');
+            if (faltantes.length > 0) {
+                actualizarBannerEstado('error', `⚠️ No se cargaron librerías externas: ${faltantes.join(', ')}. Verificá tu conexión a Internet.`);
             }
         }
 
@@ -1139,20 +1190,20 @@
                     let vClean = limpiarNombre(v);
                     const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
                     if(v && !BASURA.some(b => vClean === b || vClean.startsWith(b))) {
-                        optV += `<option value="${v}">${v}</option>`; 
+                        optV += `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`;
                     }
                 });
                 selV.innerHTML = optV;
             }
             if(selC) {
                 let optC = `<option value="">-- Todos los Canales --</option>`;
-                Array.from(canales).sort().forEach(c => { if(c) optC += `<option value="${c}">${c}</option>`; });
+                Array.from(canales).sort().forEach(c => { if(c) optC += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
                 selC.innerHTML = optC;
             }
             if(selM) {
                 let optM = `<option value="">-- Todas las Marcas --</option>`;
                 Array.from(marcas).sort().forEach(m => {
-                    if(m && !String(m).includes("Intereses")) optM += `<option value="${m}">${m}</option>`;
+                    if(m && !String(m).includes("Intereses")) optM += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
                 });
                 selM.innerHTML = optM;
             }
@@ -1291,12 +1342,25 @@
 
                 // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
                 if(r.vendedor) {
-                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0 };
+                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, nc: 0, bruto: 0, canalesBruto: {} };
+                    // Acumulamos venta bruta por canal para luego elegir el canal dominante del vendedor.
+                    if(r.canal && !esNC) dataFichasVend[r.vendedor].canalesBruto[r.canal] = (dataFichasVend[r.vendedor].canalesBruto[r.canal] || 0) + m;
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
                     if(!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
                         let mClean = limpiarNombre(r.marcaFinal);
                         dataFichasVend[r.vendedor].marcas[mClean] = (dataFichasVend[r.vendedor].marcas[mClean] || 0) + m;
                     }
+                }
+            });
+
+            // UX 8: si un vendedor vendió en varios canales, lo asignamos al canal donde más facturó
+            // (antes se quedaba con el canal de su PRIMERA transacción, perdiendo el resto).
+            Object.keys(dataFichasVend).forEach(v => {
+                let cb = dataFichasVend[v].canalesBruto;
+                if (cb) {
+                    let mejorCanal = "", mejorMonto = -Infinity;
+                    Object.keys(cb).forEach(c => { if (cb[c] > mejorMonto) { mejorMonto = cb[c]; mejorCanal = c; } });
+                    if (mejorCanal) dataFichasVend[v].canal = mejorCanal;
                 }
             });
 
@@ -1396,7 +1460,9 @@
             }
 
             document.getElementById('tot-bruta').innerText = '₲ ' + data.bruta.toLocaleString('es-PY');
-            document.getElementById('tot-nc').innerText = '₲ ' + data.nc.toLocaleString('es-PY');
+            let elTotNc = document.getElementById('tot-nc');
+            elTotNc.innerText = '₲ ' + data.nc.toLocaleString('es-PY');
+            elTotNc.className = 'text-right ' + claseNC(data.nc);
             document.getElementById('tot-neta').innerText = '₲ ' + data.neta.toLocaleString('es-PY');
 
             let esperadoGlobal = Math.round((objetivoFiltrado / dMes) * dTr);
@@ -1480,7 +1546,7 @@
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
-                        let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                        let rowHtml = `<tr><td>${escapeHtml(v)}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(acumVendPorCanal[canal][v].nc)}">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                         if (canal === "E-commerce") hEcomV += rowHtml; 
                         else if (canal === "Mayoristas") hMayV += rowHtml; 
                         else if (canal === "Venta Externa") hExtV += rowHtml; 
@@ -1490,9 +1556,10 @@
                     });
                 }
                 
-                // Mostrar vendedores con meta pero 0 ventas
+                // Mostrar vendedores con meta pero 0 ventas (evitando duplicar a los ya listados arriba)
                 Object.keys(dataFichasVend).forEach(v => {
-                    if (dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
+                    let yaListado = acumVendPorCanal[canal] && acumVendPorCanal[canal][v];
+                    if (!yaListado && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
                         let obj = 0;
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
                             if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
@@ -1500,7 +1567,7 @@
                         if (obj > 0) {
                             let esp = Math.round((obj / dMes) * dTr);
                             subEsp += esp; subObj += obj;
-                            let rowHtml = `<tr><td>${v}</td><td class="text-right">₲ 0</td><td class="text-right num-negativo">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
+                            let rowHtml = `<tr><td>${escapeHtml(v)}</td><td class="text-right">₲ 0</td><td class="text-right num-cero">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
                             if (canal === "E-commerce") hEcomV += rowHtml; 
                             else if (canal === "Mayoristas") hMayV += rowHtml; 
                             else if (canal === "Venta Externa") hExtV += rowHtml; 
@@ -1511,7 +1578,7 @@
                     }
                 });
 
-                let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                let totalHtml = `<tr class="total-segmento"><td>Total ${canal}</td><td class="text-right">₲ ${subNet.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(subNC)}">₲ ${subNC.toLocaleString('es-PY')}</td><td class="text-right">₲ ${subEsp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subEsp>0?((subNet/subEsp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${subObj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${subObj>0?((subNet/subObj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                 if (canal === "E-commerce") hEcomV += totalHtml; 
                 else if (canal === "Mayoristas") hMayV += totalHtml; 
                 else if (canal === "Venta Externa") hExtV += totalHtml; 
@@ -1571,7 +1638,7 @@
                     
                     let rowClass = "";
                     let checkMark = "";
-                    let isWeapon = LISTA_ARMAS.some(la => limpiarNombre(la) === mClean);
+                    let isWeapon = LISTA_ARMAS.some(la => claveMarca(la) === claveMarca(mClean));
                     
                     if (mAsig > 0) {
                         if (isWeapon) {
@@ -1588,9 +1655,9 @@
                     // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
                     let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
                     
-                    let row = `<tr class="${rowClass}"><td>${displayBrand}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                    let row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     
-                    let isMainBrand = LISTA_MARCAS.some(lm => limpiarNombre(lm) === mClean);
+                    let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mClean));
 
                     if (isMainBrand) { mRows += row; subMV += val; } 
                     else if (isWeapon) { aRows += row; subAV += val; } 
@@ -1636,7 +1703,7 @@
 
                     let rowHtmlBonos = `
                         <tr>
-                            <td class="text-left"><strong>${v}</strong></td>
+                            <td class="text-left"><strong>${escapeHtml(v)}</strong></td>
                             <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
                             <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
                             <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11.5px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
@@ -1656,7 +1723,7 @@
 
                 let fichaHtml = `
                 <div class="ficha-vendedor">
-                    <div class="ficha-header">▶ ${v}</div>
+                    <div class="ficha-header">▶ ${escapeHtml(v)}</div>
                     <div style="overflow-x:auto;">
                         <table class="ficha-table">
                             <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
@@ -1670,7 +1737,7 @@
                                 <tr class="ficha-total-final"><td>TOTAL</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>
                                 
                                 <tr><td colspan="4" class="ficha-kpi-header">--- PROYECCIÓN Y KPIs ---</td></tr>
-                                <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right num-negativo">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
+                                <tr class="ficha-kpi-normal"><td>Notas de Crédito (Devoluciones)</td><td colspan="3" class="text-right ${claseNC(vData.nc)}">₲ ${vData.nc.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal"><td>Meta Esperada a Hoy</td><td colspan="3" class="text-right" style="font-weight:bold;">₲ ${esp.toLocaleString('es-PY')}</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>% Alcanzado a Hoy</td><td colspan="3" class="text-right ${clsAlcanzado}">${pctAlcanzado}%</td></tr>
                                 <tr class="ficha-kpi-normal" style="font-weight:bold;"><td>Diferencia contra Hoy</td><td colspan="3" class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td></tr>
@@ -1721,20 +1788,26 @@
             document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonosFinal;
 
             document.getElementById('ecommerce-lista').innerHTML = `
-                <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
-                <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
-                <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
-                <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right num-negativo">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>TUPI</strong></td><td class="text-right">₲ ${brutoEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.TUPI)}">₲ ${ncEco.TUPI.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.TUPI+ncEco.TUPI).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>PORTER</strong></td><td class="text-right">₲ ${brutoEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.PORTER)}">₲ ${ncEco.PORTER.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.PORTER+ncEco.PORTER).toLocaleString('es-PY')}</td></tr>
+                <tr><td><strong>OTROS (E-commerce)</strong></td><td class="text-right">₲ ${brutoEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.OTROS)}">₲ ${ncEco.OTROS.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${(brutoEco.OTROS+ncEco.OTROS).toLocaleString('es-PY')}</td></tr>
+                <tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${(brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right ${claseNC(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)}">₲ ${(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS).toLocaleString('es-PY')}</td><td class="text-right">₲ ${((brutoEco.TUPI+brutoEco.PORTER+brutoEco.OTROS)+(ncEco.TUPI+ncEco.PORTER+ncEco.OTROS)).toLocaleString('es-PY')}</td></tr>
             `;
 
-            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
-            let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${c}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
+            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
+            let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             
             // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
-            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumMarcas[m]||0; vM+=v; hM += `<tr><td>${m}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
-            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumMarcas[a]||0; vA+=v; hA += `<tr><td>${a}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { if(!LISTA_MARCAS.includes(r) && !LISTA_ARMAS.includes(r)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${r}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
+            // Agrupamos las ventas por clave de marca (tolerante a puntos/símbolos) para clasificar bien.
+            let acumPorClave = {};
+            Object.keys(acumMarcas).forEach(k => { let ck = claveMarca(k); acumPorClave[ck] = (acumPorClave[ck] || 0) + acumMarcas[k]; });
+            let clavesMarcas = LISTA_MARCAS.map(m => claveMarca(m));
+            let clavesArmas = LISTA_ARMAS.map(a => claveMarca(a));
+
+            let hM = ""; let vM = 0; LISTA_MARCAS.forEach(m => { let v = acumPorClave[claveMarca(m)]||0; vM+=v; hM += `<tr><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td></tr>`;
+            let hA = ""; let vA = 0; LISTA_ARMAS.forEach(a => { let v = acumPorClave[claveMarca(a)]||0; vA+=v; hA += `<tr><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td></tr>`;
+            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { let ck = claveMarca(r); if(!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
 
             try {
                 if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
