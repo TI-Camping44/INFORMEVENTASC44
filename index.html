@@ -100,6 +100,17 @@
         th.th-sort:hover { background-color: #dbe4ef; }
         th.th-sort .sort-ind { color: var(--teal-accent); font-size: 10px; }
 
+        /* Multi-selección (casillas) */
+        .multi-select { position: relative; }
+        .ms-btn { width: 100%; padding: 8px 10px; font-size: 11.5px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ms-btn:after { content: "▾"; float: right; color: var(--text-muted); }
+        .ms-panel { display: none; position: absolute; z-index: 200; top: calc(100% + 2px); left: 0; right: 0; min-width: 200px; max-height: 240px; overflow-y: auto; background: white; border: 1px solid var(--gray-border); border-radius: 6px; box-shadow: 0 6px 16px rgba(0,0,0,0.18); padding: 4px; }
+        .ms-panel.open { display: block; }
+        .ms-panel label { display: flex; align-items: center; gap: 7px; padding: 5px 8px; font-size: 11px; cursor: pointer; font-weight: normal; border-radius: 4px; }
+        .ms-panel label:hover { background: #eef5fb; }
+        .ms-panel label.ms-all { font-weight: bold; border-bottom: 1px solid var(--gray-border); margin-bottom: 3px; color: var(--navy-main); }
+        .ms-panel input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+
         .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
         .badge-pending { background-color: #fed7d7; color: #742a2a; border: 1px solid #feb2b2; }
@@ -196,19 +207,28 @@
                 <select id="select-mes" onchange="aplicarFiltrosDropdown()"></select>
             </div>
             <div class="filter-group">
-                <label>👤 Vendedor</label>
-                <select id="select-vendedor" onchange="aplicarFiltrosDropdown()"></select>
+                <label>👤 Vendedor (multi)</label>
+                <div class="multi-select" id="ms-vendedor">
+                    <button type="button" class="ms-btn" onclick="toggleMs('ms-vendedor')">-- Todos los Vendedores --</button>
+                    <div class="ms-panel"></div>
+                </div>
             </div>
-            
+
             <button id="btn-share-vendor" class="btn-clear-filters" style="background-color: #3182ce; color: white; border: none; margin-bottom: 2px;" onclick="copiarLinkVendedor()">🔗 Compartir a Comercial</button>
-            
+
             <div class="filter-group">
-                <label>🏷️ Canal / Equipo</label>
-                <select id="select-canal" onchange="aplicarFiltrosDropdown()"></select>
+                <label>🏷️ Canal / Equipo (multi)</label>
+                <div class="multi-select" id="ms-canal">
+                    <button type="button" class="ms-btn" onclick="toggleMs('ms-canal')">-- Todos los Canales --</button>
+                    <div class="ms-panel"></div>
+                </div>
             </div>
             <div class="filter-group">
-                <label>🎯 Marca</label>
-                <select id="select-marca" onchange="aplicarFiltrosDropdown()"></select>
+                <label>🎯 Marca (multi)</label>
+                <div class="multi-select" id="ms-marca">
+                    <button type="button" class="ms-btn" onclick="toggleMs('ms-marca')">-- Todas las Marcas --</button>
+                    <div class="ms-panel"></div>
+                </div>
             </div>
             <div class="filter-group">
                 <label>📅 Día Exacto</label>
@@ -888,9 +908,9 @@
         }
 
         function copiarLinkVendedor() {
-            let v = document.getElementById('select-vendedor').value;
+            let v = (filtrosActivos.vendedores && filtrosActivos.vendedores.length === 1) ? filtrosActivos.vendedores[0] : "";
             if (!v) {
-                alert("⚠️ Primero seleccioná un vendedor en el menú desplegable.");
+                alert("⚠️ Primero seleccioná UN solo vendedor en el filtro para compartir su panel.");
                 return;
             }
             let urlObj = new URL(window.location.href);
@@ -911,7 +931,56 @@
         let lineasDeDatosGlobales = [];
         let idxProductoGlobal = -1; // índice de la columna "Producto" en DATA (drill-down por marca)
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", desde: "", hasta: "", mesActualLive: 7 };
+        let filtrosActivos = { mes: "7", vendedores: [], canales: [], marcas: [], fecha: "", desde: "", hasta: "", mesActualLive: 7 };
+
+        // ===== MULTI-SELECCIÓN (casillas) =====
+        // Abre/cierra el panel de un multi-select y cierra los demás.
+        function toggleMs(id) {
+            document.querySelectorAll('.ms-panel').forEach(p => { if (!p.closest('#' + id)) p.classList.remove('open'); });
+            let panel = document.querySelector('#' + id + ' .ms-panel');
+            if (panel) panel.classList.toggle('open');
+        }
+        // Cierra los paneles al hacer clic fuera.
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.multi-select')) document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
+        });
+        // Rellena un multi-select con opciones y su casilla "Todos".
+        function poblarMulti(id, opciones, textoTodos) {
+            let panel = document.querySelector('#' + id + ' .ms-panel');
+            if (!panel) return;
+            let html = `<label class="ms-all"><input type="checkbox" onchange="msToggleTodos('${id}', this)"> ${textoTodos}</label>`;
+            opciones.forEach(o => {
+                html += `<label><input type="checkbox" value="${escapeHtml(o)}" onchange="msCambio('${id}')"> ${escapeHtml(o)}</label>`;
+            });
+            panel.innerHTML = html;
+        }
+        // Marca/desmarca todas las casillas de un multi-select.
+        function msToggleTodos(id, chkTodos) {
+            let panel = document.querySelector('#' + id + ' .ms-panel');
+            panel.querySelectorAll('input[type="checkbox"][value]').forEach(c => c.checked = chkTodos.checked);
+            msCambio(id);
+        }
+        // Recolecta lo tildado y aplica los filtros.
+        function msCambio(id) {
+            let panel = document.querySelector('#' + id + ' .ms-panel');
+            let sel = Array.from(panel.querySelectorAll('input[type="checkbox"][value]:checked')).map(c => c.value);
+            let allChk = panel.querySelector('.ms-all input');
+            let totalOpc = panel.querySelectorAll('input[type="checkbox"][value]').length;
+            if (allChk) allChk.checked = (sel.length === totalOpc && totalOpc > 0);
+            let btn = document.querySelector('#' + id + ' .ms-btn');
+            let textoTodos = btn.getAttribute('data-todos') || '-- Todos --';
+            if (btn) btn.textContent = (sel.length === 0 || sel.length === totalOpc) ? textoTodos : (sel.length + ' seleccionado' + (sel.length > 1 ? 's' : ''));
+            // Guardamos en filtrosActivos (vacío = todos)
+            let arr = (sel.length === totalOpc) ? [] : sel;
+            if (id === 'ms-vendedor') filtrosActivos.vendedores = arr;
+            else if (id === 'ms-canal') filtrosActivos.canales = arr;
+            else if (id === 'ms-marca') filtrosActivos.marcas = arr;
+            try { filtrarYRenderizarTodo(); } catch(e){}
+        }
+        // Predicados de filtro (array vacío = pasa todo).
+        function vendedorPasaFiltro(v) { return filtrosActivos.vendedores.length === 0 || filtrosActivos.vendedores.some(x => sonElMismoVendedor(v, x)); }
+        function canalPasaFiltro(c) { return filtrosActivos.canales.length === 0 || filtrosActivos.canales.includes(c); }
+        function marcaPasaFiltro(mk) { return filtrosActivos.marcas.length === 0 || filtrosActivos.marcas.some(x => limpiarNombre(x) === limpiarNombre(mk)); }
         let simulacionDiasTrans = null;
 
         let HISTORICO_METAS = {
@@ -1350,21 +1419,19 @@
             
             if (vendorQuery) {
                 setTimeout(() => {
-                    let selV = document.getElementById('select-vendedor');
-                    if (selV) {
-                        selV.value = vendorQuery;
-                        selV.disabled = true; 
-                    }
-                    filtrosActivos.vendedor = vendorQuery;
-                    
+                    // Modo "solo este vendedor": fijamos el multi de vendedor a ese único nombre y bloqueamos filtros.
+                    filtrosActivos.vendedores = [vendorQuery];
+                    let btnV = document.querySelector('#ms-vendedor .ms-btn');
+                    if (btnV) { btnV.textContent = vendorQuery; btnV.disabled = true; }
+
                     document.getElementById('select-mes').disabled = true;
-                    document.getElementById('select-canal').disabled = true;
                     document.getElementById('select-fecha').disabled = true;
-                    document.getElementById('select-marca').disabled = true;
+                    let btnC = document.querySelector('#ms-canal .ms-btn'); if (btnC) btnC.disabled = true;
+                    let btnM = document.querySelector('#ms-marca .ms-btn'); if (btnM) btnM.disabled = true;
                     document.getElementById('btn-share-vendor').style.display = 'none';
                     document.getElementById('btn-reset').style.display = 'none';
                     document.getElementById('btn-sync').style.display = 'none';
-                    
+
                     try { filtrarYRenderizarTodo(); } catch(e){}
                 }, 100);
             } else {
@@ -1373,42 +1440,25 @@
         }
 
         function popularDropdownFiltros(vendedores, canales, marcas) {
-            let selV = document.getElementById('select-vendedor');
-            let selC = document.getElementById('select-canal');
-            let selM = document.getElementById('select-marca');
+            // Vendedores (filtrando "basura")
+            const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
+            let vends = Array.from(vendedores).sort().filter(v => { let vc = limpiarNombre(v); return v && !BASURA.some(b => vc === b || vc.startsWith(b)); });
+            let cans = Array.from(canales).sort().filter(c => c);
+            let marc = Array.from(marcas).sort().filter(m => m && !String(m).includes("Intereses"));
 
-            if(selV) {
-                let optV = `<option value="">-- Todos los Vendedores --</option>`;
-                Array.from(vendedores).sort().forEach(v => { 
-                    let vClean = limpiarNombre(v);
-                    const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
-                    if(v && !BASURA.some(b => vClean === b || vClean.startsWith(b))) {
-                        optV += `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`;
-                    }
-                });
-                selV.innerHTML = optV;
-            }
-            if(selC) {
-                let optC = `<option value="">-- Todos los Canales --</option>`;
-                Array.from(canales).sort().forEach(c => { if(c) optC += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
-                selC.innerHTML = optC;
-            }
-            if(selM) {
-                let optM = `<option value="">-- Todas las Marcas --</option>`;
-                Array.from(marcas).sort().forEach(m => {
-                    if(m && !String(m).includes("Intereses")) optM += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
-                });
-                selM.innerHTML = optM;
-            }
+            let btnV = document.querySelector('#ms-vendedor .ms-btn'); if (btnV) btnV.setAttribute('data-todos', '-- Todos los Vendedores --');
+            let btnC = document.querySelector('#ms-canal .ms-btn'); if (btnC) btnC.setAttribute('data-todos', '-- Todos los Canales --');
+            let btnM = document.querySelector('#ms-marca .ms-btn'); if (btnM) btnM.setAttribute('data-todos', '-- Todas las Marcas --');
+
+            poblarMulti('ms-vendedor', vends, '(Todos los Vendedores)');
+            poblarMulti('ms-canal', cans, '(Todos los Canales)');
+            poblarMulti('ms-marca', marc, '(Todas las Marcas)');
         }
 
         function aplicarFiltrosDropdown() {
             let oldMes = filtrosActivos.mes;
             filtrosActivos.mes = document.getElementById('select-mes').value;
-            filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
-            filtrosActivos.canal = document.getElementById('select-canal').value;
             filtrosActivos.fecha = document.getElementById('select-fecha').value;
-            filtrosActivos.marca = document.getElementById('select-marca').value;
             filtrosActivos.desde = document.getElementById('select-desde') ? document.getElementById('select-desde').value : "";
             filtrosActivos.hasta = document.getElementById('select-hasta') ? document.getElementById('select-hasta').value : "";
 
@@ -1429,13 +1479,18 @@
         function limpiarTodosLosFiltros() {
             filtrosActivos.mes = String(filtrosActivos.mesActualLive);
             document.getElementById('select-mes').value = String(filtrosActivos.mesActualLive);
-            document.getElementById('select-vendedor').value = "";
-            document.getElementById('select-canal').value = "";
             document.getElementById('select-fecha').value = "";
-            document.getElementById('select-marca').value = "";
             if (document.getElementById('select-desde')) document.getElementById('select-desde').value = "";
             if (document.getElementById('select-hasta')) document.getElementById('select-hasta').value = "";
             filtrosActivos.desde = ""; filtrosActivos.hasta = "";
+            filtrosActivos.vendedores = []; filtrosActivos.canales = []; filtrosActivos.marcas = [];
+            // Destildar todas las casillas y restaurar textos
+            ['ms-vendedor','ms-canal','ms-marca'].forEach(id => {
+                let panel = document.querySelector('#' + id + ' .ms-panel');
+                if (panel) panel.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+                let btn = document.querySelector('#' + id + ' .ms-btn');
+                if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
+            });
             document.getElementById('select-mes').disabled = false;
             document.getElementById('select-fecha').disabled = false;
 
@@ -1610,9 +1665,9 @@
                     if (t < tDesde || t > tHasta) return;
                 } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
 
-                if (filtrosActivos.vendedor && !sonElMismoVendedor(r.vendedor, filtrosActivos.vendedor)) return;
-                if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
-                if (filtrosActivos.marca && limpiarNombre(r.marcaFinal) !== limpiarNombre(filtrosActivos.marca)) return;
+                if (!vendedorPasaFiltro(r.vendedor)) return;
+                if (!canalPasaFiltro(r.canal)) return;
+                if (!marcaPasaFiltro(r.marcaFinal)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return;
 
                 let esNC = (r.documento === "Nota de Crédito");
@@ -1730,34 +1785,42 @@
             if (isNaN(dTr) || dTr <= 0) dTr = 4.5;
 
             let objetivoFiltrado = METAS_ACTIVAS.global || 0;
-            if (filtrosActivos.vendedor && filtrosActivos.marca) {
+            let selVend = filtrosActivos.vendedores || [];
+            let selCanal = filtrosActivos.canales || [];
+            let selMarca = filtrosActivos.marcas || [];
+            if (selVend.length && selMarca.length) {
                 let mF = 0;
-                let marcaUpper = limpiarNombre(filtrosActivos.marca);
+                let marcasUpper = selMarca.map(m => limpiarNombre(m));
                 Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                     let parts = String(k).split('|||');
-                    if (parts.length === 2 && limpiarNombre(parts[1]) === marcaUpper) {
-                        if (sonElMismoVendedor(parts[0], filtrosActivos.vendedor)) {
+                    if (parts.length === 2 && marcasUpper.includes(limpiarNombre(parts[1]))) {
+                        if (selVend.some(vv => sonElMismoVendedor(parts[0], vv))) {
                             mF += METAS_ACTIVAS.vendedorMarca[k];
                         }
                     }
                 });
                 objetivoFiltrado = mF;
-            } else if (filtrosActivos.vendedor) {
+            } else if (selVend.length) {
                 let foundMeta = 0;
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
-                    if (sonElMismoVendedor(k, filtrosActivos.vendedor)) {
-                        foundMeta = METAS_ACTIVAS.vendedoresTotales[k];
+                    if (selVend.some(vv => sonElMismoVendedor(k, vv))) {
+                        foundMeta += METAS_ACTIVAS.vendedoresTotales[k];
                     }
                 });
                 objetivoFiltrado = foundMeta;
-            } else if (filtrosActivos.canal) {
-                objetivoFiltrado = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[filtrosActivos.canal]) ? METAS_ACTIVAS.canales[filtrosActivos.canal] : 0;
-            } else if (filtrosActivos.marca) {
-                let mClean = limpiarNombre(filtrosActivos.marca);
+            } else if (selCanal.length) {
+                let sumC = 0;
+                selCanal.forEach(c => {
+                    if (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) sumC += METAS_ACTIVAS.canales[c];
+                });
+                objetivoFiltrado = sumC;
+            } else if (selMarca.length) {
+                let marcasClean = selMarca.map(m => limpiarNombre(m));
                 let sumM = 0;
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                        if(k.toUpperCase().endsWith("|||" + mClean)) sumM += METAS_ACTIVAS.vendedorMarca[k];
+                        let parts = String(k).split('|||');
+                        if (parts.length === 2 && marcasClean.includes(limpiarNombre(parts[1]))) sumM += METAS_ACTIVAS.vendedorMarca[k];
                     });
                 }
                 objetivoFiltrado = sumM;
@@ -1976,7 +2039,7 @@
                 // Arma el bloque de un canal (header + vendedores + subtotal). Devuelve sus totales.
                 function bloqueCanal(canal) {
                     // Si hay un canal filtrado (ej: al tocar la torta), solo mostramos ese canal.
-                    if (filtrosActivos.canal && canal !== filtrosActivos.canal) return null;
+                    if (filtrosActivos.canales.length && !filtrosActivos.canales.includes(canal)) return null;
                     let filas = [];
                     if (acumVendPorCanal[canal]) {
                         Object.keys(acumVendPorCanal[canal]).forEach(v => {
@@ -2329,12 +2392,12 @@
                     }
                 });
             }
-            // Si hay filtro de vendedor, el objetivo de marca debe ser el de ese vendedor únicamente.
-            if (filtrosActivos.vendedor && METAS_ACTIVAS.vendedorMarca) {
+            // Si hay filtro de vendedor(es), el objetivo de marca debe ser el de esos vendedores únicamente.
+            if (filtrosActivos.vendedores.length && METAS_ACTIVAS.vendedorMarca) {
                 objPorClaveMarca = {};
                 Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                     let parts = String(k).split('|||');
-                    if (parts.length === 2 && sonElMismoVendedor(parts[0], filtrosActivos.vendedor)) {
+                    if (parts.length === 2 && filtrosActivos.vendedores.some(vv => sonElMismoVendedor(parts[0], vv))) {
                         let ck = claveMarca(parts[1]);
                         objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS.vendedorMarca[k];
                     }
@@ -2395,9 +2458,11 @@
                                 onClick: (e, elements) => {
                                     if (elements.length > 0) {
                                         let c = arrCanalesLabels[elements[0].index];
-                                        let filterSelect = document.getElementById('select-canal');
-                                        if(filterSelect.value === c) filterSelect.value = ""; else filterSelect.value = c;
-                                        aplicarFiltrosDropdown();
+                                        let panel = document.querySelector('#ms-canal .ms-panel');
+                                        if (panel) {
+                                            let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === c);
+                                            if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); }
+                                        }
                                     }
                                 }
                             }
