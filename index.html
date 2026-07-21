@@ -252,7 +252,7 @@
 
             <div class="charts-row">
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📅 CURVA DE CRECIMIENTO: ACUMULADO REAL VS ACUMULADO ESPERADO</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📅 CURVA DE CRECIMIENTO: TOTAL VENDIDO VS ESPERADO AL PERÍODO</span>
                     <div style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
                         <canvas id="lineChart"></canvas>
                     </div>
@@ -2275,8 +2275,8 @@
                             data: { 
                                 labels: arrDiasGrafico, 
                                 datasets: [
-                                    { label: 'Acumulado Real (₲)', data: arrValoresRealAcumulado, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true },
-                                    { label: 'Meta Esperada a Hoy (₲)', data: arrValoresEsperadoAcumulado, borderColor: '#e53e3e', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }
+                                    { label: 'Total Vendido (₲)', data: arrValoresRealAcumulado, borderColor: '#1c3d5a', backgroundColor: 'rgba(28, 61, 90, 0.05)', borderWidth: 2, tension: 0.15, fill: true },
+                                    { label: 'Esperado al Período (₲)', data: arrValoresEsperadoAcumulado, borderColor: '#e53e3e', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }
                                 ] 
                             },
                             options: { 
