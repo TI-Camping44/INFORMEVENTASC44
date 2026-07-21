@@ -1895,6 +1895,8 @@
 
                 // Arma el bloque de un canal (header + vendedores + subtotal). Devuelve sus totales.
                 function bloqueCanal(canal) {
+                    // Si hay un canal filtrado (ej: al tocar la torta), solo mostramos ese canal.
+                    if (filtrosActivos.canal && canal !== filtrosActivos.canal) return null;
                     let filas = [];
                     if (acumVendPorCanal[canal]) {
                         Object.keys(acumVendPorCanal[canal]).forEach(v => {
