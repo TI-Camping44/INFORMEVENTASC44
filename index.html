@@ -1728,22 +1728,33 @@
             let acumuladoDiarioSuma = 0;
             let acumuladoEsperadoSuma = 0;
             let hVentasDiarias = "";
-            
-            Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
-                acumuladoDiarioSuma += acumDias[f];
-                acumuladoEsperadoSuma += metaDiariaEscalonada;
-                
-                hVentasDiarias += `<tr><td class="text-center">${f}</td><td class="text-right">₲ ${acumDias[f].toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
-                
-                arrFechasOriginales.push(f);
-                let fPart = String(f).split(' ')[0];
-                if (fPart.includes('/')) {
-                    let p = fPart.split('/');
-                    arrDiasGrafico.push(p[0] + '/' + p[1]);
-                } else {
-                    arrDiasGrafico.push(fPart);
-                }
-                
+
+            // En modo "Año Completo (YTD)" la curva se agrupa por MES (12 puntos legibles);
+            // con un mes puntual seleccionado, sigue día por día.
+            let modoAnual = (filtrosActivos.mes === "" && !filtrosActivos.fecha);
+            let puntosGrafico = [];
+            if (modoAnual) {
+                const nombresMes = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+                let porMes = {};
+                Object.keys(acumDias).forEach(f => { let mi = getMonthFromDate(f); if (mi>0) porMes[mi] = (porMes[mi]||0) + acumDias[f]; });
+                Object.keys(porMes).map(Number).sort((a,b)=>a-b).forEach(mi => {
+                    puntosGrafico.push({ label: nombresMes[mi-1] || String(mi), venta: porMes[mi], fecha: null });
+                });
+            } else {
+                Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
+                    let fPart = String(f).split(' ')[0];
+                    let label = fPart.includes('/') ? (fPart.split('/')[0] + '/' + fPart.split('/')[1]) : fPart;
+                    puntosGrafico.push({ label: label, venta: acumDias[f], fecha: f });
+                });
+            }
+
+            let metaPorPunto = puntosGrafico.length > 0 ? (objetivoFiltrado / puntosGrafico.length) : 0;
+            puntosGrafico.forEach(p => {
+                acumuladoDiarioSuma += p.venta;
+                acumuladoEsperadoSuma += metaPorPunto;
+                hVentasDiarias += `<tr><td class="text-center">${p.fecha || p.label}</td><td class="text-right">₲ ${p.venta.toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
+                arrFechasOriginales.push(p.fecha);
+                arrDiasGrafico.push(p.label);
                 arrValoresRealAcumulado.push(acumuladoDiarioSuma);
                 arrValoresEsperadoAcumulado.push(Math.round(acumuladoEsperadoSuma));
             });
@@ -2261,6 +2272,7 @@
                                 onClick: (e, elements) => {
                                     if (elements.length > 0) {
                                         let fObj = arrFechasOriginales[elements[0].index];
+                                        if (!fObj) return; // puntos mensuales (YTD) no tienen día exacto: no filtran
                                         let filterInput = document.getElementById('select-fecha');
                                         if(filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
                                         aplicarFiltrosDropdown();
