@@ -84,7 +84,17 @@
         table.excel-table td { padding: 8px 12px; border: 1px solid var(--gray-border); white-space: nowrap; vertical-align: middle; }
         table.excel-table tr.header-segmento td { background-color: var(--navy-light) !important; color: white !important; font-weight: bold; font-size: 12px; padding: 10px 12px; letter-spacing: 0.5px; }
         table.excel-table tr.total-segmento td { background-color: #f7fafc !important; font-weight: bold; border-top: 2px solid var(--navy-main); }
-        table.excel-table tr:hover { background-color: #f8fafc; }
+
+        /* ===== LEGIBILIDAD ===== */
+        /* Filas alternadas (cebra) para seguir filas largas sin perderse */
+        table.excel-table tbody tr:nth-child(even):not(.header-segmento):not(.total-segmento):not(.row-cumplida) td { background-color: #f4f8fc; }
+        /* Semáforo en las columnas de % (celdas centradas): fondo verde si cumple, rojo si no */
+        table.excel-table td.text-center.num-positivo { background-color: #e3f6e8 !important; }
+        table.excel-table td.text-center.num-negativo { background-color: #fdeaea !important; }
+        /* Fila del vendedor que alcanzó su meta del mes: verde suave en toda la fila */
+        table.excel-table tbody tr.row-cumplida td { background-color: #d9f2e3 !important; }
+        /* Hover más marcado */
+        table.excel-table tbody tr:hover td { background-color: #e5eef8 !important; }
 
         .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
@@ -1800,7 +1810,8 @@
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
-                        let rowHtml = `<tr><td>${escapeHtml(v)}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(acumVendPorCanal[canal][v].nc)}">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                        let cumplida = (obj > 0 && net >= obj) ? ' class="row-cumplida"' : '';
+                        let rowHtml = `<tr${cumplida}><td>${escapeHtml(v)}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(acumVendPorCanal[canal][v].nc)}">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                         if (canal === "E-commerce") hEcomV += rowHtml; 
                         else if (canal === "Mayoristas") hMayV += rowHtml; 
                         else if (canal === "Venta Externa") hExtV += rowHtml; 
@@ -1903,7 +1914,8 @@
                     let rows = `<tr class="header-segmento"><td colspan="13">--- ${canal.toUpperCase()} ---</td></tr>`;
                     let sNet = 0, sObj = 0;
                     filas.sort((a, b) => a.v.localeCompare(b.v)).forEach(f => {
-                        rows += `<tr><td>${escapeHtml(f.v)}</td>${celdas(f.net, f.obj, false)}</tr>`;
+                        let cumplida = (f.obj > 0 && f.net >= f.obj) ? ' class="row-cumplida"' : '';
+                        rows += `<tr${cumplida}><td>${escapeHtml(f.v)}</td>${celdas(f.net, f.obj, false)}</tr>`;
                         sNet += f.net; sObj += f.obj;
                     });
                     rows += `<tr class="total-segmento"><td>Total ${canal}</td>${celdas(sNet, sObj, false)}</tr>`;
