@@ -210,6 +210,14 @@
                 <label>📅 Día Exacto</label>
                 <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()">
             </div>
+            <div class="filter-group">
+                <label>📆 Desde (rango)</label>
+                <input type="date" id="select-desde" onchange="aplicarFiltrosDropdown()">
+            </div>
+            <div class="filter-group">
+                <label>📆 Hasta (rango)</label>
+                <input type="date" id="select-hasta" onchange="aplicarFiltrosDropdown()">
+            </div>
             <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()" id="btn-reset">❌ Limpiar</button>
         </div>
 
@@ -867,7 +875,7 @@
         let lineasDeDatosGlobales = [];
         let idxProductoGlobal = -1; // índice de la columna "Producto" en DATA (drill-down por marca)
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", mesActualLive: 7 };
+        let filtrosActivos = { mes: "7", vendedor: "", canal: "", fecha: "", marca: "", desde: "", hasta: "", mesActualLive: 7 };
         let simulacionDiasTrans = null;
 
         let HISTORICO_METAS = {
@@ -1363,11 +1371,21 @@
             filtrosActivos.mes = document.getElementById('select-mes').value;
             filtrosActivos.vendedor = document.getElementById('select-vendedor').value;
             filtrosActivos.canal = document.getElementById('select-canal').value;
-            filtrosActivos.fecha = document.getElementById('select-fecha').value; 
+            filtrosActivos.fecha = document.getElementById('select-fecha').value;
             filtrosActivos.marca = document.getElementById('select-marca').value;
-            
+            filtrosActivos.desde = document.getElementById('select-desde') ? document.getElementById('select-desde').value : "";
+            filtrosActivos.hasta = document.getElementById('select-hasta') ? document.getElementById('select-hasta').value : "";
+
+            // El rango de fechas tiene prioridad: si está activo, deshabilitamos Mes y Día Exacto.
+            let selMes = document.getElementById('select-mes'), selFecha = document.getElementById('select-fecha');
+            if (filtrosActivos.desde && filtrosActivos.hasta) {
+                selMes.disabled = true; selFecha.disabled = true; filtrosActivos.fecha = "";
+            } else {
+                selMes.disabled = false; selFecha.disabled = false;
+            }
+
             if (filtrosActivos.mes !== oldMes) {
-                simulacionDiasTrans = null; 
+                simulacionDiasTrans = null;
             }
             try { filtrarYRenderizarTodo(); } catch(e){}
         }
@@ -1379,7 +1397,12 @@
             document.getElementById('select-canal').value = "";
             document.getElementById('select-fecha').value = "";
             document.getElementById('select-marca').value = "";
-            
+            if (document.getElementById('select-desde')) document.getElementById('select-desde').value = "";
+            if (document.getElementById('select-hasta')) document.getElementById('select-hasta').value = "";
+            filtrosActivos.desde = ""; filtrosActivos.hasta = "";
+            document.getElementById('select-mes').disabled = false;
+            document.getElementById('select-fecha').disabled = false;
+
             simulacionDiasTrans = METAS_LIVE.diasTranscurridos;
             try { filtrarYRenderizarTodo(); } catch(e){}
         }
@@ -1468,30 +1491,39 @@
             "Federal": { objAno: 120000000, objAcum: 197000000 }
         };
 
+        // Suma las metas de un rango de meses [m1..m2] (usado por YTD y por el filtro de rango de fechas).
+        function sumarMesesMetas(m1, m2) {
+            let liveMonth = filtrosActivos.mesActualLive;
+            let acc = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
+            for (let m = m1; m <= m2; m++) {
+                let mData = (m === liveMonth) ? METAS_LIVE : HISTORICO_METAS[String(m)];
+                if (!mData) continue;
+                acc.global += (mData.global || 0);
+                acc.diasMes += (mData.diasMes || 0);
+                let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
+                acc.diasTranscurridos += transVal;
+                if (mData.canales) Object.keys(mData.canales).forEach(c => { acc.canales[c] = (acc.canales[c] || 0) + (mData.canales[c] || 0); });
+                if (mData.vendedoresTotales) Object.keys(mData.vendedoresTotales).forEach(v => { acc.vendedoresTotales[v] = (acc.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); });
+                if (mData.vendedorMarca) Object.keys(mData.vendedorMarca).forEach(vm => { acc.vendedorMarca[vm] = (acc.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); });
+            }
+            return acc;
+        }
+
         function obtenerMetasEstructuraBI() {
             let mesSelec = filtrosActivos.mes;
             let liveMonth = filtrosActivos.mesActualLive;
-            
             let defaultEmpty = { global: 0, diasMes: 25, diasTranscurridos: 25, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
 
-            if (mesSelec === "") { 
-                let metasYTD = JSON.parse(JSON.stringify(defaultEmpty));
-                for (let m = 1; m <= liveMonth; m++) {
-                    let key = String(m);
-                    let mData = (m === liveMonth) ? METAS_LIVE : HISTORICO_METAS[key];
-                    if(!mData) continue;
-                    
-                    metasYTD.global += (mData.global || 0);
-                    metasYTD.diasMes += (mData.diasMes || 0);
-                    
-                    let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
-                    metasYTD.diasTranscurridos += transVal;
+            // Rango de fechas (Desde/Hasta): sumamos las metas de los meses que abarca.
+            if (filtrosActivos.desde && filtrosActivos.hasta) {
+                let m1 = parseInt(filtrosActivos.desde.split('-')[1], 10);
+                let m2 = parseInt(filtrosActivos.hasta.split('-')[1], 10);
+                if (m1 > m2) { let t = m1; m1 = m2; m2 = t; }
+                return sumarMesesMetas(m1, m2);
+            }
 
-                    if(mData.canales) { Object.keys(mData.canales).forEach(c => { metasYTD.canales[c] = (metasYTD.canales[c] || 0) + (mData.canales[c] || 0); }); }
-                    if(mData.vendedoresTotales) { Object.keys(mData.vendedoresTotales).forEach(v => { metasYTD.vendedoresTotales[v] = (metasYTD.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); }); }
-                    if (mData.vendedorMarca) { Object.keys(mData.vendedorMarca).forEach(vm => { metasYTD.vendedorMarca[vm] = (metasYTD.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); }); }
-                }
-                return metasYTD;
+            if (mesSelec === "") {
+                return sumarMesesMetas(1, liveMonth);
             } else if (parseInt(mesSelec) === liveMonth) {
                 return METAS_LIVE;
             } else {
@@ -1511,30 +1543,41 @@
 
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
 
-            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos || 25; 
+            let diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos || 25;
             let diasTotalesActivos = METAS_ACTIVAS.diasMes || 25;
             let filtroTime = 0;
-            
-            if (filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
+
+            // Rango de fechas Desde/Hasta (tiene prioridad sobre el filtro de Mes).
+            let rangoActivo = !!(filtrosActivos.desde && filtrosActivos.hasta);
+            let tDesde = rangoActivo ? getIsoTime(filtrosActivos.desde) : 0;
+            let tHasta = rangoActivo ? getIsoTime(filtrosActivos.hasta) : 0;
+
+            if (!rangoActivo && filtrosActivos.mes === String(filtrosActivos.mesActualLive) && !filtrosActivos.fecha) {
                 if (simulacionDiasTrans !== null) { diasTranscurridosActivos = simulacionDiasTrans; }
                 poblarDropdownDiasTranscurridos(diasTotalesActivos);
             }
-            
-            if (filtrosActivos.fecha) {
+
+            if (rangoActivo) {
+                // En rango usamos los días acumulados de los meses (ya calculados en METAS_ACTIVAS).
+                diasTranscurridosActivos = METAS_ACTIVAS.diasTranscurridos;
+            } else if (filtrosActivos.fecha) {
                 filtroTime = getIsoTime(filtrosActivos.fecha);
-                diasTranscurridosActivos = 1; 
+                diasTranscurridosActivos = 1;
             } else if (filtrosActivos.mes !== "" && filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
-                diasTranscurridosActivos = METAS_ACTIVAS.diasMes; 
+                diasTranscurridosActivos = METAS_ACTIVAS.diasMes;
             }
 
             // PROCESAMOS VENTAS EN VIVO DE ODOO (ÚNICA FUENTE DE VENTAS)
             lineasDeDatosGlobales.forEach(r => {
-                if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
-                
+                if (rangoActivo) {
+                    let t = parseDateToTime(r.fecha);
+                    if (t < tDesde || t > tHasta) return;
+                } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
+
                 if (filtrosActivos.vendedor && !sonElMismoVendedor(r.vendedor, filtrosActivos.vendedor)) return;
                 if (filtrosActivos.canal && r.canal !== filtrosActivos.canal) return;
                 if (filtrosActivos.marca && limpiarNombre(r.marcaFinal) !== limpiarNombre(filtrosActivos.marca)) return;
-                if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return; 
+                if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return;
 
                 let esNC = (r.documento === "Nota de Crédito");
                 let m = r.totalGs;
@@ -1687,8 +1730,9 @@
             let numPuntosEnGrafico = Object.keys(acumDias).length;
             let metaDiariaEscalonada = numPuntosEnGrafico > 0 ? (objetivoFiltrado / numPuntosEnGrafico) : 0;
 
-            document.getElementById('lbl-txt-habiles').innerText = (filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles");
-            document.getElementById('lbl-txt-transcurridos').innerText = (filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)");
+            let rangoActivoV = !!(filtrosActivos.desde && filtrosActivos.hasta);
+            document.getElementById('lbl-txt-habiles').innerText = rangoActivoV ? "Días Hábiles Rango" : ((filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles"));
+            document.getElementById('lbl-txt-transcurridos').innerText = rangoActivoV ? "Transcurridos Rango" : ((filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)"));
             document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
             
@@ -1696,7 +1740,7 @@
             
             let selectTransHTML = document.getElementById('lbl-dias-trans');
             if (selectTransHTML) {
-                if (filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
+                if (rangoActivoV || filtrosActivos.mes !== String(filtrosActivos.mesActualLive)) {
                     selectTransHTML.innerHTML = `<option value="${dTr}">${dTr.toFixed(1).replace('.', ',')}</option>`;
                     selectTransHTML.disabled = true;
                 } else {
@@ -2224,7 +2268,7 @@
             let elFEco = document.getElementById('grid-fichas-ecommerce');
             if (elFEco) elFEco.innerHTML = hCliSlides || `<div style="padding:15px;color:#a0aec0;">Sin ventas de e-commerce en el período.</div>`;
 
-            let hNcC = ""; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) hNcC += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-canal').innerHTML = hNcC;
+            let hNcC = ""; let totNcCanal = 0; Object.keys(acumCanales).forEach(c => { if(acumCanales[c].nc < 0) { hNcC += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumCanales[c].nc.toLocaleString('es-PY')}</td></tr>`; totNcCanal += acumCanales[c].nc; } }); hNcC += `<tr class="total-segmento"><td>TOTAL NOTAS DE CRÉDITO</td><td class="text-right num-negativo">₲ ${totNcCanal.toLocaleString('es-PY')}</td></tr>`; document.getElementById('nc-por-canal').innerHTML = hNcC;
             let hNcCl = ""; Object.keys(acumClientesNC).sort((a,b)=>acumClientesNC[a]-acumClientesNC[b]).slice(0,5).forEach(c => { hNcCl += `<tr><td>${escapeHtml(c)}</td><td class="text-right num-negativo">₲ ${acumClientesNC[c].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-cliente').innerHTML = hNcCl;
             let hNcF = ""; Object.keys(acumFechasNC).forEach(f => { hNcF += `<tr><td class="text-center">${f}</td><td class="text-right num-negativo">₲ ${acumFechasNC[f].toLocaleString('es-PY')}</td></tr>`; }); document.getElementById('nc-por-fecha').innerHTML = hNcF;
             // Item 6: NC por vendedor responsable (ordenado por mayor devolución)
