@@ -1842,8 +1842,35 @@
             // ============================================================
             (function construirConsolidado(){
                 let hCon = "";
-                let granNet = 0, granEsp = 0, granObj = 0, granProy = 0;
-                canalesSegmentos.forEach(canal => {
+
+                // Devuelve las 12 celdas numéricas (todo lo que va después del nombre) para un net/obj dados.
+                function celdas(net, obj, white) {
+                    let esp = Math.round((obj / dMes) * dTr);
+                    let proy = Math.round(dTr > 0 ? (net / dTr) * dMes : 0);
+                    let difHoy = net - esp, falta = obj - net;
+                    let factDiaEsp = Math.round(obj / dMes), factRealDia = Math.round(dTr > 0 ? net / dTr : 0);
+                    let pctH = esp > 0 ? ((net / esp) * 100).toFixed(0) : '0';
+                    let pctM = obj > 0 ? ((net / obj) * 100).toFixed(0) : '0';
+                    let pctP = obj > 0 ? ((proy / obj) * 100).toFixed(0) : '0';
+                    let pctDia = factDiaEsp > 0 ? ((factRealDia / factDiaEsp) * 100).toFixed(0) : '0';
+                    let W = white ? ' style="color:#fff;"' : '';
+                    let cls = ok => white ? '' : (ok ? 'num-positivo' : 'num-negativo');
+                    return `<td class="text-right"${W}>₲ ${net.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-right"${W}>₲ ${esp.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-right ${cls(difHoy>=0)}"${W}>₲ ${difHoy.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-center ${cls(Number(pctH)>=100)}"${W}>${pctH}%</td>`
+                        + `<td class="text-right"${W}>₲ ${obj.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-right ${cls(falta<=0)}"${W}>₲ ${falta.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-center ${cls(Number(pctM)>=100)}"${W}>${pctM}%</td>`
+                        + `<td class="text-right"${W}>₲ ${proy.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-center ${cls(Number(pctP)>=100)}"${W}>${pctP}%</td>`
+                        + `<td class="text-right"${W}>₲ ${factDiaEsp.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-right"${W}>₲ ${factRealDia.toLocaleString('es-PY')}</td>`
+                        + `<td class="text-center ${cls(Number(pctDia)>=100)}"${W}>${pctDia}%</td>`;
+                }
+
+                // Arma el bloque de un canal (header + vendedores + subtotal). Devuelve sus totales.
+                function bloqueCanal(canal) {
                     let filas = [];
                     if (acumVendPorCanal[canal]) {
                         Object.keys(acumVendPorCanal[canal]).forEach(v => {
@@ -1861,35 +1888,39 @@
                             if (obj > 0) filas.push({ v: v, net: 0, obj: obj });
                         }
                     });
-                    if (filas.length === 0) return;
-
-                    hCon += `<tr class="header-segmento"><td colspan="13">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
-                    let sNet = 0, sEsp = 0, sObj = 0, sProy = 0;
+                    if (filas.length === 0) return null;
+                    let rows = `<tr class="header-segmento"><td colspan="13">--- ${canal.toUpperCase()} ---</td></tr>`;
+                    let sNet = 0, sObj = 0;
                     filas.sort((a, b) => a.v.localeCompare(b.v)).forEach(f => {
-                        let esp = Math.round((f.obj / dMes) * dTr);
-                        let proy = Math.round(dTr > 0 ? (f.net / dTr) * dMes : 0);
-                        let difHoy = f.net - esp;
-                        let falta = f.obj - f.net;
-                        let factDiaEsp = Math.round(f.obj / dMes);
-                        let factRealDia = Math.round(dTr > 0 ? f.net / dTr : 0);
-                        let pctDia = factDiaEsp > 0 ? ((factRealDia / factDiaEsp) * 100).toFixed(0) : '0';
-                        sNet += f.net; sEsp += esp; sObj += f.obj; sProy += proy;
-                        let pctH = esp > 0 ? ((f.net / esp) * 100).toFixed(0) : '0';
-                        let pctM = f.obj > 0 ? ((f.net / f.obj) * 100).toFixed(0) : '0';
-                        let pctP = f.obj > 0 ? ((proy / f.obj) * 100).toFixed(0) : '0';
-                        hCon += `<tr><td>${escapeHtml(f.v)}</td><td class="text-right">₲ ${f.net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-right ${difHoy>=0?'num-positivo':'num-negativo'}">₲ ${difHoy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctH)>=100?'num-positivo':'num-negativo'}">${pctH}%</td><td class="text-right">₲ ${f.obj.toLocaleString('es-PY')}</td><td class="text-right ${falta<=0?'num-positivo':'num-negativo'}">₲ ${falta.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctM)>=100?'num-positivo':'num-negativo'}">${pctM}%</td><td class="text-right">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctP)>=100?'num-positivo':'num-negativo'}">${pctP}%</td><td class="text-right">₲ ${factDiaEsp.toLocaleString('es-PY')}</td><td class="text-right">₲ ${factRealDia.toLocaleString('es-PY')}</td><td class="text-center ${Number(pctDia)>=100?'num-positivo':'num-negativo'}">${pctDia}%</td></tr>`;
+                        rows += `<tr><td>${escapeHtml(f.v)}</td>${celdas(f.net, f.obj, false)}</tr>`;
+                        sNet += f.net; sObj += f.obj;
                     });
-                    granNet += sNet; granEsp += sEsp; granObj += sObj; granProy += sProy;
-                    let partic = data.neta !== 0 ? ((sNet / data.neta) * 100).toFixed(1) : '0';
-                    let sDifHoy = sNet - sEsp, sFalta = sObj - sNet;
-                    let sFactDiaEsp = Math.round(sObj / dMes), sFactRealDia = Math.round(dTr > 0 ? sNet / dTr : 0);
-                    let sPctDia = sFactDiaEsp > 0 ? ((sFactRealDia / sFactDiaEsp) * 100).toFixed(0) : '0';
-                    hCon += `<tr class="total-segmento"><td>Total ${canal} (${partic}% del total)</td><td class="text-right">₲ ${sNet.toLocaleString('es-PY')}</td><td class="text-right">₲ ${sEsp.toLocaleString('es-PY')}</td><td class="text-right ${sDifHoy>=0?'num-positivo':'num-negativo'}">₲ ${sDifHoy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sEsp>0?((sNet/sEsp)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sObj.toLocaleString('es-PY')}</td><td class="text-right ${sFalta<=0?'num-positivo':'num-negativo'}">₲ ${sFalta.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sNet/sObj)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sProy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sObj>0?((sProy/sObj)*100).toFixed(0):'0'}%</td><td class="text-right">₲ ${sFactDiaEsp.toLocaleString('es-PY')}</td><td class="text-right">₲ ${sFactRealDia.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${sPctDia}%</td></tr>`;
+                    rows += `<tr class="total-segmento"><td>Total ${canal}</td>${celdas(sNet, sObj, false)}</tr>`;
+                    return { rows, net: sNet, obj: sObj };
+                }
+
+                // Fila de total de grupo (Consumidor Final / Mayoristas / Directorio) con % de participación.
+                function totalGrupo(label, net, obj) {
+                    let partic = data.neta !== 0 ? ((net / data.neta) * 100).toFixed(1) : '0';
+                    return `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">${label} — ${partic}% del total</td>${celdas(net, obj, true)}</tr>`;
+                }
+
+                // GRUPO 1: CONSUMIDOR FINAL = Salón + Online + Venta Externa + E-commerce
+                let cfNet = 0, cfObj = 0, huboCF = false;
+                ["Salon", "Online", "Venta Externa", "E-commerce"].forEach(canal => {
+                    let b = bloqueCanal(canal);
+                    if (b) { hCon += b.rows; cfNet += b.net; cfObj += b.obj; huboCF = true; }
                 });
-                let gDifHoy = granNet - granEsp, gFalta = granObj - granNet;
-                let gFactDiaEsp = Math.round(granObj / dMes), gFactRealDia = Math.round(dTr > 0 ? granNet / dTr : 0);
-                let gPctDia = gFactDiaEsp > 0 ? ((gFactRealDia / gFactDiaEsp) * 100).toFixed(0) : '0';
-                hCon += `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">TOTAL GENERAL</td><td class="text-right" style="color:#fff;">₲ ${granNet.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${granEsp.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${gDifHoy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granEsp>0?((granNet/granEsp)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granObj.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${gFalta.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granNet/granObj)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${granProy.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${granObj>0?((granProy/granObj)*100).toFixed(0):'0'}%</td><td class="text-right" style="color:#fff;">₲ ${gFactDiaEsp.toLocaleString('es-PY')}</td><td class="text-right" style="color:#fff;">₲ ${gFactRealDia.toLocaleString('es-PY')}</td><td class="text-center" style="color:#fff;">${gPctDia}%</td></tr>`;
+                if (huboCF) hCon += totalGrupo("TOTAL CONSUMIDOR FINAL", cfNet, cfObj);
+
+                // GRUPO 2: MAYORISTAS (aparte)
+                let bMay = bloqueCanal("Mayoristas");
+                if (bMay) { hCon += bMay.rows; hCon += totalGrupo("TOTAL MAYORISTAS", bMay.net, bMay.obj); }
+
+                // GRUPO 3: DIRECTORIO (aparte)
+                let bDir = bloqueCanal("Directorio");
+                if (bDir) { hCon += bDir.rows; hCon += totalGrupo("TOTAL DIRECTORIO", bDir.net, bDir.obj); }
+
                 let elCon = document.getElementById('grid-resumen-consolidado');
                 if (elCon) elCon.innerHTML = hCon;
             })();
