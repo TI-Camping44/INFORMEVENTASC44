@@ -95,6 +95,10 @@
         table.excel-table tbody tr.row-cumplida td { background-color: #d9f2e3 !important; }
         /* Hover más marcado */
         table.excel-table tbody tr:hover td { background-color: #e5eef8 !important; }
+        /* Encabezados ordenables */
+        th.th-sort { cursor: pointer; user-select: none; }
+        th.th-sort:hover { background-color: #dbe4ef; }
+        th.th-sort .sort-ind { color: var(--teal-accent); font-size: 10px; }
 
         .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; text-align: center; }
         .badge-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
@@ -519,16 +523,16 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Marca</th>
-                                <th class="text-right">Venta Acum. (YTD)</th>
-                                <th class="text-right">Objetivo Año</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-right">Obj. Acumulado</th>
-                                <th class="text-right">Diferencia</th>
-                                <th class="text-right">Faltante p/ Objetivo</th>
-                                <th class="text-right">Proy. a Dic</th>
-                                <th class="text-center">% Proy.</th>
-                                <th class="text-center">Debería estar</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Marca</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Venta Acum. (YTD)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Año</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Obj. Acumulado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Diferencia</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Faltante p/ Objetivo</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Proy. a Dic</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Proy.</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">Debería estar</th>
                             </tr>
                         </thead>
                         <tbody id="grid-anual-marcas"></tbody>
@@ -540,16 +544,16 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Línea / Calibre</th>
-                                <th class="text-right">Venta Acum. (YTD)</th>
-                                <th class="text-right">Objetivo Año</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-right">Obj. Acumulado</th>
-                                <th class="text-right">Diferencia</th>
-                                <th class="text-right">Faltante p/ Objetivo</th>
-                                <th class="text-right">Proy. a Dic</th>
-                                <th class="text-center">% Proy.</th>
-                                <th class="text-center">Debería estar</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Venta Acum. (YTD)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Año</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Obj. Acumulado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Diferencia</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Faltante p/ Objetivo</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Proy. a Dic</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Proy.</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">Debería estar</th>
                             </tr>
                         </thead>
                         <tbody id="grid-anual-aym"></tbody>
@@ -669,7 +673,7 @@
                     <div class="excel-title">MARCAS PRINCIPALES</div>
                     <div class="table-responsive-wrapper">
                         <table class="excel-table">
-                            <thead><tr><th>Marca</th><th class="text-right">Ventas en GS</th><th class="text-right">Objetivo</th><th class="text-right">% Logrado</th></tr></thead>
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
                             <tbody id="marcas-lista"></tbody>
                             <tfoot id="marcas-footer"></tfoot>
                         </table>
@@ -679,7 +683,7 @@
                     <div class="excel-title">ARMAS Y MUNICIONES</div>
                     <div class="table-responsive-wrapper">
                         <table class="excel-table">
-                            <thead><tr><th>Línea / Calibre</th><th class="text-right">Ventas en GS</th><th class="text-right">Objetivo</th><th class="text-right">% Logrado</th></tr></thead>
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
                             <tbody id="armas-lista"></tbody>
                             <tfoot id="armas-footer"></tfoot>
                         </table>
@@ -689,7 +693,7 @@
                     <div class="excel-title">RESTO DE MARCAS</div>
                     <div class="table-responsive-wrapper">
                         <table class="excel-table">
-                            <thead><tr><th>Clasificación</th><th class="text-right">Ventas en GS</th></tr></thead>
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
                             <tbody id="resto-lista"></tbody>
                             <tfoot id="resto-footer"></tfoot>
                         </table>
@@ -707,6 +711,38 @@
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
+        }
+
+        // Ordena una tabla plana al tocar el encabezado (alterna asc/desc). Detecta números (₲, %).
+        function valorCeldaOrden(td) {
+            if (!td) return '';
+            let t = (td.innerText || '').trim();
+            let limpio = t.replace(/[₲%\s]/g, '').replace(/\./g, '');
+            if (limpio !== '' && /^-?\d+$/.test(limpio)) return parseInt(limpio, 10);
+            return t.toLowerCase();
+        }
+        function ordenarTabla(th) {
+            let table = th.closest('table');
+            if (!table) return;
+            let tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            let idx = Array.from(th.parentNode.children).indexOf(th);
+            let asc = th.getAttribute('data-asc') !== 'true';
+            // Limpiamos indicadores de los otros encabezados
+            th.parentNode.querySelectorAll('th').forEach(h => {
+                if (h !== th) { h.removeAttribute('data-asc'); let s = h.querySelector('.sort-ind'); if (s) s.remove(); }
+            });
+            let rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                let av = valorCeldaOrden(a.children[idx]), bv = valorCeldaOrden(b.children[idx]);
+                if (typeof av === 'number' && typeof bv === 'number') return asc ? av - bv : bv - av;
+                return asc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+            });
+            rows.forEach(r => tbody.appendChild(r));
+            th.setAttribute('data-asc', asc);
+            let prev = th.querySelector('.sort-ind'); if (prev) prev.remove();
+            let ind = document.createElement('span'); ind.className = 'sort-ind'; ind.textContent = asc ? ' ▲' : ' ▼';
+            th.appendChild(ind);
         }
 
         // Drill-down: despliega u oculta los productos de una marca dentro de una ficha.
