@@ -1899,10 +1899,12 @@
                     return { rows, net: sNet, obj: sObj };
                 }
 
-                // Fila de total de grupo (Consumidor Final / Mayoristas / Directorio) con % de participación.
+                // Total de grupo en DOS filas como el Excel: "Total ... >>" (montos) + "% Participación del Total".
                 function totalGrupo(label, net, obj) {
                     let partic = data.neta !== 0 ? ((net / data.neta) * 100).toFixed(1) : '0';
-                    return `<tr class="total-segmento" style="background:var(--navy-main);"><td style="color:#fff;">${label} — ${partic}% del total</td>${celdas(net, obj, true)}</tr>`;
+                    let filaTotal = `<tr class="total-segmento" style="border-top:3px solid var(--navy-main); background:#dbe4ef;"><td style="font-weight:800; color:var(--navy-main);">${label} &gt;&gt;</td>${celdas(net, obj, false)}</tr>`;
+                    let filaPartic = `<tr class="total-segmento" style="background:#eef2f7;"><td style="font-style:italic; color:var(--text-muted);">% Participación del Total</td><td class="text-right" style="font-weight:800; color:var(--teal-accent);">${partic}%</td><td colspan="11"></td></tr>`;
+                    return filaTotal + filaPartic;
                 }
 
                 // GRUPO 1: CONSUMIDOR FINAL = Salón + Online + Venta Externa + E-commerce
