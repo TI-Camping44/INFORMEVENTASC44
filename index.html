@@ -1758,7 +1758,9 @@
                 });
             }
 
-            let metaPorPunto = puntosGrafico.length > 0 ? (objetivoFiltrado / puntosGrafico.length) : 0;
+            // La línea "Esperado" llega solo hasta lo esperado A HOY (no al objetivo del mes completo),
+            // así sube a la par de la venta real en vez de dispararse hasta arriba.
+            let metaPorPunto = puntosGrafico.length > 0 ? (esperadoGlobal / puntosGrafico.length) : 0;
             puntosGrafico.forEach(p => {
                 acumuladoDiarioSuma += p.venta;
                 acumuladoEsperadoSuma += metaPorPunto;
