@@ -2486,6 +2486,10 @@
 
             let grupos = { "Salon": [], "Online": [], "Mayoristas": [] };
             RANKING_ANUAL.forEach(cfg => {
+                // El ranking es anual (YTD): solo aplican los filtros de Canal y Vendedor.
+                // Marca y rango de fechas no aplican (los objetivos del ranking son anuales fijos).
+                if (filtrosActivos.canales.length && !filtrosActivos.canales.some(c => normCanal(c) === normCanal(cfg.canal))) return;
+                if (filtrosActivos.vendedores.length && !filtrosActivos.vendedores.some(v => sonElMismoVendedor(cfg.nombre, v))) return;
                 let vGen = 0, vMarcas = 0;
                 lineasDeDatosGlobales.forEach(r => {
                     if (normCanal(r.canal) !== normCanal(cfg.canal)) return;
