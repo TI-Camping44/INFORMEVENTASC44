@@ -593,17 +593,17 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor</th>
-                                <th class="text-right">Ventas Generales (YTD)</th>
-                                <th class="text-right">Objetivo Año</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-right">Venta de Marcas (YTD)</th>
-                                <th class="text-right">Objetivo Marcas</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-center">80%</th>
-                                <th class="text-center">20%</th>
-                                <th class="text-center">Ranking</th>
-                                <th class="text-center">37/10</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Generales (YTD)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Año</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Venta de Marcas (YTD)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Marcas</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">80%</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">20%</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">Ranking</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">37/10</th>
                             </tr>
                         </thead>
                         <tbody id="grid-ranking"></tbody>
@@ -752,13 +752,24 @@
             th.parentNode.querySelectorAll('th').forEach(h => {
                 if (h !== th) { h.removeAttribute('data-asc'); let s = h.querySelector('.sort-ind'); if (s) s.remove(); }
             });
-            let rows = Array.from(tbody.querySelectorAll('tr'));
-            rows.sort((a, b) => {
+            // Filas separadoras: cabeceras de grupo y totales quedan fijas en su lugar.
+            const esSep = (tr) => tr.classList.contains('header-segmento') || tr.classList.contains('total-segmento');
+            const cmp = (a, b) => {
                 let av = valorCeldaOrden(a.children[idx]), bv = valorCeldaOrden(b.children[idx]);
-                if (typeof av === 'number' && typeof bv === 'number') return asc ? av - bv : bv - av;
+                let an = typeof av === 'number', bn = typeof bv === 'number';
+                if (an || bn) { let x = an ? av : -Infinity, y = bn ? bv : -Infinity; return asc ? x - y : y - x; }
                 return asc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
-            });
-            rows.forEach(r => tbody.appendChild(r));
+            };
+            let allRows = Array.from(tbody.children);
+            if (allRows.some(esSep)) {
+                // Tabla agrupada: ordenamos dentro de cada bloque, sin mover separadores.
+                let bloque = [];
+                const flush = () => { bloque.sort(cmp); bloque.forEach(r => tbody.appendChild(r)); bloque = []; };
+                allRows.forEach(tr => { if (esSep(tr)) { flush(); tbody.appendChild(tr); } else bloque.push(tr); });
+                flush();
+            } else {
+                allRows.sort(cmp); allRows.forEach(r => tbody.appendChild(r));
+            }
             th.setAttribute('data-asc', asc);
             let prev = th.querySelector('.sort-ind'); if (prev) prev.remove();
             let ind = document.createElement('span'); ind.className = 'sort-ind'; ind.textContent = asc ? ' ▲' : ' ▼';
@@ -2514,6 +2525,8 @@
             ["Salon", "Online", "Mayoristas"].forEach(canal => {
                 let filas = grupos[canal] || [];
                 if (!filas.length) return;
+                // Orden por defecto: de mayor a menor Ranking (%) dentro de cada canal.
+                filas.sort((a, b) => b.ranking - a.ranking);
                 html += `<tr class="header-segmento"><td colspan="11">--- VENDEDORES ${canal.toUpperCase()} ---</td></tr>`;
                 filas.forEach(f => {
                     let clsGen = f.pctGen >= 1 ? 'num-positivo' : 'num-negativo';
