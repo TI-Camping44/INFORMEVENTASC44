@@ -117,6 +117,23 @@
         .badge-brand { background-color: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; }
 
         .fichas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; margin-top: 10px; width: 100%; }
+        /* Ícono "ver clientes" dentro de la fila de marca */
+        .cli-btn { cursor: pointer; margin-left: 5px; opacity: 0.75; font-size: 11px; user-select: none; }
+        .cli-btn:hover { opacity: 1; }
+        /* Modal de clientes por marca */
+        .cm-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        .cm-overlay.open { display: flex; }
+        .cm-box { background: #fff; border-radius: 10px; width: 100%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.3); overflow: hidden; }
+        .cm-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 18px; background: var(--navy-light); color: #fff; }
+        .cm-title { font-size: 14px; font-weight: bold; }
+        .cm-sub { font-size: 11px; opacity: 0.85; margin-top: 3px; }
+        .cm-close { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; flex-shrink: 0; margin-left: 10px; }
+        .cm-close:hover { background: rgba(255,255,255,0.35); }
+        .cm-body { overflow-y: auto; padding: 0; }
+        .cm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .cm-table th { background: #f1f5f9; color: #334155; text-align: left; padding: 9px 12px; position: sticky; top: 0; font-size: 11px; }
+        .cm-table td { padding: 8px 12px; border-bottom: 1px solid #edf2f7; }
+        .cm-table tr:nth-child(even) td { background: #f8fafc; }
         .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 10.5px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; }
         .ficha-table { width: 100%; border-collapse: collapse; min-width: 100%; }
@@ -303,19 +320,19 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor</th>
-                                <th class="text-right">Ventas Totales</th>
-                                <th class="text-right">Hoy deberías estar en</th>
-                                <th class="text-right">Dif. vs Hoy</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Mes</th>
-                                <th class="text-right">Falta p/ Objetivo</th>
-                                <th class="text-right">% Logrado Mes</th>
-                                <th class="text-right">Proyección</th>
-                                <th class="text-right">% Proyección</th>
-                                <th class="text-right">Fact. x Día Esperada</th>
-                                <th class="text-right">Fact. Prom. Real x Día</th>
-                                <th class="text-center">% Día</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Totales</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Hoy deberías estar en</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Dif. vs Hoy</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Mes</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Falta p/ Objetivo</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Proyección</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Proyección</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Fact. x Día Esperada</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Fact. Prom. Real x Día</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Día</th>
                             </tr>
                         </thead>
                         <tbody id="grid-resumen-consolidado"></tbody>
@@ -337,12 +354,12 @@
                         <table class="excel-table">
                             <thead>
                                 <tr>
-                                    <th>Canal</th>
-                                    <th class="text-right">Ventas Neta</th>
-                                    <th class="text-right">Esperado Período</th>
-                                    <th class="text-right">% Logrado</th>
-                                    <th class="text-right">Objetivo Período</th>
-                                    <th class="text-right">% Logrado Mes</th>
+                                    <th class="th-sort" onclick="ordenarTabla(this)">Canal</th>
+                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Neta</th>
+                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                                 </tr>
                             </thead>
                             <tbody id="grid-canales-resumen"></tbody>
@@ -359,13 +376,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-consumidor"></tbody>
@@ -391,13 +408,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-externa"></tbody>
@@ -418,13 +435,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-directorio"></tbody>
@@ -445,10 +462,10 @@
                     <table class="excel-table" style="margin-bottom: 25px;">
                         <thead>
                             <tr style="background:var(--navy-main); color:white;">
-                                <th>Cliente / Distribuidor</th>
-                                <th class="text-right">Ventas Brutas</th>
-                                <th class="text-right">Notas de Crédito</th>
-                                <th class="text-right">Total Venta Neta (GS)</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Cliente / Distribuidor</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Brutas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Notas de Crédito</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Total Venta Neta (GS)</th>
                             </tr>
                         </thead>
                         <tbody id="ecommerce-lista"></tbody>
@@ -459,13 +476,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-ecommerce"></tbody>
@@ -485,13 +502,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-mayoristas"></tbody>
@@ -512,13 +529,13 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>Vendedor / Canal</th>
-                                <th class="text-right">Ventas Netas</th>
-                                <th class="text-right">Devoluciones (NC)</th>
-                                <th class="text-right">Esperado Período</th>
-                                <th class="text-right">% Logrado</th>
-                                <th class="text-right">Objetivo Período</th>
-                                <th class="text-right">% Logrado Mes</th>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
                             </tr>
                         </thead>
                         <tbody id="grid-vendedores-reparaciones"></tbody>
@@ -628,13 +645,13 @@
                     <table class="excel-table" id="tabla-exportar-bonos">
                         <thead>
                             <tr style="background:#f7fafc;">
-                                <th class="text-left">Vendedor</th>
-                                <th class="text-right">Meta del Mes (₲)</th>
-                                <th class="text-right">Venta Real (₲)</th>
-                                <th class="text-center">% Logrado</th>
-                                <th class="text-center">¿Alcanzó Meta?</th>
-                                <th class="text-center">Marcas (Grales)</th>
-                                <th class="text-center">Armas y Municiones</th>
+                                <th class="text-left th-sort" onclick="ordenarTabla(this)">Vendedor</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Meta del Mes (₲)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Venta Real (₲)</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">¿Alcanzó Meta?</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">Marcas (Grales)</th>
+                                <th class="text-center th-sort" onclick="ordenarTabla(this)">Armas y Municiones</th>
                             </tr>
                         </thead>
                         <tbody id="grid-bonos-vendedores"></tbody>
@@ -651,7 +668,7 @@
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Por Canal de Distribución</span>
                         <div class="table-responsive-wrapper">
                             <table class="excel-table">
-                                <thead><tr><th>Canal</th><th class="text-right">Monto NC</th></tr></thead>
+                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Canal</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-canal"></tbody>
                             </table>
                         </div>
@@ -660,7 +677,7 @@
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Top 5 Clientes Afectados</span>
                         <div class="table-responsive-wrapper">
                             <table class="excel-table">
-                                <thead><tr><th>Cliente</th><th class="text-right">Monto NC</th></tr></thead>
+                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Cliente</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-cliente"></tbody>
                             </table>
                         </div>
@@ -669,7 +686,7 @@
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Por Vendedor Responsable</span>
                         <div class="table-responsive-wrapper">
                             <table class="excel-table">
-                                <thead><tr><th>Vendedor</th><th class="text-right">Monto NC</th></tr></thead>
+                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-vendedor"></tbody>
                             </table>
                         </div>
@@ -678,7 +695,7 @@
                         <span style="font-weight:bold; font-size:12px; display:block; padding:10px; background:var(--gray-bg); margin-bottom:10px; border-radius:6px;">Cronología Completa</span>
                         <div class="table-responsive-wrapper">
                             <table class="excel-table">
-                                <thead><tr><th>Fecha</th><th class="text-right">Monto NC</th></tr></thead>
+                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Fecha</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Monto NC</th></tr></thead>
                                 <tbody id="nc-por-fecha"></tbody>
                             </table>
                         </div>
@@ -786,6 +803,62 @@
             }
             if (el) { var c = el.querySelector('.pd-caret'); if (c) c.textContent = show ? '▾' : '▸'; }
         }
+
+        // =========================================================================
+        // 👥 CLIENTES POR MARCA — al tocar el ícono de una marca en la ficha de un
+        // vendedor, abre una ventana con los clientes que compraron esa marca.
+        // =========================================================================
+        let __clientesMarcaReg = {};
+        function verClientesMarca(uid, ev) {
+            if (ev) ev.stopPropagation(); // no dispares el drill-down de productos
+            let info = __clientesMarcaReg[uid];
+            if (!info) return;
+            let clientes = info.clientes || {};
+            // Clientes ordenados por monto comprado, de mayor a menor.
+            let claves = Object.keys(clientes).filter(c => clientes[c] > 0).sort((a, b) => clientes[b] - clientes[a]);
+            let total = claves.reduce((s, c) => s + clientes[c], 0);
+            let filas = claves.map((c, i) => {
+                let pct = total > 0 ? ((clientes[c] / total) * 100).toFixed(1) : '0';
+                return `<tr>
+                    <td style="text-align:center; color:#718096;">${i + 1}</td>
+                    <td>${escapeHtml(c)}</td>
+                    <td class="text-right" style="font-weight:bold; color:#2b7a78;">₲ ${clientes[c].toLocaleString('es-PY')}</td>
+                    <td class="text-center" style="color:#4a5568;">${pct}%</td>
+                </tr>`;
+            }).join('');
+            if (!filas) filas = `<tr><td colspan="4" style="text-align:center; color:#a0aec0; padding:16px;">Sin clientes registrados para esta marca.</td></tr>`;
+
+            let ov = document.getElementById('modal-clientes-marca');
+            if (!ov) {
+                ov = document.createElement('div');
+                ov.id = 'modal-clientes-marca';
+                ov.className = 'cm-overlay';
+                ov.onclick = function(e) { if (e.target === ov) cerrarClientesMarca(); };
+                document.body.appendChild(ov);
+            }
+            ov.innerHTML = `
+                <div class="cm-box">
+                    <div class="cm-head">
+                        <div>
+                            <div class="cm-title">👥 Clientes que compraron <strong>${escapeHtml(info.marca)}</strong></div>
+                            <div class="cm-sub">Vendedor: ${escapeHtml(info.vendedor)} · ${claves.length} cliente${claves.length === 1 ? '' : 's'} · Total ₲ ${total.toLocaleString('es-PY')}</div>
+                        </div>
+                        <button class="cm-close" onclick="cerrarClientesMarca()">✕</button>
+                    </div>
+                    <div class="cm-body">
+                        <table class="cm-table">
+                            <thead><tr><th style="width:36px;">#</th><th>Cliente</th><th class="text-right">Compró (₲)</th><th class="text-center">% del total</th></tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+            ov.classList.add('open');
+        }
+        function cerrarClientesMarca() {
+            let ov = document.getElementById('modal-clientes-marca');
+            if (ov) ov.classList.remove('open');
+        }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarClientesMarca(); });
 
         // =========================================================================
         // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
@@ -1729,7 +1802,7 @@
 
                 // SIEMPRE CREA EL OBJETO DEL VENDEDOR PARA LAS FICHAS AUNQUE VENDA 0
                 if(r.vendedor) {
-                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, productos: {}, nc: 0, bruto: 0, canalesBruto: {} };
+                    if(!dataFichasVend[r.vendedor]) dataFichasVend[r.vendedor] = { canal: r.canal, marcas: {}, productos: {}, clientes: {}, nc: 0, bruto: 0, canalesBruto: {} };
                     // Acumulamos venta bruta por canal para luego elegir el canal dominante del vendedor.
                     if(r.canal && !esNC) dataFichasVend[r.vendedor].canalesBruto[r.canal] = (dataFichasVend[r.vendedor].canalesBruto[r.canal] || 0) + m;
                     if(esNC) dataFichasVend[r.vendedor].nc += m; else dataFichasVend[r.vendedor].bruto += m;
@@ -1741,6 +1814,12 @@
                             if (!dataFichasVend[r.vendedor].productos[mClean]) dataFichasVend[r.vendedor].productos[mClean] = {};
                             let pName = String(r.producto).replace(/\s+/g, ' ').trim();
                             dataFichasVend[r.vendedor].productos[mClean][pName] = (dataFichasVend[r.vendedor].productos[mClean][pName] || 0) + m;
+                        }
+                        // Clientes que compraron esta marca a este vendedor (para el modal de clientes por marca).
+                        if (r.cliente) {
+                            if (!dataFichasVend[r.vendedor].clientes[mClean]) dataFichasVend[r.vendedor].clientes[mClean] = {};
+                            let cName = String(r.cliente).replace(/\s+/g, ' ').trim();
+                            dataFichasVend[r.vendedor].clientes[mClean][cName] = (dataFichasVend[r.vendedor].clientes[mClean][cName] || 0) + m;
                         }
                     }
                 }
@@ -1773,7 +1852,7 @@
                         else if (vMeta.includes("EXTERNA")) guessedCanal = "Venta Externa";
                         
                         // Los inyectamos para que se vean sus 0
-                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, productos: {}, nc: 0, bruto: 0 };
+                        dataFichasVend[vMeta] = { canal: guessedCanal, marcas: {}, productos: {}, clientes: {}, nc: 0, bruto: 0 };
                     }
                 });
             }
@@ -2111,6 +2190,7 @@
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let bonosDataByCanal = { "Salon": [], "Online": [], "Venta Externa": [], "Directorio": [], "E-commerce": [], "Mayoristas": [], "Reparaciones": [] };
             let __pdSeq = 0; // secuencia para grupos de drill-down (producto por marca)
+            __clientesMarcaReg = {}; // se regenera en cada render (los uid 'cm#' se reasignan)
 
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
@@ -2174,15 +2254,24 @@
                     // Drill-down: productos vendidos de esta marca por este vendedor
                     let prodMap = (vData.productos && vData.productos[mClean]) ? vData.productos[mClean] : {};
                     let prodKeys = Object.keys(prodMap).filter(p => prodMap[p] > 0).sort((a,b)=>prodMap[b]-prodMap[a]);
+                    // Clientes que compraron esta marca a este vendedor → ícono para abrir el modal.
+                    let cliMap = (vData.clientes && vData.clientes[mClean]) ? vData.clientes[mClean] : {};
+                    let tieneClientes = Object.keys(cliMap).some(c => cliMap[c] > 0);
+                    let iconoCli = "";
+                    if (tieneClientes) {
+                        let cuid = 'cm' + (++__pdSeq);
+                        __clientesMarcaReg[cuid] = { vendedor: v, marca: displayBrand, clientes: cliMap };
+                        iconoCli = ` <span class="cli-btn" title="Ver clientes que compraron esta marca" onclick="verClientesMarca('${cuid}', event)">👥</span>`;
+                    }
                     let row;
                     if (prodKeys.length > 0) {
                         let uid = 'pd' + (++__pdSeq);
-                        row = `<tr class="${rowClass}" style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                        row = `<tr class="${rowClass}" style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                         prodKeys.forEach(p => {
                             row += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${prodMap[p].toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>`;
                         });
                     } else {
-                        row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                        row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
                     }
 
                     let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mClean));
