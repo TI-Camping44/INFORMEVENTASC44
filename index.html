@@ -417,6 +417,12 @@
 
             <div class="excel-container" style="margin-top:20px;">
                 <div class="excel-title">⚔️ MARCAS Y LÍNEAS — CONSUMIDOR FINAL</div>
+                <div style="padding:12px 15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del vendedor:</label>
+                    <select id="sel-marcas-vend-cf" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark); min-width:260px;">
+                        <option value="">— Todos los vendedores —</option>
+                    </select>
+                </div>
             </div>
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -514,6 +520,12 @@
 
             <div class="excel-container" style="margin-top:20px;">
                 <div class="excel-title">⚔️ MARCAS Y LÍNEAS — MAYORISTAS</div>
+                <div style="padding:12px 15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del vendedor:</label>
+                    <select id="sel-marcas-vend-may" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark); min-width:260px;">
+                        <option value="">— Todos los vendedores —</option>
+                    </select>
+                </div>
             </div>
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -824,30 +836,37 @@
         // Respeta el filtro de vendedor activo (tanto en ventas como en objetivo).
         function renderMarcasEnTablas(scopeChannels, suffix) {
             if (!METAS_ACTIVAS_G) return;
-            let scope = scopeChannels || Object.keys(acumMarcasPorCanalGlobal);
+            let scope = scopeChannels || Object.keys(acumMarcasCanalVendGlobal);
+            // Vendedor elegido en el selector local de esta sección ('' = todos).
+            let selV = document.getElementById('sel-marcas-vend' + suffix);
+            let vendSel = selV ? selV.value : '';
 
-            // Ventas por marca sumando los canales del scope (los datos ya vienen filtrados por vendedor/mes).
+            // Ventas por marca: sumamos sobre los canales del scope y el/los vendedor(es).
             let acumMarcasScope = {};
             scope.forEach(c => {
-                let mm = acumMarcasPorCanalGlobal[c] || {};
-                Object.keys(mm).forEach(k => { acumMarcasScope[k] = (acumMarcasScope[k] || 0) + mm[k]; });
+                let vends = acumMarcasCanalVendGlobal[c] || {};
+                Object.keys(vends).forEach(v => {
+                    if (vendSel && v !== vendSel) return;
+                    let mm = vends[v];
+                    Object.keys(mm).forEach(k => { acumMarcasScope[k] = (acumMarcasScope[k] || 0) + mm[k]; });
+                });
             });
             let acumPorClave = {};
             Object.keys(acumMarcasScope).forEach(k => { let ck = claveMarca(k); acumPorClave[ck] = (acumPorClave[ck] || 0) + acumMarcasScope[k]; });
 
-            // Objetivo por marca = metas de los vendedores de esos canales, intersectado con el filtro de vendedor.
-            let vendoresScope = [];
-            scope.forEach(c => { let s = vendedoresPorCanalGlobal[c]; if (s) s.forEach(v => vendoresScope.push(v)); });
-            let todosCanales = !scopeChannels; // Resumen General: todos los vendedores
+            // Objetivo por marca: del vendedor elegido, o de todos los vendedores de esos canales.
+            let vendoresScope;
+            if (vendSel) { vendoresScope = [vendSel]; }
+            else { vendoresScope = []; scope.forEach(c => { let s = vendedoresPorCanalGlobal[c]; if (s) s.forEach(v => vendoresScope.push(v)); }); }
+            let todosCanales = !scopeChannels && !vendSel; // Resumen General sin selector: todos
             let objPorClaveMarca = {};
             if (METAS_ACTIVAS_G.vendedorMarca) {
                 Object.keys(METAS_ACTIVAS_G.vendedorMarca).forEach(k => {
                     let parts = String(k).split('|||');
                     if (parts.length !== 2) return;
                     let vend = parts[0];
-                    let enCanal = todosCanales || vendoresScope.some(vv => sonElMismoVendedor(vv, vend));
-                    let enVendFiltro = !filtrosActivos.vendedores.length || filtrosActivos.vendedores.some(vv => sonElMismoVendedor(vv, vend));
-                    if (enCanal && enVendFiltro) { let ck = claveMarca(parts[1]); objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS_G.vendedorMarca[k]; }
+                    let enScope = todosCanales || vendoresScope.some(vv => sonElMismoVendedor(vv, vend));
+                    if (enScope) { let ck = claveMarca(parts[1]); objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS_G.vendedorMarca[k]; }
                 });
             }
 
@@ -876,6 +895,19 @@
             renderMarcasEnTablas(null, '');
             renderMarcasEnTablas(['Salon', 'Online', 'Venta Externa', 'E-commerce'], '-cf');
             renderMarcasEnTablas(['Mayoristas'], '-may');
+        }
+        // Pobla el selector local de vendedor de una sección de Marcas y Líneas, preservando la selección.
+        function poblarSelectorMarcasVend(suffix, scopeChannels) {
+            let sel = document.getElementById('sel-marcas-vend' + suffix);
+            if (!sel) return;
+            let prev = sel.value;
+            let set = new Set();
+            scopeChannels.forEach(c => { let s = vendedoresPorCanalGlobal[c]; if (s) s.forEach(v => { if (esVendedorReal(v)) set.add(v); }); });
+            let vends = Array.from(set).sort();
+            let html = '<option value="">— Todos los vendedores —</option>';
+            vends.forEach(v => { html += `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`; });
+            sel.innerHTML = html;
+            if (prev && vends.includes(prev)) sel.value = prev; // preservar selección
         }
 
         // =========================================================================
@@ -1096,6 +1128,7 @@
         let canalesLimpiosGlobal = [];
         let marcasLimpiasGlobal = [];
         let acumMarcasPorCanalGlobal = {}; // canal -> { marcaFinal: venta } (para Marcas y Líneas por canal)
+        let acumMarcasCanalVendGlobal = {}; // canal -> vendedor -> { marcaFinal: venta } (para el selector local de vendedor)
         let METAS_ACTIVAS_G = null;        // metas del período activo (para re-render del selector de canal-marcas)
         let tabActivaId = 'tab-general';
         // Qué canales corresponden a cada pestaña (para el filtro contextual de Canal/Vendedor).
@@ -1633,6 +1666,9 @@
             let btnM = document.querySelector('#ms-marca .ms-btn'); if (btnM) btnM.setAttribute('data-todos', '-- Todas las Marcas --');
 
             poblarMulti('ms-marca', marcasLimpiasGlobal, '(Todas las Marcas)');
+            // Selectores locales de vendedor de las secciones Marcas y Líneas por canal.
+            poblarSelectorMarcasVend('-cf', ['Salon', 'Online', 'Venta Externa', 'E-commerce']);
+            poblarSelectorMarcasVend('-may', ['Mayoristas']);
             // Vendedor y Canal se pueblan según la pestaña activa.
             ajustarFiltrosPorTab(tabActivaId);
         }
@@ -1820,6 +1856,7 @@
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
             acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
+            acumMarcasCanalVendGlobal = {}; // se recalcula por canal+vendedor en cada render
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let acumMarcaObj = {}; // objetivo por clave de marca (para pestaña Marcas y Líneas)
             let ecomPorCliente = {}; // e-commerce: ventas y marcas agrupadas por cliente
@@ -1857,6 +1894,14 @@
                     let t = parseDateToTime(r.fecha);
                     if (t < tDesde || t > tHasta) return;
                 } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
+
+                // Marcas por canal+vendedor: respeta el período (y día exacto) pero NO el filtro de
+                // vendedor/canal/marca, para alimentar el selector local de la sección Marcas y Líneas.
+                if (!(filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) && r.documento !== "Nota de Crédito" && r.marcaFinal && !String(r.marcaFinal).includes("Intereses") && r.canal && r.vendedor) {
+                    if (!acumMarcasCanalVendGlobal[r.canal]) acumMarcasCanalVendGlobal[r.canal] = {};
+                    if (!acumMarcasCanalVendGlobal[r.canal][r.vendedor]) acumMarcasCanalVendGlobal[r.canal][r.vendedor] = {};
+                    acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] = (acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] || 0) + r.totalGs;
+                }
 
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
