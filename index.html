@@ -2027,14 +2027,6 @@
                     if (t < tDesde || t > tHasta) return;
                 } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
 
-                // Marcas por canal+vendedor: respeta el período (y día exacto) pero NO el filtro de
-                // vendedor/canal/marca, para alimentar el selector local de la sección Marcas y Líneas.
-                if (!(filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) && r.documento !== "Nota de Crédito" && r.marcaFinal && !String(r.marcaFinal).includes("Intereses") && r.canal && r.vendedor) {
-                    if (!acumMarcasCanalVendGlobal[r.canal]) acumMarcasCanalVendGlobal[r.canal] = {};
-                    if (!acumMarcasCanalVendGlobal[r.canal][r.vendedor]) acumMarcasCanalVendGlobal[r.canal][r.vendedor] = {};
-                    acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] = (acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] || 0) + r.totalGs;
-                }
-
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
                 if (!marcaPasaFiltro(r.marcaFinal)) return;
@@ -2069,6 +2061,13 @@
                 if (r.marcaFinal && r.canal) {
                     if (!acumMarcasPorCanalGlobal[r.canal]) acumMarcasPorCanalGlobal[r.canal] = {};
                     acumMarcasPorCanalGlobal[r.canal][r.marcaFinal] = (acumMarcasPorCanalGlobal[r.canal][r.marcaFinal] || 0) + m;
+                }
+                // Marcas por canal+vendedor (sección Marcas y Líneas): ahora se llena DESPUÉS de los filtros,
+                // así respeta canal/vendedor/marca/fecha igual que el resto del dashboard.
+                if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses") && r.canal && r.vendedor) {
+                    if (!acumMarcasCanalVendGlobal[r.canal]) acumMarcasCanalVendGlobal[r.canal] = {};
+                    if (!acumMarcasCanalVendGlobal[r.canal][r.vendedor]) acumMarcasCanalVendGlobal[r.canal][r.vendedor] = {};
+                    acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] = (acumMarcasCanalVendGlobal[r.canal][r.vendedor][r.marcaFinal] || 0) + m;
                 }
 
                 if (r.canal === "E-commerce") {
