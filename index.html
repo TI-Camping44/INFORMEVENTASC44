@@ -210,7 +210,6 @@
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
         <div class="menu-item" onclick="switchTab('tab-reparaciones', this)">🔧 Reparaciones</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
-        <div class="menu-item" onclick="switchTab('tab-marcas', this)">⚔️ Marcas y Líneas</div>
         <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
         <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
         <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
@@ -331,12 +330,50 @@
                                     <th>Canal</th>
                                     <th class="text-right">Ventas Neta</th>
                                     <th class="text-right">Esperado Período</th>
+                                    <th class="text-right">Diferencia</th>
                                     <th class="text-right">% Logrado</th>
                                     <th class="text-right">Objetivo Período</th>
+                                    <th class="text-right">Proyección</th>
                                     <th class="text-right">% Logrado Mes</th>
                                 </tr>
                             </thead>
                             <tbody id="grid-canales-resumen"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="excel-container" style="margin-top:20px;">
+                <div class="excel-title">⚔️ MARCAS Y LÍNEAS</div>
+            </div>
+            <div class="three-column-grid">
+                <div class="excel-container">
+                    <div class="excel-title">MARCAS PRINCIPALES</div>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                            <tbody id="marcas-lista"></tbody>
+                            <tfoot id="marcas-footer"></tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">ARMAS Y MUNICIONES</div>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                            <tbody id="armas-lista"></tbody>
+                            <tfoot id="armas-footer"></tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">RESTO DE MARCAS</div>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
+                            <tbody id="resto-lista"></tbody>
+                            <tfoot id="resto-footer"></tfoot>
                         </table>
                     </div>
                 </div>
@@ -673,41 +710,6 @@
                                 <tbody id="nc-por-fecha"></tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-marcas" class="tab-content">
-            <div class="three-column-grid">
-                <div class="excel-container">
-                    <div class="excel-title">MARCAS PRINCIPALES</div>
-                    <div class="table-responsive-wrapper">
-                        <table class="excel-table">
-                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                            <tbody id="marcas-lista"></tbody>
-                            <tfoot id="marcas-footer"></tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="excel-container">
-                    <div class="excel-title">ARMAS Y MUNICIONES</div>
-                    <div class="table-responsive-wrapper">
-                        <table class="excel-table">
-                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                            <tbody id="armas-lista"></tbody>
-                            <tfoot id="armas-footer"></tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="excel-container">
-                    <div class="excel-title">RESTO DE MARCAS</div>
-                    <div class="table-responsive-wrapper">
-                        <table class="excel-table">
-                            <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
-                            <tbody id="resto-lista"></tbody>
-                            <tfoot id="resto-footer"></tfoot>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -2079,9 +2081,11 @@
             let espDe = (obj) => Math.round((obj / dMes) * dTr);
             let celdasCanal = (net, obj) => {
                 let esp = espDe(obj);
+                let dif = net - esp; // diferencia contra lo esperado a hoy (verde adelantado, rojo atrasado)
+                let proy = dTr > 0 ? Math.round((net / dTr) * dMes) : net; // proyección lineal a fin de período
                 let pL = esp > 0 ? ((net / esp) * 100).toFixed(0) + '%' : '0%';
                 let pM = obj > 0 ? ((net / obj) * 100).toFixed(0) + '%' : '0%';
-                return `<td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pL}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pM}</td>`;
+                return `<td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-right ${dif >= 0 ? 'num-positivo' : 'num-negativo'}">₲ ${dif.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pL}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-right" style="font-weight:bold;">₲ ${proy.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pM}</td>`;
             };
             let objDe = (c) => (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) ? METAS_ACTIVAS.canales[c] : 0;
             let netDe = (c) => acumCanales[c] ? (acumCanales[c].bruto + acumCanales[c].nc) : 0;
