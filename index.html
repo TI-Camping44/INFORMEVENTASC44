@@ -415,6 +415,33 @@
                 </div>
             </div>
 
+            <div class="excel-container" style="margin-top:20px;">
+                <div class="excel-title">⚔️ MARCAS Y LÍNEAS — CONSUMIDOR FINAL</div>
+            </div>
+            <div class="three-column-grid">
+                <div class="excel-container">
+                    <div class="excel-title">MARCAS PRINCIPALES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="marcas-lista-cf"></tbody><tfoot id="marcas-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">ARMAS Y MUNICIONES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="armas-lista-cf"></tbody><tfoot id="armas-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">RESTO DE MARCAS</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
+                        <tbody id="resto-lista-cf"></tbody><tfoot id="resto-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+            </div>
+
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
@@ -446,33 +473,6 @@
                     </table>
                 </div>
                 <div class="fichas-grid" id="grid-fichas-ecommerce"></div>
-            </div>
-
-            <div class="excel-container" style="margin-top:20px;">
-                <div class="excel-title">⚔️ MARCAS Y LÍNEAS — CONSUMIDOR FINAL</div>
-            </div>
-            <div class="three-column-grid">
-                <div class="excel-container">
-                    <div class="excel-title">MARCAS PRINCIPALES</div>
-                    <div class="table-responsive-wrapper"><table class="excel-table">
-                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                        <tbody id="marcas-lista-cf"></tbody><tfoot id="marcas-footer-cf"></tfoot>
-                    </table></div>
-                </div>
-                <div class="excel-container">
-                    <div class="excel-title">ARMAS Y MUNICIONES</div>
-                    <div class="table-responsive-wrapper"><table class="excel-table">
-                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                        <tbody id="armas-lista-cf"></tbody><tfoot id="armas-footer-cf"></tfoot>
-                    </table></div>
-                </div>
-                <div class="excel-container">
-                    <div class="excel-title">RESTO DE MARCAS</div>
-                    <div class="table-responsive-wrapper"><table class="excel-table">
-                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
-                        <tbody id="resto-lista-cf"></tbody><tfoot id="resto-footer-cf"></tfoot>
-                    </table></div>
-                </div>
             </div>
         </div>
 
@@ -2049,6 +2049,16 @@
             if (scopeHdr && scopeHdr.length > 0 && sinFiltrosExtra) {
                 hdrNeta = scopeHdr.reduce((s, c) => s + (acumCanales[c] ? (acumCanales[c].bruto + acumCanales[c].nc) : 0), 0);
                 hdrObj = scopeHdr.reduce((s, c) => s + ((METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) ? METAS_ACTIVAS.canales[c] : 0), 0);
+                // Respaldo: meses históricos no guardan objetivo por canal → sumamos las metas de los
+                // vendedores de esos canales (vendedoresTotales sí está en todos los meses).
+                if (hdrObj === 0 && METAS_ACTIVAS.vendedoresTotales) {
+                    let vendSet = new Set();
+                    scopeHdr.forEach(c => { let vs = vendedoresPorCanalGlobal[c]; if (vs) vs.forEach(v => vendSet.add(v)); });
+                    let vendArr = Array.from(vendSet);
+                    Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                        if (vendArr.some(vv => sonElMismoVendedor(vv, k))) hdrObj += METAS_ACTIVAS.vendedoresTotales[k];
+                    });
+                }
                 hdrTitulo = (tabActivaId === 'tab-consumidor') ? 'META CONSUMIDOR FINAL' : ('META ' + scopeHdr.map(c => c.toUpperCase()).join(' / '));
             } else {
                 hdrNeta = data.neta;
@@ -2102,7 +2112,7 @@
                 </tr>
             `;
 
-            let arrDiasGrafico = [], arrVentaPorPunto = [], arrObjetivoPorPunto = [], arrFechasOriginales = [];
+            let arrDiasGrafico = [], arrVentaPorPunto = [], arrObjetivoPorPunto = [], arrFechasOriginales = [], arrMesGrafico = [];
             let acumuladoDiarioSuma = 0;
             let hVentasDiarias = "";
 
@@ -2115,13 +2125,13 @@
                 let porMes = {};
                 Object.keys(acumDias).forEach(f => { let mi = getMonthFromDate(f); if (mi>0) porMes[mi] = (porMes[mi]||0) + acumDias[f]; });
                 Object.keys(porMes).map(Number).sort((a,b)=>a-b).forEach(mi => {
-                    puntosGrafico.push({ label: nombresMes[mi-1] || String(mi), venta: porMes[mi], fecha: null });
+                    puntosGrafico.push({ label: nombresMes[mi-1] || String(mi), venta: porMes[mi], fecha: null, mesIdx: mi });
                 });
             } else {
                 Object.keys(acumDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
                     let fPart = String(f).split(' ')[0];
                     let label = fPart.includes('/') ? (fPart.split('/')[0] + '/' + fPart.split('/')[1]) : fPart;
-                    puntosGrafico.push({ label: label, venta: acumDias[f], fecha: f });
+                    puntosGrafico.push({ label: label, venta: acumDias[f], fecha: f, mesIdx: null });
                 });
             }
 
@@ -2137,6 +2147,7 @@
                 acumuladoDiarioSuma += p.venta; // acumulado solo para la tabla de ventas diarias
                 hVentasDiarias += `<tr><td class="text-center">${p.fecha || p.label}</td><td class="text-right">₲ ${p.venta.toLocaleString('es-PY')}</td><td class="text-right num-positivo" style="font-weight:bold;">₲ ${acumuladoDiarioSuma.toLocaleString('es-PY')}</td></tr>`;
                 arrFechasOriginales.push(p.fecha);
+                arrMesGrafico.push(p.mesIdx);
                 arrDiasGrafico.push(p.label);
                 arrVentaPorPunto.push(Math.round(p.venta));
                 arrObjetivoPorPunto.push(Math.round(objPorPunto));
@@ -2688,8 +2699,15 @@
                     responsive: true, maintainAspectRatio: false,
                     onClick: (e, elements) => {
                         if (elements.length > 0) {
+                            let mesIdx = arrMesGrafico[elements[0].index];
+                            if (mesIdx) {
+                                // Año Completo: al tocar un mes, filtramos a ese mes.
+                                let sm = document.getElementById('select-mes');
+                                if (sm) { sm.value = String(mesIdx); aplicarFiltrosDropdown(); }
+                                return;
+                            }
                             let fObj = arrFechasOriginales[elements[0].index];
-                            if (!fObj) return; // puntos mensuales (YTD) no tienen día exacto: no filtran
+                            if (!fObj) return; // sin día exacto: no filtra
                             let filterInput = document.getElementById('select-fecha');
                             if (filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
                             aplicarFiltrosDropdown();
