@@ -2016,7 +2016,7 @@
                     // Contimarket: nuevo equipo de ventas que entra como E-commerce, pero se agrupa/muestra
                     // bajo "Contimarket" (no el nombre del cliente al que se factura).
                     let cliKey = r.contimarket ? "Contimarket" : (r.cliente || "SIN CLIENTE");
-                    if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {}, productos: {} };
+                    if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {}, productos: {}, clientes: {} };
                     if (esNC) ecomPorCliente[cliKey].nc += m; else ecomPorCliente[cliKey].bruto += m;
                     if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
                         let mc = limpiarNombre(r.marcaFinal);
@@ -2026,6 +2026,12 @@
                             if (!ecomPorCliente[cliKey].productos[mc]) ecomPorCliente[cliKey].productos[mc] = {};
                             let pName = String(r.producto).replace(/\s+/g, ' ').trim();
                             ecomPorCliente[cliKey].productos[mc][pName] = (ecomPorCliente[cliKey].productos[mc][pName] || 0) + m;
+                        }
+                        // 👥 En Contimarket (y demás), guardamos el CLIENTE REAL de cada marca para el botón de clientes.
+                        if (r.cliente) {
+                            if (!ecomPorCliente[cliKey].clientes[mc]) ecomPorCliente[cliKey].clientes[mc] = {};
+                            let cName = String(r.cliente).replace(/\s+/g, ' ').trim();
+                            ecomPorCliente[cliKey].clientes[mc][cName] = (ecomPorCliente[cliKey].clientes[mc][cName] || 0) + m;
                         }
                     }
                 }
@@ -2754,18 +2760,26 @@
                 Object.keys(d.marcas).sort().forEach(mc => {
                     let val = d.marcas[mc]; if (val <= 0) return; nMarcas++;
                     let display = mc.charAt(0) + mc.slice(1).toLowerCase();
+                    // 👥 Botón de clientes: a qué clientes reales se les vendió esta marca (clave en Contimarket).
+                    let cliMap = (d.clientes && d.clientes[mc]) ? d.clientes[mc] : {};
+                    let iconoCli = '';
+                    if (Object.keys(cliMap).length > 0) {
+                        let cuid = 'ce' + (++__pdSeq);
+                        __clientesMarcaReg[cuid] = { vendedor: cli, marca: display, clientes: cliMap };
+                        iconoCli = ` <span class="cli-btn" title="Ver a qué clientes se les vendió esta marca" onclick="verClientesMarca('${cuid}', event)">👥</span>`;
+                    }
                     // Drill-down: productos comprados de esta marca por este cliente de e-commerce.
                     let prodMap = (d.productos && d.productos[mc]) ? d.productos[mc] : {};
                     let prodKeys = Object.keys(prodMap).filter(p => prodMap[p] > 0).sort((a, b) => prodMap[b] - prodMap[a]);
                     let row;
                     if (prodKeys.length > 0) {
                         let uid = 'pe' + (++__pdSeq);
-                        row = `<tr style="cursor:pointer;" title="Ver productos comprados" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                        row = `<tr style="cursor:pointer;" title="Ver productos comprados" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(display)}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
                         prodKeys.forEach(p => {
                             row += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${prodMap[p].toLocaleString('es-PY')}</td></tr>`;
                         });
                     } else {
-                        row = `<tr><td>${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                        row = `<tr><td>${escapeHtml(display)}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
                     }
                     if (LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mc))) { mRows += row; sM += val; }
                     else if (LISTA_ARMAS.some(la => claveMarca(la) === claveMarca(mc))) { aRows += row; sA += val; }
