@@ -223,7 +223,7 @@
                 <label>📆 Mes / Período de Análisis</label>
                 <select id="select-mes" onchange="aplicarFiltrosDropdown()"></select>
             </div>
-            <div class="filter-group">
+            <div class="filter-group" id="fg-vendedor" style="display:none;">
                 <label>👤 Vendedor (multi)</label>
                 <div class="multi-select" id="ms-vendedor">
                     <button type="button" class="ms-btn" onclick="toggleMs('ms-vendedor')">-- Todos los Vendedores --</button>
@@ -231,9 +231,9 @@
                 </div>
             </div>
 
-            <button id="btn-share-vendor" class="btn-clear-filters" style="background-color: #3182ce; color: white; border: none; margin-bottom: 2px;" onclick="copiarLinkVendedor()">🔗 Compartir a Comercial</button>
+            <button id="btn-share-vendor" class="btn-clear-filters" style="display:none; background-color: #3182ce; color: white; border: none; margin-bottom: 2px;" onclick="copiarLinkVendedor()">🔗 Compartir a Comercial</button>
 
-            <div class="filter-group">
+            <div class="filter-group" id="fg-canal" style="display:none;">
                 <label>🏷️ Canal / Equipo (multi)</label>
                 <div class="multi-select" id="ms-canal">
                     <button type="button" class="ms-btn" onclick="toggleMs('ms-canal')">-- Todos los Canales --</button>
@@ -748,6 +748,30 @@
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
+            ajustarFiltrosPorTab(tabId);
+        }
+
+        // En "Resumen General" no se filtra por vendedor ni por canal (se ve todo consolidado),
+        // así que ocultamos esos dos filtros; en las demás pestañas sí aparecen.
+        function ajustarFiltrosPorTab(tabId) {
+            let esGeneral = (tabId === 'tab-general');
+            let fgV = document.getElementById('fg-vendedor');
+            let fgC = document.getElementById('fg-canal');
+            if (fgV) fgV.style.display = esGeneral ? 'none' : '';
+            if (fgC) fgC.style.display = esGeneral ? 'none' : '';
+            if (esGeneral) {
+                // Al volver al resumen, limpiamos vendedor/canal si venían activos de otra pestaña.
+                let habia = (filtrosActivos.vendedores.length || filtrosActivos.canales.length);
+                ['ms-vendedor', 'ms-canal'].forEach(id => {
+                    let panel = document.querySelector('#' + id + ' .ms-panel');
+                    if (panel) panel.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+                    let btn = document.querySelector('#' + id + ' .ms-btn');
+                    if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
+                });
+                filtrosActivos.vendedores = [];
+                filtrosActivos.canales = [];
+                if (habia) { try { filtrarYRenderizarTodo(); } catch (e) {} }
+            }
         }
 
         // Ordena una tabla plana al tocar el encabezado (alterna asc/desc). Detecta números (₲, %).
