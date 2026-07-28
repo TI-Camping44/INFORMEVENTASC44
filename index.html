@@ -305,13 +305,13 @@
             <div class="charts-row">
                 <div class="chart-wrapper">
                     <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 EVOLUCIÓN DE VENTA VS OBJETIVO (POR DÍA / POR MES)</span>
-                    <div style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
+                    <div class="container-line" style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
                         <canvas id="lineChart"></canvas>
                     </div>
                 </div>
                 <div class="chart-wrapper">
                     <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
-                    <div style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
+                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
@@ -349,6 +349,19 @@
 
             <div class="excel-container" style="margin-top:20px;">
                 <div class="excel-title">⚔️ MARCAS Y LÍNEAS</div>
+                <div style="padding:12px 15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del canal:</label>
+                    <select id="sel-marcas-canal" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark);">
+                        <option value="cf">Consumidor Final (Salón + Online + Venta Externa + E-commerce)</option>
+                        <option value="Salon">— Salón</option>
+                        <option value="Online">— Online</option>
+                        <option value="Venta Externa">— Venta Externa</option>
+                        <option value="E-commerce">— E-commerce</option>
+                        <option value="Mayoristas">Mayoristas</option>
+                        <option value="Directorio">Directorio / Licitaciones</option>
+                        <option value="all">General (todos los canales)</option>
+                    </select>
+                </div>
             </div>
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -385,6 +398,16 @@
         </div>
 
         <div id="tab-consumidor" class="tab-content">
+            <div class="charts-row">
+                <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 EVOLUCIÓN DE VENTA VS OBJETIVO (POR DÍA / POR MES)</span>
+                    <div class="container-line" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                </div>
+                <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
+                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                </div>
+            </div>
             <div class="excel-container">
                 <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (Salón / Online / Venta Externa / E-commerce)</div>
                 <div class="table-responsive-wrapper">
@@ -440,6 +463,16 @@
         </div>
 
         <div id="tab-mayoristas" class="tab-content">
+            <div class="charts-row">
+                <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 EVOLUCIÓN DE VENTA VS OBJETIVO (POR DÍA / POR MES)</span>
+                    <div class="container-line" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                </div>
+                <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
+                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                </div>
+            </div>
             <div class="excel-container">
                 <div class="excel-title">🏢 RESUMEN CANAL MAYORISTAS</div>
                 <div class="table-responsive-wrapper">
@@ -744,6 +777,59 @@
             if (caret) caret.textContent = card.classList.contains('collapsed') ? '▶' : '▼';
         }
 
+        // Renderiza las tablas de Marcas y Líneas (Principales / A&M / Resto) según el canal elegido.
+        function renderMarcasLineas() {
+            if (!METAS_ACTIVAS_G) return;
+            let selEl = document.getElementById('sel-marcas-canal');
+            let val = selEl ? selEl.value : 'cf';
+            let scope;
+            if (val === 'cf') scope = ['Salon', 'Online', 'Venta Externa', 'E-commerce'];
+            else if (val === 'all') scope = Object.keys(acumMarcasPorCanalGlobal);
+            else scope = [val];
+
+            // Ventas por marca sumando los canales del scope.
+            let acumMarcasScope = {};
+            scope.forEach(c => {
+                let mm = acumMarcasPorCanalGlobal[c] || {};
+                Object.keys(mm).forEach(k => { acumMarcasScope[k] = (acumMarcasScope[k] || 0) + mm[k]; });
+            });
+            let acumPorClave = {};
+            Object.keys(acumMarcasScope).forEach(k => { let ck = claveMarca(k); acumPorClave[ck] = (acumPorClave[ck] || 0) + acumMarcasScope[k]; });
+
+            // Objetivo por marca = metas de los vendedores que pertenecen a esos canales.
+            let vendoresScope = [];
+            scope.forEach(c => { let s = vendedoresPorCanalGlobal[c]; if (s) s.forEach(v => vendoresScope.push(v)); });
+            let objPorClaveMarca = {};
+            if (METAS_ACTIVAS_G.vendedorMarca) {
+                Object.keys(METAS_ACTIVAS_G.vendedorMarca).forEach(k => {
+                    let parts = String(k).split('|||');
+                    if (parts.length !== 2) return;
+                    let enScope = (val === 'all') || vendoresScope.some(vv => sonElMismoVendedor(vv, parts[0]));
+                    if (enScope) { let ck = claveMarca(parts[1]); objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS_G.vendedorMarca[k]; }
+                });
+            }
+
+            let clavesMarcas = LISTA_MARCAS.map(m => claveMarca(m));
+            let clavesArmas = LISTA_ARMAS.map(a => claveMarca(a));
+            let celObj = (obj) => `<td class="text-right" style="color:${obj > 0 ? '#4a5568' : '#a0aec0'}">₲ ${obj.toLocaleString('es-PY')}</td>`;
+            let celPct = (v, obj) => { let p = obj > 0 ? ((v / obj) * 100) : 0; return `<td class="text-center ${p >= 100 ? 'num-positivo' : (obj > 0 ? 'num-negativo' : 'num-cero')}">${obj > 0 ? p.toFixed(0) + '%' : '-'}</td>`; };
+
+            let hM = "", vM = 0, oM = 0;
+            LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; hM += `<tr class="ficha-marca-row"><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
+            setHtmlSafe('marcas-lista', hM);
+            setHtmlSafe('marcas-footer', `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM > 0 ? ((vM / oM) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
+
+            let hA = "", vA = 0, oA = 0;
+            LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; hA += `<tr class="ficha-marca-row"><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
+            setHtmlSafe('armas-lista', hA);
+            setHtmlSafe('armas-footer', `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA > 0 ? ((vA / oA) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
+
+            let hR = "", vR = 0;
+            Object.keys(acumMarcasScope).sort().forEach(r => { let ck = claveMarca(r); if (!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)) { let v = acumMarcasScope[r]; vR += v; hR += `<tr class="ficha-marca-row"><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; } });
+            setHtmlSafe('resto-lista', hR);
+            setHtmlSafe('resto-footer', `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`);
+        }
+
         // =========================================================================
         // 👥 CLIENTES POR MARCA — al tocar el ícono de una marca en la ficha de un
         // vendedor, abre una ventana con los clientes que compraron esa marca.
@@ -961,6 +1047,8 @@
         let vendedoresLimpiosGlobal = [];
         let canalesLimpiosGlobal = [];
         let marcasLimpiasGlobal = [];
+        let acumMarcasPorCanalGlobal = {}; // canal -> { marcaFinal: venta } (para Marcas y Líneas por canal)
+        let METAS_ACTIVAS_G = null;        // metas del período activo (para re-render del selector de canal-marcas)
         let tabActivaId = 'tab-general';
         // Qué canales corresponden a cada pestaña (para el filtro contextual de Canal/Vendedor).
         // [] = sin filtro vendedor/canal (Resumen General); null = todos (pestañas transversales).
@@ -1683,6 +1771,7 @@
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
+            acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
             let acumMarcaObj = {}; // objetivo por clave de marca (para pestaña Marcas y Líneas)
             let ecomPorCliente = {}; // e-commerce: ventas y marcas agrupadas por cliente
@@ -1752,6 +1841,10 @@
 
                 if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
                 if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
+                if (r.marcaFinal && r.canal) {
+                    if (!acumMarcasPorCanalGlobal[r.canal]) acumMarcasPorCanalGlobal[r.canal] = {};
+                    acumMarcasPorCanalGlobal[r.canal][r.marcaFinal] = (acumMarcasPorCanalGlobal[r.canal][r.marcaFinal] || 0) + m;
+                }
 
                 if (r.canal === "E-commerce") {
                     if (String(r.cliente).toUpperCase().includes("TUPI")) {
@@ -2531,100 +2624,64 @@
             
             // CORRECCIÓN CELDAS EN BLANCO: Si el valor es cero o nulo, imprimirá ₲ 0 en color gris.
             // Agrupamos las ventas por clave de marca (tolerante a puntos/símbolos) para clasificar bien.
-            let acumPorClave = {};
-            Object.keys(acumMarcas).forEach(k => { let ck = claveMarca(k); acumPorClave[ck] = (acumPorClave[ck] || 0) + acumMarcas[k]; });
-            let clavesMarcas = LISTA_MARCAS.map(m => claveMarca(m));
-            let clavesArmas = LISTA_ARMAS.map(a => claveMarca(a));
+            // Marcas y Líneas: se renderiza según el canal elegido en el selector (por defecto Consumidor Final).
+            METAS_ACTIVAS_G = METAS_ACTIVAS;
+            renderMarcasLineas();
 
-            // Item 3: objetivo por clave de marca = suma de metas por vendedor-marca (tolerante a símbolos).
-            let objPorClaveMarca = {};
-            if (METAS_ACTIVAS.vendedorMarca) {
-                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                    let parts = String(k).split('|||');
-                    if (parts.length === 2) {
-                        let ck = claveMarca(parts[1]);
-                        objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS.vendedorMarca[k];
-                    }
-                });
-            }
-            // Si hay filtro de vendedor(es), el objetivo de marca debe ser el de esos vendedores únicamente.
-            if (filtrosActivos.vendedores.length && METAS_ACTIVAS.vendedorMarca) {
-                objPorClaveMarca = {};
-                Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
-                    let parts = String(k).split('|||');
-                    if (parts.length === 2 && filtrosActivos.vendedores.some(vv => sonElMismoVendedor(parts[0], vv))) {
-                        let ck = claveMarca(parts[1]);
-                        objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS.vendedorMarca[k];
-                    }
-                });
-            }
-            let celObj = (obj) => `<td class="text-right" style="color:${obj>0?'#4a5568':'#a0aec0'}">₲ ${obj.toLocaleString('es-PY')}</td>`;
-            let celPct = (v,obj) => { let p = obj>0?((v/obj)*100):0; return `<td class="text-center ${p>=100?'num-positivo':(obj>0?'num-negativo':'num-cero')}">${obj>0?p.toFixed(0)+'%':'-'}</td>`; };
-
-            let hM = ""; let vM = 0; let oM = 0; LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck]||0; let obj = objPorClaveMarca[ck]||0; vM+=v; oM+=obj; hM += `<tr><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v,obj)}</tr>`; }); document.getElementById('marcas-lista').innerHTML = hM; document.getElementById('marcas-footer').innerHTML = `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM>0?((vM/oM)*100).toFixed(0)+'%':'-'}</td></tr>`;
-            let hA = ""; let vA = 0; let oA = 0; LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck]||0; let obj = objPorClaveMarca[ck]||0; vA+=v; oA+=obj; hA += `<tr><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v,obj)}</tr>`; }); document.getElementById('armas-lista').innerHTML = hA; document.getElementById('armas-footer').innerHTML = `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA>0?((vA/oA)*100).toFixed(0)+'%':'-'}</td></tr>`;
-            let hR = ""; let vR = 0; Object.keys(acumMarcas).forEach(r => { let ck = claveMarca(r); if(!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)){ let v = acumMarcas[r]; vR+=v; hR += `<tr><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v>0?'#2b7a78':'#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; }}); document.getElementById('resto-lista').innerHTML = hR; document.getElementById('resto-footer').innerHTML = `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`;
-
+            // === CURVA: se dibuja en TODOS los contenedores .container-line (Resumen y demás pestañas) ===
             try {
-                if (window.chartLine) { window.chartLine.destroy(); window.chartLine = null; }
-                let containerLine = document.getElementById('container-lineChart');
-                if(containerLine) {
-                    containerLine.innerHTML = '<canvas id="lineChart"></canvas>';
-                    let elLine = document.getElementById('lineChart');
-                    if (elLine && arrDiasGrafico.length > 0) {
-                        window.chartLine = new Chart(elLine.getContext('2d'), {
-                            type: 'bar',
-                            data: {
-                                labels: arrDiasGrafico,
-                                datasets: [
-                                    { type: 'bar', label: etiquetaVenta, data: arrVentaPorPunto, backgroundColor: 'rgba(28, 61, 90, 0.65)', borderColor: '#1c3d5a', borderWidth: 1, order: 2 },
-                                    { type: 'line', label: etiquetaObjetivo, data: arrObjetivoPorPunto, borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.05)', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, tension: 0, order: 1 }
-                                ]
-                            },
-                            options: { 
-                                responsive: true, maintainAspectRatio: false,
-                                onClick: (e, elements) => {
-                                    if (elements.length > 0) {
-                                        let fObj = arrFechasOriginales[elements[0].index];
-                                        if (!fObj) return; // puntos mensuales (YTD) no tienen día exacto: no filtran
-                                        let filterInput = document.getElementById('select-fecha');
-                                        if(filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
-                                        aplicarFiltrosDropdown();
-                                    }
-                                }
-                            }
-                        });
+                (window.__lineCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
+                window.__lineCharts = [];
+                let lineDatasets = [
+                    { type: 'bar', label: etiquetaVenta, data: arrVentaPorPunto, backgroundColor: 'rgba(28, 61, 90, 0.65)', borderColor: '#1c3d5a', borderWidth: 1, order: 2 },
+                    { type: 'line', label: etiquetaObjetivo, data: arrObjetivoPorPunto, borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.05)', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, tension: 0, order: 1 }
+                ];
+                let lineOpts = {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            let fObj = arrFechasOriginales[elements[0].index];
+                            if (!fObj) return; // puntos mensuales (YTD) no tienen día exacto: no filtran
+                            let filterInput = document.getElementById('select-fecha');
+                            if (filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
+                            aplicarFiltrosDropdown();
+                        }
                     }
+                };
+                if (arrDiasGrafico.length > 0) {
+                    document.querySelectorAll('.container-line').forEach(cont => {
+                        cont.innerHTML = '<canvas></canvas>';
+                        let data = { labels: arrDiasGrafico.slice(), datasets: JSON.parse(JSON.stringify(lineDatasets)) };
+                        window.__lineCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'bar', data: data, options: lineOpts }));
+                    });
                 }
-            } catch(e) { console.error("Error al renderizar curva", e); }
+            } catch (e) { console.error("Error al renderizar curva", e); }
 
+            // === TORTA: se dibuja en TODOS los contenedores .container-pie ===
             try {
-                if (window.chartPie) { window.chartPie.destroy(); window.chartPie = null; }
-                let containerPie = document.getElementById('container-pieChart');
-                if(containerPie) {
-                    containerPie.innerHTML = '<canvas id="pieChart"></canvas>';
-                    let elPie = document.getElementById('pieChart');
-                    if (elPie && arrCanalesLabels.length > 0) {
-                        window.chartPie = new Chart(elPie.getContext('2d'), {
-                            type: 'doughnut', 
-                            data: { labels: arrCanalesLabels, datasets: [{ data: arrCanalesData, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] },
-                            options: { 
-                                responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
-                                onClick: (e, elements) => {
-                                    if (elements.length > 0) {
-                                        let c = arrCanalesLabels[elements[0].index];
-                                        let panel = document.querySelector('#ms-canal .ms-panel');
-                                        if (panel) {
-                                            let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === c);
-                                            if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); }
-                                        }
-                                    }
-                                }
+                (window.__pieCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
+                window.__pieCharts = [];
+                let pieOpts = {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            let c = arrCanalesLabels[elements[0].index];
+                            let panel = document.querySelector('#ms-canal .ms-panel');
+                            if (panel) {
+                                let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === c);
+                                if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); }
                             }
-                        });
+                        }
                     }
+                };
+                if (arrCanalesLabels.length > 0) {
+                    document.querySelectorAll('.container-pie').forEach(cont => {
+                        cont.innerHTML = '<canvas></canvas>';
+                        let data = { labels: arrCanalesLabels.slice(), datasets: [{ data: arrCanalesData.slice(), backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] };
+                        window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: data, options: pieOpts }));
+                    });
                 }
-            } catch(e) { console.error("Error al renderizar pie", e); }
+            } catch (e) { console.error("Error al renderizar pie", e); }
         }
 
         // =========================================================================
