@@ -135,7 +135,13 @@
         .cm-table td { padding: 8px 12px; border-bottom: 1px solid #edf2f7; }
         .cm-table tr:nth-child(even) td { background: #f8fafc; }
         .ficha-vendedor { background: white; border: 1px solid #cbd5e0; box-shadow: 0 4px 8px rgba(0,0,0,0.04); font-size: 10.5px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; }
+        .ficha-header { background: var(--navy-light); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 11px; cursor: pointer; user-select: none; position: relative; }
+        .ficha-header:hover { background: #24507e; }
+        .ficha-header .fh-caret { position: absolute; left: 10px; top: 10px; font-size: 10px; }
+        .ficha-summary { font-weight: normal; font-size: 10px; opacity: 0.92; margin-top: 3px; }
+        .ficha-vendedor.collapsed .ficha-body { display: none; }
+        /* Fichas colapsadas: grilla más compacta (varias por fila) */
+        .fichas-grid { align-items: start; }
         .ficha-table { width: 100%; border-collapse: collapse; min-width: 100%; }
         .ficha-table th { background: #f8fafc; padding: 6px; text-align: center; border-bottom: 1px solid var(--gray-border); color: var(--text-dark); font-size: 10.5px;}
         .ficha-table td { padding: 5px 6px; border-bottom: 1px dashed #e2e8f0; }
@@ -725,6 +731,15 @@
                 rows[i].style.display = show ? 'table-row' : 'none';
             }
             if (el) { var c = el.querySelector('.pd-caret'); if (c) c.textContent = show ? '▾' : '▸'; }
+        }
+
+        // Despliega/colapsa una ficha de vendedor (o cliente) al tocar su encabezado.
+        function toggleFicha(el) {
+            let card = el.closest('.ficha-vendedor');
+            if (!card) return;
+            card.classList.toggle('collapsed');
+            let caret = el.querySelector('.fh-caret');
+            if (caret) caret.textContent = card.classList.contains('collapsed') ? '▶' : '▼';
         }
 
         // =========================================================================
@@ -1897,11 +1912,10 @@
                 hdrObj = objetivoFiltrado;
                 hdrTitulo = 'META GLOBAL DEL PERÍODO';
             }
-            let hdrEsp = Math.round((hdrObj / dMes) * dTr);
-            let hdrDif = hdrNeta - hdrEsp; // diferencia vs lo esperado a hoy (verde adelantados / rojo atrasados)
+            let hdrDif = hdrNeta - hdrObj; // diferencia contra el objetivo del período (negativo = falta)
             let hdrAvance = hdrObj > 0 ? ((hdrNeta / hdrObj) * 100).toFixed(1) : 0;
             document.getElementById('txt-meta-global').innerText = `${hdrTitulo}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA A HOY: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>`;
+            document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA AL OBJETIVO: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
@@ -2372,9 +2386,9 @@
                 let pctProyA = subAObj > 0 ? ((proyA / subAObj) * 100).toFixed(0) : '0';
 
                 let fichaHtml = `
-                <div class="ficha-vendedor">
-                    <div class="ficha-header">▶ ${escapeHtml(v)}</div>
-                    <div style="overflow-x:auto;">
+                <div class="ficha-vendedor collapsed">
+                    <div class="ficha-header" onclick="toggleFicha(this)"><span class="fh-caret">▶</span> ${escapeHtml(v)}<div class="ficha-summary">₲ ${net.toLocaleString('es-PY')} · ${obj > 0 ? ((net / obj) * 100).toFixed(0) + '% del obj.' : 'sin obj.'}</div></div>
+                    <div class="ficha-body" style="overflow-x:auto;">
                         <table class="ficha-table">
                             <thead><tr><th>Marca</th><th class="text-right">Ventas</th><th class="text-right">Meta</th><th class="text-center">%</th></tr></thead>
                             <tbody>
@@ -2487,7 +2501,7 @@
                     else { rRows += row; sR += val; }
                 });
                 let neta = d.bruto + d.nc;
-                hCliSlides += `<div class="ficha-vendedor"><div class="ficha-header">▶ ${escapeHtml(cli)}</div><div style="overflow-x:auto;"><table class="ficha-table"><thead><tr><th>Marca</th><th class="text-right">Ventas</th></tr></thead><tbody>
+                hCliSlides += `<div class="ficha-vendedor collapsed"><div class="ficha-header" onclick="toggleFicha(this)"><span class="fh-caret">▶</span> ${escapeHtml(cli)}<div class="ficha-summary">₲ ${neta.toLocaleString('es-PY')} · ${nMarcas} marcas</div></div><div class="ficha-body" style="overflow-x:auto;"><table class="ficha-table"><thead><tr><th>Marca</th><th class="text-right">Ventas</th></tr></thead><tbody>
                     <tr><td colspan="2" class="ficha-section">[ MARCAS GRALES. ]</td></tr>${mRows || '<tr><td colspan="2" class="num-cero">—</td></tr>'}
                     <tr class="ficha-subtotal"><td>Subtotal Marcas</td><td class="text-right">₲ ${sM.toLocaleString('es-PY')}</td></tr>
                     <tr><td colspan="2" class="ficha-section">[ ARMAS Y MUNICIONES ]</td></tr>${aRows || '<tr><td colspan="2" class="num-cero">—</td></tr>'}
