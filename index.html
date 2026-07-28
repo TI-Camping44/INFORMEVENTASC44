@@ -249,15 +249,15 @@
             </div>
             <div class="filter-group">
                 <label>📅 Día Exacto</label>
-                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()">
+                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <div class="filter-group">
                 <label>📆 Desde (rango)</label>
-                <input type="date" id="select-desde" onchange="aplicarFiltrosDropdown()">
+                <input type="date" id="select-desde" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <div class="filter-group">
                 <label>📆 Hasta (rango)</label>
-                <input type="date" id="select-hasta" onchange="aplicarFiltrosDropdown()">
+                <input type="date" id="select-hasta" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()" id="btn-reset">❌ Limpiar</button>
         </div>
@@ -748,30 +748,56 @@
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
+            tabActivaId = tabId;
             ajustarFiltrosPorTab(tabId);
         }
 
-        // En "Resumen General" no se filtra por vendedor ni por canal (se ve todo consolidado),
-        // así que ocultamos esos dos filtros; en las demás pestañas sí aparecen.
+        // Filtro contextual según la pestaña:
+        //  - Resumen General: sin filtro de Vendedor ni Canal (se ve todo consolidado).
+        //  - Consumidor Final: Canal ofrece Salón/Online; Vendedor = vendedores de esos canales.
+        //  - Canales únicos (Mayoristas, Externa, Directorio, E-commerce, Reparaciones):
+        //    se oculta Canal y el Vendedor trae solo los de ese canal.
+        //  - Otras pestañas transversales (NC, Marcas, Anual, Ranking, Bonos): todos.
         function ajustarFiltrosPorTab(tabId) {
-            let esGeneral = (tabId === 'tab-general');
             let fgV = document.getElementById('fg-vendedor');
             let fgC = document.getElementById('fg-canal');
-            if (fgV) fgV.style.display = esGeneral ? 'none' : '';
-            if (fgC) fgC.style.display = esGeneral ? 'none' : '';
-            if (esGeneral) {
-                // Al volver al resumen, limpiamos vendedor/canal si venían activos de otra pestaña.
-                let habia = (filtrosActivos.vendedores.length || filtrosActivos.canales.length);
-                ['ms-vendedor', 'ms-canal'].forEach(id => {
-                    let panel = document.querySelector('#' + id + ' .ms-panel');
-                    if (panel) panel.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-                    let btn = document.querySelector('#' + id + ' .ms-btn');
-                    if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
-                });
-                filtrosActivos.vendedores = [];
-                filtrosActivos.canales = [];
-                if (habia) { try { filtrarYRenderizarTodo(); } catch (e) {} }
+            let scope = CANALES_POR_TAB[tabId]; // array de canales, [] (general) o undefined (transversal)
+
+            // Antes de repoblar limpiamos la selección de vendedor/canal (cambian las opciones).
+            let habia = (filtrosActivos.vendedores.length || filtrosActivos.canales.length);
+            filtrosActivos.vendedores = [];
+            filtrosActivos.canales = [];
+
+            if (scope && scope.length === 0) {
+                // Resumen General: ocultar ambos.
+                if (fgV) fgV.style.display = 'none';
+                if (fgC) fgC.style.display = 'none';
+            } else if (scope && scope.length === 1) {
+                // Canal único: ocultar Canal, poblar Vendedor solo con los de ese canal.
+                if (fgC) fgC.style.display = 'none';
+                if (fgV) fgV.style.display = '';
+                poblarMulti('ms-vendedor', vendedoresDeCanales(scope), '(Todos los Vendedores)');
+            } else if (scope && scope.length > 1) {
+                // Consumidor Final: Canal con sus sub-canales, Vendedor con los de esos canales.
+                if (fgC) fgC.style.display = '';
+                if (fgV) fgV.style.display = '';
+                poblarMulti('ms-canal', scope.slice(), '(Todos los Canales)');
+                poblarMulti('ms-vendedor', vendedoresDeCanales(scope), '(Todos los Vendedores)');
+            } else {
+                // Pestañas transversales: todos los vendedores y canales.
+                if (fgC) fgC.style.display = '';
+                if (fgV) fgV.style.display = '';
+                poblarMulti('ms-canal', canalesLimpiosGlobal, '(Todos los Canales)');
+                poblarMulti('ms-vendedor', vendedoresLimpiosGlobal, '(Todos los Vendedores)');
             }
+
+            // Restaurar textos de los botones a "Todos".
+            ['ms-vendedor', 'ms-canal'].forEach(id => {
+                let btn = document.querySelector('#' + id + ' .ms-btn');
+                if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
+            });
+
+            if (habia) { try { filtrarYRenderizarTodo(); } catch (e) {} }
         }
 
         // Ordena una tabla plana al tocar el encabezado (alterna asc/desc). Detecta números (₲, %).
@@ -1040,6 +1066,23 @@
         let idxProductoGlobal = -1; // índice de la columna "Producto" en DATA (drill-down por marca)
         let fechasGlobalesOrdenadas = []; 
         let filtrosActivos = { mes: "7", vendedores: [], canales: [], marcas: [], fecha: "", desde: "", hasta: "", mesActualLive: 7 };
+        // Mapa canal -> Set(vendedores) y listas limpias, para poblar los filtros según la pestaña activa.
+        let vendedoresPorCanalGlobal = {};
+        let vendedoresLimpiosGlobal = [];
+        let canalesLimpiosGlobal = [];
+        let marcasLimpiasGlobal = [];
+        let tabActivaId = 'tab-general';
+        // Qué canales corresponden a cada pestaña (para el filtro contextual de Canal/Vendedor).
+        // [] = sin filtro vendedor/canal (Resumen General); null = todos (pestañas transversales).
+        const CANALES_POR_TAB = {
+            'tab-general': [],
+            'tab-consumidor': ['Salon', 'Online'],
+            'tab-externa': ['Venta Externa'],
+            'tab-directorio': ['Directorio'],
+            'tab-ecommerce': ['E-commerce'],
+            'tab-mayoristas': ['Mayoristas'],
+            'tab-reparaciones': ['Reparaciones']
+        };
 
         // ===== MULTI-SELECCIÓN (casillas) =====
         // Abre/cierra el panel de un multi-select y cierra los demás.
@@ -1478,6 +1521,7 @@
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let marcasSet = new Set();
+            vendedoresPorCanalGlobal = {};
 
             // Metemos al menú a los vendedores históricos aunque no hayan vendido nada
             Object.keys(HISTORICO_METAS).forEach(m => {
@@ -1515,6 +1559,10 @@
                 if(d.vendedor) vendedoresSet.add(d.vendedor);
                 if(d.canal) canalesSet.add(d.canal);
                 if(d.marcaFinal) marcasSet.add(d.marcaFinal);
+                if(d.canal && d.vendedor) {
+                    if(!vendedoresPorCanalGlobal[d.canal]) vendedoresPorCanalGlobal[d.canal] = new Set();
+                    vendedoresPorCanalGlobal[d.canal].add(d.vendedor);
+                }
 
                 lineasDeDatosGlobales.push(d);
             }
@@ -1547,20 +1595,32 @@
             }
         }
 
+        // Filtra nombres "basura" que no son vendedores reales.
+        const BASURA_VEND = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
+        function esVendedorReal(v) { let vc = limpiarNombre(v); return !!v && !BASURA_VEND.some(b => vc === b || vc.startsWith(b)); }
+
         function popularDropdownFiltros(vendedores, canales, marcas) {
-            // Vendedores (filtrando "basura")
-            const BASURA = ["TOTAL", "CONSUM. FINAL", "CONSUMIDOR", "MAYORISTA 25", "33", "120", "100", "LICITACION", "SIN VENDEDOR", "ONLINE"];
-            let vends = Array.from(vendedores).sort().filter(v => { let vc = limpiarNombre(v); return v && !BASURA.some(b => vc === b || vc.startsWith(b)); });
-            let cans = Array.from(canales).sort().filter(c => c);
-            let marc = Array.from(marcas).sort().filter(m => m && !String(m).includes("Intereses"));
+            vendedoresLimpiosGlobal = Array.from(vendedores).sort().filter(esVendedorReal);
+            canalesLimpiosGlobal = Array.from(canales).sort().filter(c => c);
+            marcasLimpiasGlobal = Array.from(marcas).sort().filter(m => m && !String(m).includes("Intereses"));
 
             let btnV = document.querySelector('#ms-vendedor .ms-btn'); if (btnV) btnV.setAttribute('data-todos', '-- Todos los Vendedores --');
             let btnC = document.querySelector('#ms-canal .ms-btn'); if (btnC) btnC.setAttribute('data-todos', '-- Todos los Canales --');
             let btnM = document.querySelector('#ms-marca .ms-btn'); if (btnM) btnM.setAttribute('data-todos', '-- Todas las Marcas --');
 
-            poblarMulti('ms-vendedor', vends, '(Todos los Vendedores)');
-            poblarMulti('ms-canal', cans, '(Todos los Canales)');
-            poblarMulti('ms-marca', marc, '(Todas las Marcas)');
+            poblarMulti('ms-marca', marcasLimpiasGlobal, '(Todas las Marcas)');
+            // Vendedor y Canal se pueblan según la pestaña activa.
+            ajustarFiltrosPorTab(tabActivaId);
+        }
+
+        // Vendedores que pertenecen a un conjunto de canales (para el filtro por pestaña).
+        function vendedoresDeCanales(canalesScope) {
+            let set = new Set();
+            (canalesScope || []).forEach(c => {
+                let s = vendedoresPorCanalGlobal[c];
+                if (s) s.forEach(v => { if (esVendedorReal(v)) set.add(v); });
+            });
+            return Array.from(set).sort();
         }
 
         function aplicarFiltrosDropdown() {
@@ -1816,11 +1876,17 @@
 
                     // Item 7: agrupamos e-commerce POR CLIENTE (ventas, NC y marcas de cada cliente)
                     let cliKey = r.cliente || "SIN CLIENTE";
-                    if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {} };
+                    if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {}, productos: {} };
                     if (esNC) ecomPorCliente[cliKey].nc += m; else ecomPorCliente[cliKey].bruto += m;
                     if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
                         let mc = limpiarNombre(r.marcaFinal);
                         ecomPorCliente[cliKey].marcas[mc] = (ecomPorCliente[cliKey].marcas[mc] || 0) + m;
+                        // Drill-down: productos comprados de cada marca por este cliente de e-commerce.
+                        if (r.producto) {
+                            if (!ecomPorCliente[cliKey].productos[mc]) ecomPorCliente[cliKey].productos[mc] = {};
+                            let pName = String(r.producto).replace(/\s+/g, ' ').trim();
+                            ecomPorCliente[cliKey].productos[mc][pName] = (ecomPorCliente[cliKey].productos[mc][pName] || 0) + m;
+                        }
                     }
                 }
 
@@ -2470,7 +2536,19 @@
                 Object.keys(d.marcas).sort().forEach(mc => {
                     let val = d.marcas[mc]; if (val <= 0) return; nMarcas++;
                     let display = mc.charAt(0) + mc.slice(1).toLowerCase();
-                    let row = `<tr><td>${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                    // Drill-down: productos comprados de esta marca por este cliente de e-commerce.
+                    let prodMap = (d.productos && d.productos[mc]) ? d.productos[mc] : {};
+                    let prodKeys = Object.keys(prodMap).filter(p => prodMap[p] > 0).sort((a, b) => prodMap[b] - prodMap[a]);
+                    let row;
+                    if (prodKeys.length > 0) {
+                        let uid = 'pe' + (++__pdSeq);
+                        row = `<tr style="cursor:pointer;" title="Ver productos comprados" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                        prodKeys.forEach(p => {
+                            row += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${prodMap[p].toLocaleString('es-PY')}</td></tr>`;
+                        });
+                    } else {
+                        row = `<tr><td>${escapeHtml(display)}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td></tr>`;
+                    }
                     if (LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mc))) { mRows += row; sM += val; }
                     else if (LISTA_ARMAS.some(la => claveMarca(la) === claveMarca(mc))) { aRows += row; sA += val; }
                     else { rRows += row; sR += val; }
