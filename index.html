@@ -1014,9 +1014,9 @@
             __mkSeq = 0; // uids de drill-down únicos por render
             let CF = ['Salon', 'Online', 'Venta Externa', 'E-commerce'];
             renderMarcasEnTablas(null, '', false);         // Resumen General (todos los canales)
-            renderMarcasEnTablas(CF, '-cf', false);         // Consumidor Final GENERAL (sin selector/drill)
+            renderMarcasEnTablas(CF, '-cf', true);          // Consumidor Final GENERAL (con desglose ▸ y 👥, como las fichas)
             renderMarcasEnTablas(CF, '-cfv', true);         // Consumidor Final POR VENDEDOR (selector + drill)
-            renderMarcasEnTablas(['Mayoristas'], '-may', false);  // Mayoristas GENERAL
+            renderMarcasEnTablas(['Mayoristas'], '-may', true);   // Mayoristas GENERAL (con desglose ▸ y 👥)
             renderMarcasEnTablas(['Mayoristas'], '-mayv', true);  // Mayoristas POR VENDEDOR
         }
         // Pobla el selector local de vendedor de una sección de Marcas y Líneas, preservando la selección.
@@ -1464,6 +1464,8 @@
             let vUpper = limpiarNombre(vendedor);
             let cUpper = limpiarNombre(canalCSV);
 
+            if (vUpper.includes("CONTIMARKET") || cUpper.includes("CONTIMARKET")) return "E-commerce";
+
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
             if (vUpper.includes("VENTA EXTERNA") || vUpper.includes("EXTERNA")) return "Venta Externa";
             if (vUpper.includes("REPARACIONES") || vUpper.includes("TALLER") || vUpper.includes("SERVICIO")) return "Reparaciones";
@@ -1727,9 +1729,11 @@
                 if (!r || r.length < 31 || r[1] === "") continue;
 
                 let cNormalizado = obtenerCanalReal(r[17], r[18]);
+                let esContimarket = limpiarNombre(r[17]).includes("CONTIMARKET") || limpiarNombre(r[18]).includes("CONTIMARKET");
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30]),
+                    contimarket: esContimarket,
                     producto: (idxProductoGlobal >= 0 ? (r[idxProductoGlobal] || "") : ""),
                     categoria: (idxCategoria >= 0 ? (r[idxCategoria] || "") : "")
                 };
@@ -2074,7 +2078,9 @@
                     }
 
                     // Item 7: agrupamos e-commerce POR CLIENTE (ventas, NC y marcas de cada cliente)
-                    let cliKey = r.cliente || "SIN CLIENTE";
+                    // Contimarket: nuevo equipo de ventas que entra como E-commerce, pero se agrupa/muestra
+                    // bajo "Contimarket" (no el nombre del cliente al que se factura).
+                    let cliKey = r.contimarket ? "Contimarket" : (r.cliente || "SIN CLIENTE");
                     if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {}, productos: {} };
                     if (esNC) ecomPorCliente[cliKey].nc += m; else ecomPorCliente[cliKey].bruto += m;
                     if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
