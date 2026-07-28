@@ -348,20 +348,7 @@
             </div>
 
             <div class="excel-container" style="margin-top:20px;">
-                <div class="excel-title">⚔️ MARCAS Y LÍNEAS</div>
-                <div style="padding:12px 15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del canal:</label>
-                    <select id="sel-marcas-canal" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark);">
-                        <option value="cf">Consumidor Final (Salón + Online + Venta Externa + E-commerce)</option>
-                        <option value="Salon">— Salón</option>
-                        <option value="Online">— Online</option>
-                        <option value="Venta Externa">— Venta Externa</option>
-                        <option value="E-commerce">— E-commerce</option>
-                        <option value="Mayoristas">Mayoristas</option>
-                        <option value="Directorio">Directorio / Licitaciones</option>
-                        <option value="all">General (todos los canales)</option>
-                    </select>
-                </div>
+                <div class="excel-title">⚔️ MARCAS Y LÍNEAS (todos los canales)</div>
             </div>
             <div class="three-column-grid">
                 <div class="excel-container">
@@ -460,6 +447,33 @@
                 </div>
                 <div class="fichas-grid" id="grid-fichas-ecommerce"></div>
             </div>
+
+            <div class="excel-container" style="margin-top:20px;">
+                <div class="excel-title">⚔️ MARCAS Y LÍNEAS — CONSUMIDOR FINAL</div>
+            </div>
+            <div class="three-column-grid">
+                <div class="excel-container">
+                    <div class="excel-title">MARCAS PRINCIPALES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="marcas-lista-cf"></tbody><tfoot id="marcas-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">ARMAS Y MUNICIONES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="armas-lista-cf"></tbody><tfoot id="armas-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">RESTO DE MARCAS</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
+                        <tbody id="resto-lista-cf"></tbody><tfoot id="resto-footer-cf"></tfoot>
+                    </table></div>
+                </div>
+            </div>
         </div>
 
         <div id="tab-mayoristas" class="tab-content">
@@ -496,6 +510,33 @@
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
                 <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
+            </div>
+
+            <div class="excel-container" style="margin-top:20px;">
+                <div class="excel-title">⚔️ MARCAS Y LÍNEAS — MAYORISTAS</div>
+            </div>
+            <div class="three-column-grid">
+                <div class="excel-container">
+                    <div class="excel-title">MARCAS PRINCIPALES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="marcas-lista-may"></tbody><tfoot id="marcas-footer-may"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">ARMAS Y MUNICIONES</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
+                        <tbody id="armas-lista-may"></tbody><tfoot id="armas-footer-may"></tfoot>
+                    </table></div>
+                </div>
+                <div class="excel-container">
+                    <div class="excel-title">RESTO DE MARCAS</div>
+                    <div class="table-responsive-wrapper"><table class="excel-table">
+                        <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
+                        <tbody id="resto-lista-may"></tbody><tfoot id="resto-footer-may"></tfoot>
+                    </table></div>
+                </div>
             </div>
         </div>
 
@@ -777,17 +818,15 @@
             if (caret) caret.textContent = card.classList.contains('collapsed') ? '▶' : '▼';
         }
 
-        // Renderiza las tablas de Marcas y Líneas (Principales / A&M / Resto) según el canal elegido.
-        function renderMarcasLineas() {
+        // Renderiza Marcas y Líneas (Principales / A&M / Resto) para un conjunto de canales y un sufijo de IDs.
+        //  - scopeChannels: array de canales; null = todos los canales (Resumen General).
+        //  - suffix: '' (Resumen), '-cf' (Consumidor Final), '-may' (Mayoristas).
+        // Respeta el filtro de vendedor activo (tanto en ventas como en objetivo).
+        function renderMarcasEnTablas(scopeChannels, suffix) {
             if (!METAS_ACTIVAS_G) return;
-            let selEl = document.getElementById('sel-marcas-canal');
-            let val = selEl ? selEl.value : 'cf';
-            let scope;
-            if (val === 'cf') scope = ['Salon', 'Online', 'Venta Externa', 'E-commerce'];
-            else if (val === 'all') scope = Object.keys(acumMarcasPorCanalGlobal);
-            else scope = [val];
+            let scope = scopeChannels || Object.keys(acumMarcasPorCanalGlobal);
 
-            // Ventas por marca sumando los canales del scope.
+            // Ventas por marca sumando los canales del scope (los datos ya vienen filtrados por vendedor/mes).
             let acumMarcasScope = {};
             scope.forEach(c => {
                 let mm = acumMarcasPorCanalGlobal[c] || {};
@@ -796,16 +835,19 @@
             let acumPorClave = {};
             Object.keys(acumMarcasScope).forEach(k => { let ck = claveMarca(k); acumPorClave[ck] = (acumPorClave[ck] || 0) + acumMarcasScope[k]; });
 
-            // Objetivo por marca = metas de los vendedores que pertenecen a esos canales.
+            // Objetivo por marca = metas de los vendedores de esos canales, intersectado con el filtro de vendedor.
             let vendoresScope = [];
             scope.forEach(c => { let s = vendedoresPorCanalGlobal[c]; if (s) s.forEach(v => vendoresScope.push(v)); });
+            let todosCanales = !scopeChannels; // Resumen General: todos los vendedores
             let objPorClaveMarca = {};
             if (METAS_ACTIVAS_G.vendedorMarca) {
                 Object.keys(METAS_ACTIVAS_G.vendedorMarca).forEach(k => {
                     let parts = String(k).split('|||');
                     if (parts.length !== 2) return;
-                    let enScope = (val === 'all') || vendoresScope.some(vv => sonElMismoVendedor(vv, parts[0]));
-                    if (enScope) { let ck = claveMarca(parts[1]); objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS_G.vendedorMarca[k]; }
+                    let vend = parts[0];
+                    let enCanal = todosCanales || vendoresScope.some(vv => sonElMismoVendedor(vv, vend));
+                    let enVendFiltro = !filtrosActivos.vendedores.length || filtrosActivos.vendedores.some(vv => sonElMismoVendedor(vv, vend));
+                    if (enCanal && enVendFiltro) { let ck = claveMarca(parts[1]); objPorClaveMarca[ck] = (objPorClaveMarca[ck] || 0) + METAS_ACTIVAS_G.vendedorMarca[k]; }
                 });
             }
 
@@ -816,18 +858,24 @@
 
             let hM = "", vM = 0, oM = 0;
             LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; hM += `<tr class="ficha-marca-row"><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
-            setHtmlSafe('marcas-lista', hM);
-            setHtmlSafe('marcas-footer', `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM > 0 ? ((vM / oM) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
+            setHtmlSafe('marcas-lista' + suffix, hM);
+            setHtmlSafe('marcas-footer' + suffix, `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM > 0 ? ((vM / oM) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
 
             let hA = "", vA = 0, oA = 0;
             LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; hA += `<tr class="ficha-marca-row"><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
-            setHtmlSafe('armas-lista', hA);
-            setHtmlSafe('armas-footer', `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA > 0 ? ((vA / oA) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
+            setHtmlSafe('armas-lista' + suffix, hA);
+            setHtmlSafe('armas-footer' + suffix, `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA > 0 ? ((vA / oA) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
 
             let hR = "", vR = 0;
             Object.keys(acumMarcasScope).sort().forEach(r => { let ck = claveMarca(r); if (!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)) { let v = acumMarcasScope[r]; vR += v; hR += `<tr class="ficha-marca-row"><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; } });
-            setHtmlSafe('resto-lista', hR);
-            setHtmlSafe('resto-footer', `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`);
+            setHtmlSafe('resto-lista' + suffix, hR);
+            setHtmlSafe('resto-footer' + suffix, `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`);
+        }
+        // Dibuja las 3 vistas: Resumen (todos), Consumidor Final y Mayoristas.
+        function renderMarcasLineas() {
+            renderMarcasEnTablas(null, '');
+            renderMarcasEnTablas(['Salon', 'Online', 'Venta Externa', 'E-commerce'], '-cf');
+            renderMarcasEnTablas(['Mayoristas'], '-may');
         }
 
         // =========================================================================
