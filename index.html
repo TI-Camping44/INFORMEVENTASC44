@@ -314,32 +314,6 @@
                 </div>
             </div>
 
-            <div class="excel-container">
-                <div class="excel-title">📋 RESUMEN CONSOLIDADO POR CANAL Y VENDEDOR</div>
-                <div class="table-responsive-wrapper">
-                    <table class="excel-table">
-                        <thead>
-                            <tr>
-                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Totales</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Hoy deberías estar en</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Dif. vs Hoy</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Mes</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Falta p/ Objetivo</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Proyección</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Proyección</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Fact. x Día Esperada</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Fact. Prom. Real x Día</th>
-                                <th class="text-center th-sort" onclick="ordenarTabla(this)">% Día</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grid-resumen-consolidado"></tbody>
-                    </table>
-                </div>
-            </div>
-
             <div class="grid-1-2">
                 <div class="excel-container">
                     <div class="excel-title">🔍 DESGLOSE DE COMPROBANTES Y PARTICIPACIÓN DIRECTA</div>
@@ -354,12 +328,12 @@
                         <table class="excel-table">
                             <thead>
                                 <tr>
-                                    <th class="th-sort" onclick="ordenarTabla(this)">Canal</th>
-                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Neta</th>
-                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
-                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
-                                    <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
+                                    <th>Canal</th>
+                                    <th class="text-right">Ventas Neta</th>
+                                    <th class="text-right">Esperado Período</th>
+                                    <th class="text-right">% Logrado</th>
+                                    <th class="text-right">Objetivo Período</th>
+                                    <th class="text-right">% Logrado Mes</th>
                                 </tr>
                             </thead>
                             <tbody id="grid-canales-resumen"></tbody>
@@ -1650,7 +1624,7 @@
             document.getElementById('select-fecha').value = "";
             if (document.getElementById('select-desde')) document.getElementById('select-desde').value = "";
             if (document.getElementById('select-hasta')) document.getElementById('select-hasta').value = "";
-            filtrosActivos.desde = ""; filtrosActivos.hasta = "";
+            filtrosActivos.fecha = ""; filtrosActivos.desde = ""; filtrosActivos.hasta = "";
             filtrosActivos.vendedores = []; filtrosActivos.canales = []; filtrosActivos.marcas = [];
             // Destildar todas las casillas y restaurar textos
             ['ms-vendedor','ms-canal','ms-marca'].forEach(id => {
@@ -2099,12 +2073,50 @@
             let arrCanalesLabels = [];
             let arrCanalesData = [];
 
+            // Tabla de canales del Resumen: "Consumidor Final" agrupa Salón/Online/Venta Externa/E-commerce
+            // (desplegable), y van sueltos Mayoristas, Directorio/Licitaciones y Reparaciones.
             let hCan = "";
+            let espDe = (obj) => Math.round((obj / dMes) * dTr);
+            let celdasCanal = (net, obj) => {
+                let esp = espDe(obj);
+                let pL = esp > 0 ? ((net / esp) * 100).toFixed(0) + '%' : '0%';
+                let pM = obj > 0 ? ((net / obj) * 100).toFixed(0) + '%' : '0%';
+                return `<td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pL}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${pM}</td>`;
+            };
+            let objDe = (c) => (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) ? METAS_ACTIVAS.canales[c] : 0;
+            let netDe = (c) => acumCanales[c] ? (acumCanales[c].bruto + acumCanales[c].nc) : 0;
+
+            const CF_SUBS = ["Salon", "Online", "Venta Externa", "E-commerce"];
+            let cfNet = 0, cfObj = 0, cfSubRows = "";
+            CF_SUBS.forEach(c => {
+                if (!acumCanales[c]) return;
+                let obj = objDe(c), net = netDe(c);
+                cfNet += net; cfObj += obj;
+                cfSubRows += `<tr class="grpcf pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:26px; color:#4a5568;">${escapeHtml(c)}</td>${celdasCanal(net, obj)}</tr>`;
+                if (net !== 0) { arrCanalesLabels.push(c); arrCanalesData.push(net); }
+            });
+            if (cfSubRows) {
+                hCan += `<tr style="cursor:pointer;" title="Desplegar Consumidor Final" onclick="togglePd('grpcf', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> <strong>CONSUMIDOR FINAL</strong></td>${celdasCanal(cfNet, cfObj)}</tr>`;
+                hCan += cfSubRows;
+            }
+            // Canales sueltos (fuera de Consumidor Final)
+            let sueltos = [
+                { key: "Mayoristas", label: "Mayoristas" },
+                { key: "Directorio", label: "Directorio / Licitaciones" },
+                { key: "Reparaciones", label: "Reparaciones" }
+            ];
+            let yaListados = new Set(CF_SUBS.concat(sueltos.map(s => s.key)));
+            sueltos.forEach(s => {
+                if (!acumCanales[s.key]) return;
+                let obj = objDe(s.key), net = netDe(s.key);
+                hCan += `<tr><td><strong>${escapeHtml(s.label)}</strong></td>${celdasCanal(net, obj)}</tr>`;
+                if (net !== 0) { arrCanalesLabels.push(s.key); arrCanalesData.push(net); }
+            });
+            // Cualquier canal nuevo no contemplado, para no perder datos
             Object.keys(acumCanales).forEach(c => {
-                let obj = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) ? METAS_ACTIVAS.canales[c] : 0;
-                let net = acumCanales[c].bruto + acumCanales[c].nc;
-                let esp = Math.round((obj / dMes) * dTr);
-                hCan += `<tr><td><strong>${c}</strong></td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center num-positivo">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                if (yaListados.has(c)) return;
+                let obj = objDe(c), net = netDe(c);
+                hCan += `<tr><td><strong>${escapeHtml(c)}</strong></td>${celdasCanal(net, obj)}</tr>`;
                 if (net !== 0) { arrCanalesLabels.push(c); arrCanalesData.push(net); }
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
