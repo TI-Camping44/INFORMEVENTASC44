@@ -624,6 +624,8 @@
             if (element) element.classList.add('active');
             tabActivaId = tabId;
             ajustarFiltrosPorTab(tabId);
+            // Re-render para que la META del encabezado se agrupe según la pestaña activa.
+            try { filtrarYRenderizarTodo(); } catch (e) {}
         }
 
         // Filtro contextual según la pestaña:
@@ -638,7 +640,6 @@
             let scope = CANALES_POR_TAB[tabId]; // array de canales, [] (general) o undefined (transversal)
 
             // Antes de repoblar limpiamos la selección de vendedor/canal (cambian las opciones).
-            let habia = (filtrosActivos.vendedores.length || filtrosActivos.canales.length);
             filtrosActivos.vendedores = [];
             filtrosActivos.canales = [];
 
@@ -670,8 +671,6 @@
                 let btn = document.querySelector('#' + id + ' .ms-btn');
                 if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
             });
-
-            if (habia) { try { filtrarYRenderizarTodo(); } catch (e) {} }
         }
 
         // Ordena una tabla plana al tocar el encabezado (alterna asc/desc). Detecta números (₲, %).
@@ -1884,8 +1883,25 @@
             let rangoActivoV = !!(filtrosActivos.desde && filtrosActivos.hasta);
             document.getElementById('lbl-txt-habiles').innerText = rangoActivoV ? "Días Hábiles Rango" : ((filtrosActivos.mes === "") ? "Días Hábiles YTD" : (filtrosActivos.fecha ? "Día Filtrado" : "Días hábiles"));
             document.getElementById('lbl-txt-transcurridos').innerText = rangoActivoV ? "Transcurridos Rango" : ((filtrosActivos.mes === "") ? "Transcurridos YTD" : (filtrosActivos.fecha ? "Calculando 1 Día" : "Transcurridos (Corte)"));
-            document.getElementById('txt-meta-global').innerText = `META GLOBAL DEL PERÍODO: ₲ ${data.neta.toLocaleString('es-PY')} / ₲ ${objetivoFiltrado.toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerText = `AVANCE GENERAL: ${objetivoFiltrado > 0 ? ((data.neta / objetivoFiltrado) * 100).toFixed(1) : 0}%`;
+            // META del encabezado según la pestaña: en un tab de canal (sin filtros extra) muestra
+            // solo el objetivo de esos canales; si no, usa el global/filtrado.
+            let scopeHdr = CANALES_POR_TAB[tabActivaId];
+            let sinFiltrosExtra = !filtrosActivos.canales.length && !filtrosActivos.vendedores.length && !filtrosActivos.marcas.length;
+            let hdrNeta, hdrObj, hdrTitulo;
+            if (scopeHdr && scopeHdr.length > 0 && sinFiltrosExtra) {
+                hdrNeta = scopeHdr.reduce((s, c) => s + (acumCanales[c] ? (acumCanales[c].bruto + acumCanales[c].nc) : 0), 0);
+                hdrObj = scopeHdr.reduce((s, c) => s + ((METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) ? METAS_ACTIVAS.canales[c] : 0), 0);
+                hdrTitulo = (tabActivaId === 'tab-consumidor') ? 'META CONSUMIDOR FINAL' : ('META ' + scopeHdr.map(c => c.toUpperCase()).join(' / '));
+            } else {
+                hdrNeta = data.neta;
+                hdrObj = objetivoFiltrado;
+                hdrTitulo = 'META GLOBAL DEL PERÍODO';
+            }
+            let hdrEsp = Math.round((hdrObj / dMes) * dTr);
+            let hdrDif = hdrNeta - hdrEsp; // diferencia vs lo esperado a hoy (verde adelantados / rojo atrasados)
+            let hdrAvance = hdrObj > 0 ? ((hdrNeta / hdrObj) * 100).toFixed(1) : 0;
+            document.getElementById('txt-meta-global').innerText = `${hdrTitulo}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
+            document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA A HOY: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
