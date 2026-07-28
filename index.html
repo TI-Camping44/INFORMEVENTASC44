@@ -148,10 +148,12 @@
         .ficha-table td.text-right, .ficha-table th.text-right { white-space: nowrap; }
         
         .row-meta-lograda { background-color: var(--row-success-bg) !important; font-weight: bold; color: #234e52; }
-        .ficha-section { background: #f7fafc; font-weight: bold; color: #4a5568; padding: 5px 8px; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
+        .ficha-section { background: #eef4fb; font-weight: bold; color: var(--navy-main); padding: 6px 8px; border-left: 3px solid var(--teal-accent); border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; letter-spacing: 0.3px; }
         .ficha-subtotal { background: #edf2f7; font-weight: bold; border-top: 1px solid #cbd5e0; }
-        .ficha-total-final { background: #e2e8f0; font-weight: bold; font-size: 11.5px; }
-        .ficha-kpi-header { background: #2d3748; color: white; text-align: center; padding: 6px; font-weight: bold; }
+        .ficha-total-final { background: #dbe4ef; font-weight: bold; font-size: 11.5px; color: var(--navy-main); border-top: 2px solid var(--navy-main); }
+        .ficha-kpi-header { background: #2d3748; color: white; text-align: center; padding: 6px; font-weight: bold; letter-spacing: 0.3px; }
+        .ficha-marca-row:hover td { background: #f0f9f8; }
+        .ficha-marca-row td { transition: background 0.1s; }
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
@@ -2300,15 +2302,19 @@
                         __clientesMarcaReg[cuid] = { vendedor: v, marca: displayBrand, clientes: cliMap };
                         iconoCli = ` <span class="cli-btn" title="Ver clientes que compraron esta marca" onclick="verClientesMarca('${cuid}', event)">👥</span>`;
                     }
+                    // Celdas con color (estilo "Marcas Principales"): venta en teal, meta en gris, % verde/rojo.
+                    let celVenta = `<td class="text-right" style="font-weight:bold; color:${val > 0 ? '#2b7a78' : '#a0aec0'};">₲ ${val.toLocaleString('es-PY')}</td>`;
+                    let celMeta = `<td class="text-right" style="color:${mAsig > 0 ? '#4a5568' : '#a0aec0'};">₲ ${mAsig.toLocaleString('es-PY')}</td>`;
+                    let celPctM = `<td class="text-center ${mAsig > 0 ? (val >= mAsig ? 'num-positivo' : 'num-negativo') : 'num-cero'}">${pctM}</td>`;
                     let row;
                     if (prodKeys.length > 0) {
                         let uid = 'pd' + (++__pdSeq);
-                        row = `<tr class="${rowClass}" style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                        row = `<tr class="ficha-marca-row ${rowClass}" style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"><td><span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> ${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td>${celVenta}${celMeta}${celPctM}</tr>`;
                         prodKeys.forEach(p => {
                             row += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${prodMap[p].toLocaleString('es-PY')}</td><td class="text-right">-</td><td class="text-center">-</td></tr>`;
                         });
                     } else {
-                        row = `<tr class="${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td><td class="text-right">₲ ${val.toLocaleString('es-PY')}</td><td class="text-right">₲ ${mAsig.toLocaleString('es-PY')}</td><td class="text-center">${pctM}</td></tr>`;
+                        row = `<tr class="ficha-marca-row ${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td>${celVenta}${celMeta}${celPctM}</tr>`;
                     }
 
                     let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mClean));
