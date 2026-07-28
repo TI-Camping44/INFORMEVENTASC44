@@ -845,6 +845,38 @@
             if (caret) caret.textContent = card.classList.contains('collapsed') ? '▶' : '▼';
         }
 
+        // Drill-down de una marca (clave): productos + clientes sumando los vendedores indicados.
+        function ddMarca(ck, vendoresDrill) {
+            let prod = {}, cli = {};
+            (vendoresDrill || []).forEach(v => {
+                let dv = dataFichasVendGlobal[v]; if (!dv) return;
+                if (dv.productos) Object.keys(dv.productos).forEach(mk => { if (claveMarca(mk) === ck) { let pm = dv.productos[mk]; Object.keys(pm).forEach(p => { prod[p] = (prod[p] || 0) + pm[p]; }); } });
+                if (dv.clientes) Object.keys(dv.clientes).forEach(mk => { if (claveMarca(mk) === ck) { let cm = dv.clientes[mk]; Object.keys(cm).forEach(c => { cli[c] = (cli[c] || 0) + cm[c]; }); } });
+            });
+            return { prod, cli };
+        }
+        // Devuelve el caret ▸, el ícono 👥, el onclick y las filas de detalle (productos) de una marca.
+        function drillMarcaHtml(ck, display, vendoresDrill, extraCols) {
+            let dd = ddMarca(ck, vendoresDrill);
+            let prodKeys = Object.keys(dd.prod).filter(p => dd.prod[p] !== 0).sort((a, b) => dd.prod[b] - dd.prod[a]);
+            let tieneCli = Object.keys(dd.cli).some(c => dd.cli[c] !== 0);
+            let icono = "", caret = "", onclick = "", detalle = "";
+            if (tieneCli) {
+                let cuid = 'mkc' + (++__mkSeq);
+                __clientesMarcaReg[cuid] = { vendedor: '', marca: display, clientes: dd.cli };
+                icono = ` <span class="cli-btn" title="Ver a quién le vendió esta marca" onclick="verClientesMarca('${cuid}', event)">👥</span>`;
+            }
+            if (prodKeys.length) {
+                let uid = 'mkp' + (++__mkSeq);
+                caret = `<span class="pd-caret" style="color:#2b7a78; font-weight:bold;">▸</span> `;
+                onclick = ` style="cursor:pointer;" title="Ver productos vendidos" onclick="togglePd('${uid}', this)"`;
+                prodKeys.forEach(p => {
+                    detalle += `<tr class="${uid} pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:22px; color:#4a5568; font-size:10px;">${escapeHtml(p)}</td><td class="text-right" style="font-size:10px;">₲ ${dd.prod[p].toLocaleString('es-PY')}</td>${extraCols}</tr>`;
+                });
+            }
+            return { icono, caret, onclick, detalle };
+        }
+
         // Renderiza Marcas y Líneas (Principales / A&M / Resto) para un conjunto de canales y un sufijo de IDs.
         //  - scopeChannels: array de canales; null = todos los canales (Resumen General).
         //  - suffix: '' (Resumen), '-cf' (Consumidor Final), '-may' (Mayoristas).
@@ -855,6 +887,10 @@
             // Vendedor elegido en el selector local de esta sección ('' = todos).
             let selV = document.getElementById('sel-marcas-vend' + suffix);
             let vendSel = selV ? selV.value : '';
+            // Vendedores para el drill-down (productos/clientes): el elegido, o todos los del scope.
+            let vendoresDrill;
+            if (vendSel) vendoresDrill = [vendSel];
+            else vendoresDrill = Object.keys(dataFichasVendGlobal).filter(v => scope.includes(dataFichasVendGlobal[v].canal));
 
             // Ventas por marca: sumamos sobre los canales del scope y el/los vendedor(es).
             let acumMarcasScope = {};
@@ -891,26 +927,29 @@
             let celPct = (v, obj) => { let p = obj > 0 ? ((v / obj) * 100) : 0; return `<td class="text-center ${p >= 100 ? 'num-positivo' : (obj > 0 ? 'num-negativo' : 'num-cero')}">${obj > 0 ? p.toFixed(0) + '%' : '-'}</td>`; };
 
             // Ocultamos las filas con venta en 0 (los totales siguen sumando todo).
+            // Cada fila trae el drill-down de productos (▸) y el ícono 👥 de clientes.
+            const extra4 = '<td class="text-right">-</td><td class="text-center">-</td>';
             let hM = "", vM = 0, oM = 0;
-            LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; if (v === 0) return; hM += `<tr class="ficha-marca-row"><td>${escapeHtml(m)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
+            LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; if (v === 0) return; let dh = drillMarcaHtml(ck, escapeHtml(m), vendoresDrill, extra4); hM += `<tr class="ficha-marca-row"${dh.onclick}><td>${dh.caret}${escapeHtml(m)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
             if (!hM) hM = `<tr><td colspan="4" class="text-center num-cero" style="padding:10px;">Sin ventas en el período</td></tr>`;
             setHtmlSafe('marcas-lista' + suffix, hM);
             setHtmlSafe('marcas-footer' + suffix, `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM > 0 ? ((vM / oM) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
 
             let hA = "", vA = 0, oA = 0;
-            LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; if (v === 0) return; hA += `<tr class="ficha-marca-row"><td>${escapeHtml(a)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>`; });
+            LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; if (v === 0) return; let dh = drillMarcaHtml(ck, escapeHtml(a), vendoresDrill, extra4); hA += `<tr class="ficha-marca-row"${dh.onclick}><td>${dh.caret}${escapeHtml(a)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
             if (!hA) hA = `<tr><td colspan="4" class="text-center num-cero" style="padding:10px;">Sin ventas en el período</td></tr>`;
             setHtmlSafe('armas-lista' + suffix, hA);
             setHtmlSafe('armas-footer' + suffix, `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA > 0 ? ((vA / oA) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
 
             let hR = "", vR = 0;
-            Object.keys(acumMarcasScope).sort().forEach(r => { let ck = claveMarca(r); if (!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)) { let v = acumMarcasScope[r]; vR += v; if (v === 0) return; hR += `<tr class="ficha-marca-row"><td>${escapeHtml(r)}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>`; } });
+            Object.keys(acumMarcasScope).sort().forEach(r => { let ck = claveMarca(r); if (!clavesMarcas.includes(ck) && !clavesArmas.includes(ck)) { let v = acumMarcasScope[r]; vR += v; if (v === 0) return; let dh = drillMarcaHtml(ck, escapeHtml(r), vendoresDrill, ''); hR += `<tr class="ficha-marca-row"${dh.onclick}><td>${dh.caret}${escapeHtml(r)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td></tr>` + dh.detalle; } });
             if (!hR) hR = `<tr><td colspan="2" class="text-center num-cero" style="padding:10px;">Sin ventas en el período</td></tr>`;
             setHtmlSafe('resto-lista' + suffix, hR);
             setHtmlSafe('resto-footer' + suffix, `<tr class="total-segmento"><td>Total Resto Marcas</td><td class="text-right">₲ ${vR.toLocaleString('es-PY')}</td></tr>`);
         }
         // Dibuja las 3 vistas: Resumen (todos), Consumidor Final y Mayoristas.
         function renderMarcasLineas() {
+            __mkSeq = 0; // uids de drill-down únicos por render
             renderMarcasEnTablas(null, '');
             renderMarcasEnTablas(['Salon', 'Online', 'Venta Externa', 'E-commerce'], '-cf');
             renderMarcasEnTablas(['Mayoristas'], '-may');
@@ -1148,6 +1187,8 @@
         let marcasLimpiasGlobal = [];
         let acumMarcasPorCanalGlobal = {}; // canal -> { marcaFinal: venta } (para Marcas y Líneas por canal)
         let acumMarcasCanalVendGlobal = {}; // canal -> vendedor -> { marcaFinal: venta } (para el selector local de vendedor)
+        let dataFichasVendGlobal = {};       // referencia a las fichas (productos/clientes por vendedor+marca) para el drill-down
+        let __mkSeq = 0;                     // secuencia de uids para drill-down en Marcas y Líneas
         let METAS_ACTIVAS_G = null;        // metas del período activo (para re-render del selector de canal-marcas)
         let tabActivaId = 'tab-general';
         // Qué canales corresponden a cada pestaña (para el filtro contextual de Canal/Vendedor).
@@ -2051,6 +2092,7 @@
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo, acumVendedorNC, ecomPorCliente) {
             acumVendedorNC = acumVendedorNC || {};
             ecomPorCliente = ecomPorCliente || {};
+            dataFichasVendGlobal = dataFichasVend; // para el drill-down de la sección Marcas y Líneas
             let dMes = parseFloat(dMesActivo);
             let dTr = parseFloat(dTrActivo); 
 
