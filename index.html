@@ -204,11 +204,7 @@
         <h2>CAMPING 44 - BI YTD</h2>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
-        <div class="menu-item" onclick="switchTab('tab-externa', this)">🚗 Venta Externa</div>
-        <div class="menu-item" onclick="switchTab('tab-directorio', this)">👔 Directorio</div>
-        <div class="menu-item" onclick="switchTab('tab-ecommerce', this)">🛒 E-Commerce</div>
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
-        <div class="menu-item" onclick="switchTab('tab-reparaciones', this)">🔧 Reparaciones</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
         <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
         <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
@@ -306,7 +302,7 @@
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DEL CANAL EN BASE AL OBJETIVO GENERAL DEL MES</span>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
                     <div style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
@@ -382,7 +378,7 @@
 
         <div id="tab-consumidor" class="tab-content">
             <div class="excel-container">
-                <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (SALÓN / ONLINE)</div>
+                <div class="excel-title">👥 DESEMPEÑO CONSUMIDOR FINAL (Salón / Online / Venta Externa / E-commerce)</div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table">
                         <thead>
@@ -400,7 +396,7 @@
                     </table>
                 </div>
             </div>
-            
+
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
@@ -410,65 +406,14 @@
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO ONLINE</h3>
                 <div class="fichas-grid" id="grid-fichas-online"></div>
             </div>
-        </div>
 
-        <div id="tab-externa" class="tab-content">
             <div class="excel-container">
-                <div class="excel-title">🚗 DESEMPEÑO CANAL VENTA EXTERNA</div>
-                <div class="table-responsive-wrapper">
-                    <table class="excel-table">
-                        <thead>
-                            <tr>
-                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grid-vendedores-externa"></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="excel-container">
-                <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - VENTA EXTERNA</h3>
+                <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🚗 DESGLOSE DETALLADO POR MARCA - VENTA EXTERNA</h3>
                 <div class="fichas-grid" id="grid-fichas-externa"></div>
             </div>
-        </div>
-
-        <div id="tab-directorio" class="tab-content">
-            <div class="excel-container">
-                <div class="excel-title">👔 DESEMPEÑO CANAL DIRECTORIO</div>
-                <div class="table-responsive-wrapper">
-                    <table class="excel-table">
-                        <thead>
-                            <tr>
-                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grid-vendedores-directorio"></tbody>
-                    </table>
-                </div>
-            </div>
 
             <div class="excel-container">
-                <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - DIRECTORIO</h3>
-                <div class="fichas-grid" id="grid-fichas-directorio"></div>
-            </div>
-        </div>
-
-        <div id="tab-ecommerce" class="tab-content">
-            <div class="excel-container">
-                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE</div>
+                <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE (por Cliente / Distribuidor)</div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table" style="margin-bottom: 25px;">
                         <thead>
@@ -482,26 +427,6 @@
                         <tbody id="ecommerce-lista"></tbody>
                     </table>
                 </div>
-                <div class="excel-title">👥 RESUMEN VENDEDORES ASIGNADOS A E-COMMERCE</div>
-                <div class="table-responsive-wrapper">
-                    <table class="excel-table">
-                        <thead>
-                            <tr>
-                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grid-vendedores-ecommerce"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="excel-container">
                 <div class="fichas-grid" id="grid-fichas-ecommerce"></div>
             </div>
         </div>
@@ -530,33 +455,6 @@
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
                 <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
-            </div>
-        </div>
-
-        <div id="tab-reparaciones" class="tab-content">
-            <div class="excel-container">
-                <div class="excel-title">🔧 DESEMPEÑO SERVICIO TÉCNICO Y REPARACIONES</div>
-                <div class="table-responsive-wrapper">
-                    <table class="excel-table">
-                        <thead>
-                            <tr>
-                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor / Canal</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Netas</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Devoluciones (NC)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Esperado Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Período</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado Mes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grid-vendedores-reparaciones"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="excel-container">
-                <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO - REPARACIONES</h3>
-                <div class="fichas-grid" id="grid-fichas-reparaciones"></div>
             </div>
         </div>
 
@@ -1052,13 +950,11 @@
         // [] = sin filtro vendedor/canal (Resumen General); null = todos (pestañas transversales).
         const CANALES_POR_TAB = {
             'tab-general': [],
-            'tab-consumidor': ['Salon', 'Online'],
-            'tab-externa': ['Venta Externa'],
-            'tab-directorio': ['Directorio'],
-            'tab-ecommerce': ['E-commerce'],
-            'tab-mayoristas': ['Mayoristas'],
-            'tab-reparaciones': ['Reparaciones']
+            'tab-consumidor': ['Salon', 'Online', 'Venta Externa', 'E-commerce'],
+            'tab-mayoristas': ['Mayoristas']
         };
+        // Asigna innerHTML solo si el elemento existe (pestañas quitadas ya no rompen el render).
+        function setHtmlSafe(id, html) { let e = document.getElementById(id); if (e) e.innerHTML = html; }
 
         // ===== MULTI-SELECCIÓN (casillas) =====
         // Abre/cierra el panel de un multi-select y cierra los demás.
@@ -2196,12 +2092,14 @@
                 else hCons += totalHtml;
             });
 
-            document.getElementById('grid-vendedores-consumidor').innerHTML = hCons;
-            document.getElementById('grid-vendedores-ecommerce').innerHTML = hEcomV;
-            document.getElementById('grid-vendedores-mayoristas').innerHTML = hMayV;
-            document.getElementById('grid-vendedores-externa').innerHTML = hExtV;
-            document.getElementById('grid-vendedores-directorio').innerHTML = hDirV;
-            document.getElementById('grid-vendedores-reparaciones').innerHTML = hRepV;
+            // Consumidor Final ahora agrupa Salón, Online, Venta Externa y E-commerce en una sola tabla.
+            setHtmlSafe('grid-vendedores-consumidor', hCons + hExtV + hEcomV);
+            setHtmlSafe('grid-vendedores-mayoristas', hMayV);
+            // Tablas de pestañas quitadas (guardas por si el elemento ya no existe):
+            setHtmlSafe('grid-vendedores-ecommerce', hEcomV);
+            setHtmlSafe('grid-vendedores-externa', hExtV);
+            setHtmlSafe('grid-vendedores-directorio', hDirV);
+            setHtmlSafe('grid-vendedores-reparaciones', hRepV);
 
             // ============================================================
             // Item 2: TABLA CONSOLIDADA POR CANAL Y VENDEDOR (debajo de los gráficos)
@@ -2511,13 +2409,13 @@
                 }
             });
             
-            document.getElementById('grid-fichas-salon').innerHTML = hFichasSalon;
-            document.getElementById('grid-fichas-online').innerHTML = hFichasOnline;
-            document.getElementById('grid-fichas-ecommerce').innerHTML = hFichasEcom;
-            document.getElementById('grid-fichas-mayoristas').innerHTML = hFichasMayo;
-            document.getElementById('grid-fichas-externa').innerHTML = hFichasExt;
-            document.getElementById('grid-fichas-directorio').innerHTML = hFichasDir;
-            document.getElementById('grid-fichas-reparaciones').innerHTML = hFichasRep;
+            setHtmlSafe('grid-fichas-salon', hFichasSalon);
+            setHtmlSafe('grid-fichas-online', hFichasOnline);
+            setHtmlSafe('grid-fichas-ecommerce', hFichasEcom);
+            setHtmlSafe('grid-fichas-mayoristas', hFichasMayo);
+            setHtmlSafe('grid-fichas-externa', hFichasExt);
+            setHtmlSafe('grid-fichas-directorio', hFichasDir);
+            setHtmlSafe('grid-fichas-reparaciones', hFichasRep);
             
             // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
@@ -2545,7 +2443,7 @@
             if (!hEcoList) hEcoList = `<tr><td colspan="4" class="text-center num-cero">Sin ventas de e-commerce en el período</td></tr>`;
             hEcoList += `<tr class="total-segmento"><td>TOTAL GENERAL E-COMMERCE</td><td class="text-right">₲ ${totBrutoE.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(totNcE)}">₲ ${totNcE.toLocaleString('es-PY')}</td><td class="text-right">₲ ${totNetaE.toLocaleString('es-PY')}</td></tr>`;
             hEcoList += `<tr class="total-segmento" style="background:#f0fff4;"><td>🎯 OBJETIVO DEL CANAL (no por cliente)</td><td class="text-right">Esperado hoy: ₲ ${ecomEsp.toLocaleString('es-PY')}</td><td class="text-right">Objetivo mes: ₲ ${ecomObjCanal.toLocaleString('es-PY')}</td><td class="text-center ${ecomObjCanal>0 && (totNetaE/ecomObjCanal)>=1 ?'num-positivo':'num-negativo'}">% Logrado: ${ecomObjCanal>0?((totNetaE/ecomObjCanal)*100).toFixed(0):'0'}%</td></tr>`;
-            document.getElementById('ecommerce-lista').innerHTML = hEcoList;
+            setHtmlSafe('ecommerce-lista', hEcoList);
 
             // Slides POR CLIENTE con el detalle y total de marcas dentro de cada slide
             let hCliSlides = "";
