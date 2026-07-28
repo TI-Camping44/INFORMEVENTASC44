@@ -1729,7 +1729,10 @@
                 if (!r || r.length < 31 || r[1] === "") continue;
 
                 let cNormalizado = obtenerCanalReal(r[17], r[18]);
-                let esContimarket = limpiarNombre(r[17]).includes("CONTIMARKET") || limpiarNombre(r[18]).includes("CONTIMARKET");
+                // Marcador de grupo Contimarket: viene en columna aparte (r[31]) desde el Apps Script.
+                // El VENDEDOR queda como la persona real (Julia); Contimarket solo agrupa en el desglose/marcas de e-commerce.
+                let esContimarket = String(r[31] || "").toUpperCase().includes("CONTIMARKET")
+                    || limpiarNombre(r[17]).includes("CONTIMARKET"); // fallback si aún no está la columna nueva
                 let d = {
                     fecha: r[1], documento: r[5], cliente: r[13], marcaFinal: r[14],
                     unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30]),
