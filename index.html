@@ -305,13 +305,13 @@
             <div class="charts-row">
                 <div class="chart-wrapper">
                     <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 EVOLUCIÓN DE VENTA VS OBJETIVO (POR DÍA / POR MES)</span>
-                    <div class="container-line" style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
+                    <div class="container-line" data-canales="" style="height: 250px; width: 100%; position: relative;" id="container-lineChart">
                         <canvas id="lineChart"></canvas>
                     </div>
                 </div>
                 <div class="chart-wrapper">
                     <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
-                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
+                    <div class="container-pie" data-canales="" style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
@@ -444,41 +444,6 @@
                 </div>
             </div>
 
-            <div class="excel-container" style="margin-top:20px;">
-                <div class="excel-title mkl-toggle" onclick="toggleMkl(this)" style="cursor:pointer;"><span class="mkl-caret">▶</span> 👤 MARCAS POR VENDEDOR — CONSUMIDOR FINAL</div>
-                <div class="mkl-body" style="display:none;">
-                    <div style="padding:12px 15px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del vendedor:</label>
-                        <select id="sel-marcas-vend-cfv" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark); min-width:260px;">
-                            <option value="">— Todos los vendedores —</option>
-                        </select>
-                    </div>
-                    <div class="three-column-grid" style="margin-top:12px;">
-                        <div class="excel-container">
-                            <div class="excel-title">MARCAS PRINCIPALES</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                                <tbody id="marcas-lista-cfv"></tbody><tfoot id="marcas-footer-cfv"></tfoot>
-                            </table></div>
-                        </div>
-                        <div class="excel-container">
-                            <div class="excel-title">ARMAS Y MUNICIONES</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                                <tbody id="armas-lista-cfv"></tbody><tfoot id="armas-footer-cfv"></tfoot>
-                            </table></div>
-                        </div>
-                        <div class="excel-container">
-                            <div class="excel-title">RESTO DE MARCAS</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
-                                <tbody id="resto-lista-cfv"></tbody><tfoot id="resto-footer-cfv"></tfoot>
-                            </table></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
@@ -567,41 +532,6 @@
                             <div class="table-responsive-wrapper"><table class="excel-table">
                                 <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
                                 <tbody id="resto-lista-may"></tbody><tfoot id="resto-footer-may"></tfoot>
-                            </table></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="excel-container" style="margin-top:20px;">
-                <div class="excel-title mkl-toggle" onclick="toggleMkl(this)" style="cursor:pointer;"><span class="mkl-caret">▶</span> 👤 MARCAS POR VENDEDOR — MAYORISTAS</div>
-                <div class="mkl-body" style="display:none;">
-                    <div style="padding:12px 15px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <label style="font-size:12px; font-weight:bold; color:var(--navy-main);">Ver marcas del vendedor:</label>
-                        <select id="sel-marcas-vend-mayv" onchange="renderMarcasLineas()" style="padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid var(--gray-border); background:#f8fafc; font-weight:bold; color:var(--text-dark); min-width:260px;">
-                            <option value="">— Todos los vendedores —</option>
-                        </select>
-                    </div>
-                    <div class="three-column-grid" style="margin-top:12px;">
-                        <div class="excel-container">
-                            <div class="excel-title">MARCAS PRINCIPALES</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Marca</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                                <tbody id="marcas-lista-mayv"></tbody><tfoot id="marcas-footer-mayv"></tfoot>
-                            </table></div>
-                        </div>
-                        <div class="excel-container">
-                            <div class="excel-title">ARMAS Y MUNICIONES</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Línea / Calibre</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo</th><th class="text-right th-sort" onclick="ordenarTabla(this)">% Logrado</th></tr></thead>
-                                <tbody id="armas-lista-mayv"></tbody><tfoot id="armas-footer-mayv"></tfoot>
-                            </table></div>
-                        </div>
-                        <div class="excel-container">
-                            <div class="excel-title">RESTO DE MARCAS</div>
-                            <div class="table-responsive-wrapper"><table class="excel-table">
-                                <thead><tr><th class="th-sort" onclick="ordenarTabla(this)">Clasificación</th><th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas en GS</th></tr></thead>
-                                <tbody id="resto-lista-mayv"></tbody><tfoot id="resto-footer-mayv"></tfoot>
                             </table></div>
                         </div>
                     </div>
@@ -1014,10 +944,8 @@
             __mkSeq = 0; // uids de drill-down únicos por render
             let CF = ['Salon', 'Online', 'Venta Externa', 'E-commerce'];
             renderMarcasEnTablas(null, '', false);         // Resumen General (todos los canales)
-            renderMarcasEnTablas(CF, '-cf', true);          // Consumidor Final GENERAL (con desglose ▸ y 👥, como las fichas)
-            renderMarcasEnTablas(CF, '-cfv', true);         // Consumidor Final POR VENDEDOR (selector + drill)
-            renderMarcasEnTablas(['Mayoristas'], '-may', true);   // Mayoristas GENERAL (con desglose ▸ y 👥)
-            renderMarcasEnTablas(['Mayoristas'], '-mayv', true);  // Mayoristas POR VENDEDOR
+            renderMarcasEnTablas(CF, '-cf', true);          // Consumidor Final GENERAL (con desglose ▸ y 👥, respeta los filtros de arriba)
+            renderMarcasEnTablas(['Mayoristas'], '-may', true);   // Mayoristas GENERAL (con desglose ▸ y 👥, respeta los filtros de arriba)
         }
         // Pobla el selector local de vendedor de una sección de Marcas y Líneas, preservando la selección.
         function poblarSelectorMarcasVend(suffix, scopeChannels) {
@@ -1727,6 +1655,8 @@
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "") continue;
+                // Derlis: excluido totalmente del panel (no trae ni suma nada), en cualquier canal.
+                if (limpiarNombre(r[17]).includes("DERLIS")) continue;
 
                 let cNormalizado = obtenerCanalReal(r[17], r[18]);
                 // Marcador de grupo Contimarket: viene en columna aparte (r[31]) desde el Apps Script.
@@ -1798,9 +1728,6 @@
             let btnM = document.querySelector('#ms-marca .ms-btn'); if (btnM) btnM.setAttribute('data-todos', '-- Todas las Marcas --');
 
             poblarMulti('ms-marca', marcasLimpiasGlobal, '(Todas las Marcas)');
-            // Selectores locales de vendedor de las secciones "Marcas por vendedor".
-            poblarSelectorMarcasVend('-cfv', ['Salon', 'Online', 'Venta Externa', 'E-commerce']);
-            poblarSelectorMarcasVend('-mayv', ['Mayoristas']);
             // Vendedor y Canal se pueblan según la pestaña activa.
             ajustarFiltrosPorTab(tabActivaId);
         }
@@ -1953,7 +1880,10 @@
                 acc.diasMes += (mData.diasMes || 0);
                 let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
                 acc.diasTranscurridos += transVal;
-                if (mData.canales) Object.keys(mData.canales).forEach(c => { acc.canales[c] = (acc.canales[c] || 0) + (mData.canales[c] || 0); });
+                // Si un mes (histórico) no tiene objetivo por canal, usamos el del mes actual como proxy,
+                // así en YTD/rango el objetivo por canal ACUMULA por mes (y no queda en un solo mes → 703%).
+                let canalesMes = (mData.canales && Object.keys(mData.canales).length) ? mData.canales : ((typeof METAS_LIVE !== 'undefined' && METAS_LIVE.canales) ? METAS_LIVE.canales : {});
+                Object.keys(canalesMes).forEach(c => { acc.canales[c] = (acc.canales[c] || 0) + (canalesMes[c] || 0); });
                 if (mData.vendedoresTotales) Object.keys(mData.vendedoresTotales).forEach(v => { acc.vendedoresTotales[v] = (acc.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); });
                 if (mData.vendedorMarca) Object.keys(mData.vendedorMarca).forEach(vm => { acc.vendedorMarca[vm] = (acc.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); });
             }
@@ -1993,6 +1923,7 @@
             let acumMarcaObj = {}; // objetivo por clave de marca (para pestaña Marcas y Líneas)
             let ecomPorCliente = {}; // e-commerce: ventas y marcas agrupadas por cliente
             let dataFichasVend = {};
+            let acumDiasPorCanal = {}; // canal -> { fecha: venta } para el gráfico por pestaña
 
             if(METAS_ACTIVAS.canales) { Object.keys(METAS_ACTIVAS.canales).forEach(c => acumCanales[c] = { bruto: 0, nc: 0, neta: 0 }); }
 
@@ -2057,6 +1988,8 @@
                 }
 
                 if (!acumDias[r.fecha]) acumDias[r.fecha] = 0; acumDias[r.fecha] += m;
+                // Venta por día PERO por canal, para que el gráfico de cada pestaña muestre solo sus canales.
+                if (r.canal) { if (!acumDiasPorCanal[r.canal]) acumDiasPorCanal[r.canal] = {}; acumDiasPorCanal[r.canal][r.fecha] = (acumDiasPorCanal[r.canal][r.fecha] || 0) + m; }
                 if (r.marcaFinal) acumMarcas[r.marcaFinal] = (acumMarcas[r.marcaFinal] || 0) + m;
                 if (r.marcaFinal && r.canal) {
                     if (!acumMarcasPorCanalGlobal[r.canal]) acumMarcasPorCanalGlobal[r.canal] = {};
@@ -2154,7 +2087,7 @@
                 });
             }
 
-            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente);
+            renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente, acumDiasPorCanal);
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
             try { renderAnual(); } catch(e) { console.error("Error anual", e); }
           } catch(e) {
@@ -2162,7 +2095,8 @@
           }
         }
 
-        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo, acumVendedorNC, ecomPorCliente) {
+        function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo, acumVendedorNC, ecomPorCliente, acumDiasPorCanal) {
+            acumDiasPorCanal = acumDiasPorCanal || {};
             acumVendedorNC = acumVendedorNC || {};
             ecomPorCliente = ecomPorCliente || {};
             dataFichasVendGlobal = dataFichasVend; // para el drill-down de la sección Marcas y Líneas
@@ -2866,66 +2800,88 @@
             METAS_ACTIVAS_G = METAS_ACTIVAS;
             renderMarcasLineas();
 
-            // === CURVA: se dibuja en TODOS los contenedores .container-line (Resumen y demás pestañas) ===
+            // Cada contenedor de gráfico muestra SOLO los canales de su pestaña (Resumen = todos,
+            // Consumidor Final = Salón/Online/Venta Externa/E-commerce, Mayoristas = Mayoristas).
+            let scopeDeContenedor = (cont) => { let tc = cont.closest('.tab-content'); let id = tc ? tc.id : ''; return CANALES_POR_TAB[id] || []; };
+            let acumDiasScope = (scope) => {
+                if (!scope || !scope.length) return acumDias; // Resumen: todos los canales
+                let a = {}; scope.forEach(c => { let dd = acumDiasPorCanal[c]; if (dd) Object.keys(dd).forEach(f => a[f] = (a[f] || 0) + dd[f]); }); return a;
+            };
+            let objetivoScope = (scope) => {
+                if (!scope || !scope.length) return objetivoFiltrado; // Resumen: objetivo global/filtrado
+                let o = 0; scope.forEach(c => { if (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) o += METAS_ACTIVAS.canales[c]; }); return o;
+            };
+            let puntosDesde = (acDias) => {
+                let pts = [];
+                if (modoAnual) {
+                    const nombresMes = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+                    let porMes = {}; Object.keys(acDias).forEach(f => { let mi = getMonthFromDate(f); if (mi > 0) porMes[mi] = (porMes[mi] || 0) + acDias[f]; });
+                    Object.keys(porMes).map(Number).sort((a,b)=>a-b).forEach(mi => pts.push({ label: nombresMes[mi-1] || String(mi), venta: porMes[mi], fecha: null, mesIdx: mi }));
+                } else {
+                    Object.keys(acDias).sort((a,b) => parseDateToTime(a) - parseDateToTime(b)).forEach(f => {
+                        let fPart = String(f).split(' ')[0];
+                        let label = fPart.includes('/') ? (fPart.split('/')[0] + '/' + fPart.split('/')[1]) : fPart;
+                        pts.push({ label: label, venta: acDias[f], fecha: f, mesIdx: null });
+                    });
+                }
+                return pts;
+            };
+
+            // === CURVA: cada contenedor .container-line según los canales de su pestaña ===
             try {
                 (window.__lineCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
                 window.__lineCharts = [];
-                let lineDatasets = [
-                    { type: 'bar', label: etiquetaVenta, data: arrVentaPorPunto, backgroundColor: 'rgba(28, 61, 90, 0.65)', borderColor: '#1c3d5a', borderWidth: 1, order: 2 },
-                    { type: 'line', label: etiquetaObjetivo, data: arrObjetivoPorPunto, borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.05)', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, tension: 0, order: 1 }
-                ];
-                let lineOpts = {
-                    responsive: true, maintainAspectRatio: false,
-                    onClick: (e, elements) => {
+                let lineOpts = { responsive: true, maintainAspectRatio: false };
+                document.querySelectorAll('.container-line').forEach(cont => {
+                    let scope = scopeDeContenedor(cont);
+                    let pts = puntosDesde(acumDiasScope(scope));
+                    cont.innerHTML = '<canvas></canvas>';
+                    if (!pts.length) return;
+                    let objSc = objetivoScope(scope);
+                    let objPunto = modoAnual ? (objSc > 0 ? objSc / Math.max(1, liveMonthG) : 0) : (dMes > 0 ? objSc / dMes : 0);
+                    let labels = pts.map(p => p.label);
+                    let mesArr = pts.map(p => p.mesIdx), fechaArr = pts.map(p => p.fecha);
+                    let datasets = [
+                        { type: 'bar', label: etiquetaVenta, data: pts.map(p => Math.round(p.venta)), backgroundColor: 'rgba(28, 61, 90, 0.65)', borderColor: '#1c3d5a', borderWidth: 1, order: 2 },
+                        { type: 'line', label: etiquetaObjetivo, data: pts.map(() => Math.round(objPunto)), borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.05)', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, tension: 0, order: 1 }
+                    ];
+                    let opts = Object.assign({}, lineOpts, { onClick: (e, elements) => {
                         if (elements.length > 0) {
-                            let mesIdx = arrMesGrafico[elements[0].index];
-                            if (mesIdx) {
-                                // Año Completo: al tocar un mes, filtramos a ese mes.
-                                let sm = document.getElementById('select-mes');
-                                if (sm) { sm.value = String(mesIdx); aplicarFiltrosDropdown(); }
-                                return;
-                            }
-                            let fObj = arrFechasOriginales[elements[0].index];
-                            if (!fObj) return; // sin día exacto: no filtra
+                            let mesIdx = mesArr[elements[0].index];
+                            if (mesIdx) { let sm = document.getElementById('select-mes'); if (sm) { sm.value = String(mesIdx); aplicarFiltrosDropdown(); } return; }
+                            let fObj = fechaArr[elements[0].index];
+                            if (!fObj) return;
                             let filterInput = document.getElementById('select-fecha');
                             if (filterInput.value === dateToIsoString(fObj)) filterInput.value = ""; else filterInput.value = dateToIsoString(fObj);
                             aplicarFiltrosDropdown();
                         }
-                    }
-                };
-                if (arrDiasGrafico.length > 0) {
-                    document.querySelectorAll('.container-line').forEach(cont => {
-                        cont.innerHTML = '<canvas></canvas>';
-                        let data = { labels: arrDiasGrafico.slice(), datasets: JSON.parse(JSON.stringify(lineDatasets)) };
-                        window.__lineCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'bar', data: data, options: lineOpts }));
-                    });
-                }
+                    }});
+                    window.__lineCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: datasets }, options: opts }));
+                });
             } catch (e) { console.error("Error al renderizar curva", e); }
 
-            // === TORTA: se dibuja en TODOS los contenedores .container-pie ===
+            // === TORTA: cada contenedor .container-pie según los canales de su pestaña ===
             try {
                 (window.__pieCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
                 window.__pieCharts = [];
-                let pieOpts = {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
-                    onClick: (e, elements) => {
-                        if (elements.length > 0) {
-                            let c = arrCanalesLabels[elements[0].index];
-                            let panel = document.querySelector('#ms-canal .ms-panel');
-                            if (panel) {
-                                let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === c);
-                                if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); }
+                document.querySelectorAll('.container-pie').forEach(cont => {
+                    let scope = scopeDeContenedor(cont);
+                    let canales = (scope && scope.length) ? scope : Object.keys(acumCanales);
+                    let labels = [], dataArr = [];
+                    canales.forEach(c => { let net = netDe(c); if (net !== 0) { labels.push(c); dataArr.push(net); } });
+                    cont.innerHTML = '<canvas></canvas>';
+                    if (!labels.length) return;
+                    let pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
+                        onClick: (e, elements) => {
+                            if (elements.length > 0) {
+                                let cc = labels[elements[0].index];
+                                let panel = document.querySelector('#ms-canal .ms-panel');
+                                if (panel) { let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === cc); if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); } }
                             }
                         }
-                    }
-                };
-                if (arrCanalesLabels.length > 0) {
-                    document.querySelectorAll('.container-pie').forEach(cont => {
-                        cont.innerHTML = '<canvas></canvas>';
-                        let data = { labels: arrCanalesLabels.slice(), datasets: [{ data: arrCanalesData.slice(), backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] };
-                        window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: data, options: pieOpts }));
-                    });
-                }
+                    };
+                    window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: dataArr, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] }, options: pieOpts }));
+                });
             } catch (e) { console.error("Error al renderizar pie", e); }
         }
 
