@@ -1501,7 +1501,10 @@
 
                 construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
                 procesarMetasConfigActuales(filasConfigFormateadas);
-                
+                // Histórico de objetivos guardado en la propia hoja CONFIG (botón "Archivar objetivos" del menú).
+                // El Sheet manda: pisa los meses fijos del código, así se cargan meses nuevos sin tocar código.
+                cargarHistoricoDesdeConfig(filasConfigFormateadas);
+
                 // Procesamos las ventas EN VIVO
                 procesarVentasData(filasDataFormateadas);
 
@@ -1533,6 +1536,25 @@
             if (faltantes.length > 0) {
                 actualizarBannerEstado('error', `⚠️ No se cargaron librerías externas: ${faltantes.join(', ')}. Verificá tu conexión a Internet.`);
             }
+        }
+
+        // Lee el histórico de objetivos guardado en CONFIG (filas "HISTORICO_B64_n" en col A, base64 en col B),
+        // lo decodifica y lo mergea en HISTORICO_METAS (el Sheet pisa lo que esté fijo en el código).
+        function cargarHistoricoDesdeConfig(filas) {
+            try {
+                let chunks = [];
+                filas.forEach(row => {
+                    let c0 = String(row[0] || "").trim();
+                    if (c0.indexOf("HISTORICO_B64_") === 0) chunks.push({ idx: parseInt(c0.replace("HISTORICO_B64_", ""), 10) || 0, val: String(row[1] || "").trim() });
+                });
+                if (!chunks.length) return;
+                chunks.sort((a, b) => a.idx - b.idx);
+                let b64 = chunks.map(c => c.val).join("");
+                let json;
+                try { json = decodeURIComponent(escape(atob(b64))); } catch (e) { json = atob(b64); }
+                let hist = JSON.parse(json);
+                Object.keys(hist).forEach(mes => { HISTORICO_METAS[String(mes)] = hist[mes]; });
+            } catch (e) { console.error("No se pudo leer el histórico de CONFIG:", e); }
         }
 
         function procesarMetasConfigActuales(filas) {
