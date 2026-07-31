@@ -1470,9 +1470,10 @@
                 if (lt) lt.innerText = "La conexión está lenta, seguimos esperando a Google Sheets...";
             }, 4000);
 
-            // Timeout real de red: si el Sheet no responde en 20s, abortamos y caemos al manejador de error.
+            // Timeout real de red: si el Sheet no responde en 45s, abortamos y caemos al manejador de error.
+            // (La hoja DATA es grande: 10k+ filas, a veces tarda; por eso 45s en vez de 20s.)
             let controller = new AbortController();
-            let networkTimeout = setTimeout(() => controller.abort(), 20000);
+            let networkTimeout = setTimeout(() => controller.abort(), 45000);
 
             try {
                 document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
@@ -1520,7 +1521,7 @@
                 console.error(err);
                 try { filtrarYRenderizarTodo(); } catch(e){}
                 let msg = (err && err.name === 'AbortError')
-                    ? `⚠️ Google Sheets no respondió a tiempo (timeout de 20s). Revisá tu conexión y tocá "Actualizar Base".`
+                    ? `⚠️ Google Sheets no respondió a tiempo (timeout de 45s). Revisá tu conexión y tocá "Actualizar Base".`
                     : `⚠️ Error al leer datos remotos de Google Sheets. Tocá "Actualizar Base" para reintentar.`;
                 actualizarBannerEstado('error', msg);
                 document.getElementById('loader').style.display = 'none';
