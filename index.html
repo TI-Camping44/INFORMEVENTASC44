@@ -2105,6 +2105,9 @@
             // EL SECRETO PARA QUE TODOS APAREZCAN AUNQUE VENDAN 0:
             if (METAS_ACTIVAS && METAS_ACTIVAS.vendedoresTotales) {
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(vMeta => {
+                    // Tupi / Porter / Contimarket son CLIENTES de e-commerce (objetivo por cliente),
+                    // no vendedores: no los inyectamos como fichas de vendedor.
+                    if (/TUPI|PORTER|CONTIMARKET/.test(String(vMeta).toUpperCase())) return;
                     let found = false;
                     Object.keys(dataFichasVend).forEach(vReal => {
                         if (sonElMismoVendedor(vMeta, vReal)) found = true;
@@ -2778,13 +2781,28 @@
             // Item 7: E-commerce POR CLIENTE + objetivo POR CANAL (no por cliente) + total de marcas por cliente
             let ecomObjCanal = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales["E-commerce"]) ? METAS_ACTIVAS.canales["E-commerce"] : 0;
             let ecomEsp = Math.round((ecomObjCanal / dMes) * dTr);
+            // 🎯 Objetivo POR CLIENTE de e-commerce (Tupi / Porter / Contimarket), cargados como "vendedores" E-commerce.
+            let ecomObjPorCli = {};
+            if (METAS_ACTIVAS.vendedoresTotales) {
+                Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
+                    let ku = String(k).toUpperCase(), val = METAS_ACTIVAS.vendedoresTotales[k];
+                    if (ku.includes("TUPI")) ecomObjPorCli.TUPI = (ecomObjPorCli.TUPI || 0) + val;
+                    else if (ku.includes("PORTER")) ecomObjPorCli.PORTER = (ecomObjPorCli.PORTER || 0) + val;
+                    else if (ku.includes("CONTIMARKET")) ecomObjPorCli.CONTIMARKET = (ecomObjPorCli.CONTIMARKET || 0) + val;
+                });
+            }
+            let bucketCliEcom = function(cli){ let c = String(cli).toUpperCase(); if(c.includes("TUPI"))return "TUPI"; if(c.includes("PORTER"))return "PORTER"; if(c.includes("CONTIMARKET"))return "CONTIMARKET"; return null; };
+            // Un cliente con objetivo pero sin ventas también debe aparecer en la tabla.
+            Object.keys(ecomObjPorCli).forEach(b => { if(!Object.keys(ecomPorCliente).some(c=>bucketCliEcom(c)===b)) ecomPorCliente[b] = { bruto:0, nc:0, marcas:{}, productos:{}, clientes:{} }; });
             let clientesEcom = Object.keys(ecomPorCliente).sort((a,b)=> (ecomPorCliente[b].bruto+ecomPorCliente[b].nc) - (ecomPorCliente[a].bruto+ecomPorCliente[a].nc));
             let hEcoList = "", totBrutoE = 0, totNcE = 0;
             clientesEcom.forEach(cli => {
                 let d = ecomPorCliente[cli];
                 let neta = d.bruto + d.nc;
                 totBrutoE += d.bruto; totNcE += d.nc;
-                hEcoList += `<tr><td><strong>${escapeHtml(cli)}</strong></td><td class="text-right">₲ ${d.bruto.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(d.nc)}">₲ ${d.nc.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${neta.toLocaleString('es-PY')}</td></tr>`;
+                let b = bucketCliEcom(cli), obj = (b && ecomObjPorCli[b]) ? ecomObjPorCli[b] : 0;
+                let objTxt = obj > 0 ? ` <span style="font-size:10px;color:#2b7a78;white-space:nowrap;">🎯 ₲ ${obj.toLocaleString('es-PY')} · ${((neta/obj)*100).toFixed(0)}%</span>` : '';
+                hEcoList += `<tr><td><strong>${escapeHtml(cli)}</strong>${objTxt}</td><td class="text-right">₲ ${d.bruto.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(d.nc)}">₲ ${d.nc.toLocaleString('es-PY')}</td><td class="text-right num-positivo">₲ ${neta.toLocaleString('es-PY')}</td></tr>`;
             });
             let totNetaE = totBrutoE + totNcE;
             if (!hEcoList) hEcoList = `<tr><td colspan="4" class="text-center num-cero">Sin ventas de e-commerce en el período</td></tr>`;
