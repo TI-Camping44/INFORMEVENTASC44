@@ -2788,7 +2788,9 @@
                     let ku = String(k).toUpperCase(), val = METAS_ACTIVAS.vendedoresTotales[k];
                     if (ku.includes("TUPI")) ecomObjPorCli.TUPI = (ecomObjPorCli.TUPI || 0) + val;
                     else if (ku.includes("PORTER")) ecomObjPorCli.PORTER = (ecomObjPorCli.PORTER || 0) + val;
-                    else if (ku.includes("CONTIMARKET")) ecomObjPorCli.CONTIMARKET = (ecomObjPorCli.CONTIMARKET || 0) + val;
+                    // Contimarket se atribuye al vendedor "Maria Julia Olmedo Cuevas" (CONTIMARKET_VENDEDOR),
+                    // así que su objetivo puede venir cargado como "Contimarket" o como "Julia Olmedo".
+                    else if (ku.includes("CONTIMARKET") || ku.includes("JULIA OLMEDO")) ecomObjPorCli.CONTIMARKET = (ecomObjPorCli.CONTIMARKET || 0) + val;
                 });
             }
             let bucketCliEcom = function(cli){ let c = String(cli).toUpperCase(); if(c.includes("TUPI"))return "TUPI"; if(c.includes("PORTER"))return "PORTER"; if(c.includes("CONTIMARKET"))return "CONTIMARKET"; return null; };
