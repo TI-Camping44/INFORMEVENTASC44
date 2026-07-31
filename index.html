@@ -1470,15 +1470,15 @@
                 if (lt) lt.innerText = "La conexión está lenta, seguimos esperando a Google Sheets...";
             }, 4000);
 
-            // Timeout real de red: si el Sheet no responde en 45s, abortamos y caemos al manejador de error.
-            // (La hoja DATA es grande: 10k+ filas, a veces tarda; por eso 45s en vez de 20s.)
+            // Timeout real de red: si el Sheet no responde en 90s, abortamos y caemos al manejador de error.
+            // (CONFIG con fórmula personalizada CALCULAR_HABILES puede tardar ~1 min en generar su CSV.)
             let controller = new AbortController();
-            let networkTimeout = setTimeout(() => controller.abort(), 45000);
+            let networkTimeout = setTimeout(() => controller.abort(), 90000);
 
             try {
                 document.getElementById('loader-text').innerText = "Extrayendo VENTAS REALES de Google Sheets...";
                 const urlConfig = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=456712392&single=true&output=csv&cb=' + new Date().getTime();
-                const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=1920594625&single=true&output=csv&cb=' + new Date().getTime();
+                const urlData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=171657140&single=true&output=csv&cb=' + new Date().getTime();
 
                 const [resConfig, resData] = await Promise.all([fetch(urlConfig, { signal: controller.signal }), fetch(urlData, { signal: controller.signal })]);
                 if (!resConfig.ok || !resData.ok) throw new Error("Fallo Http Google");
