@@ -2392,6 +2392,11 @@
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
                             if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
                         });
+                        // 🛒 Julia Olmedo es la vendedora de TODO e-commerce (Tupi + Porter + Contimarket):
+                        // su objetivo = el objetivo total del canal E-commerce.
+                        if (canal === "E-commerce" && limpiarNombre(v).includes("JULIA OLMEDO")) {
+                            obj = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales["E-commerce"]) ? METAS_ACTIVAS.canales["E-commerce"] : obj;
+                        }
 
                         let esp = Math.round((obj / dMes) * dTr);
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
@@ -2415,6 +2420,9 @@
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
                             if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
                         });
+                        if (canal === "E-commerce" && limpiarNombre(v).includes("JULIA OLMEDO")) {
+                            obj = (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales["E-commerce"]) ? METAS_ACTIVAS.canales["E-commerce"] : obj;
+                        }
                         if (obj > 0) {
                             let esp = Math.round((obj / dMes) * dTr);
                             subEsp += esp; subObj += obj;
