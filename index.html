@@ -804,13 +804,18 @@
 
         // Drill-down: despliega u oculta los productos de una marca dentro de una ficha.
         function togglePd(uid, el) {
-            var rows = document.getElementsByClassName(uid);
+            // Robusto: toggle SOLO las filas de detalle (productos) que vienen inmediatamente
+            // debajo de la fila clickeada — sus propias filas hijas — sin depender del id de clase
+            // (así nunca se cruza con las de otra marca aunque un id se repita).
+            if (!el) return;
             var show = null;
-            for (var i = 0; i < rows.length; i++) {
-                if (show === null) show = (rows[i].style.display === 'none');
-                rows[i].style.display = show ? 'table-row' : 'none';
+            var row = el.nextElementSibling;
+            while (row && row.classList && row.classList.contains('pd-detalle')) {
+                if (show === null) show = (row.style.display === 'none');
+                row.style.display = show ? 'table-row' : 'none';
+                row = row.nextElementSibling;
             }
-            if (el) { var c = el.querySelector('.pd-caret'); if (c) c.textContent = show ? '▾' : '▸'; }
+            var c = el.querySelector('.pd-caret'); if (c) c.textContent = show ? '▾' : '▸';
         }
 
         // Despliega/colapsa la sección "Marcas y Líneas" (por canal) al tocar su título.
