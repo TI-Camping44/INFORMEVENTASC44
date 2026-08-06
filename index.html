@@ -198,6 +198,25 @@
         }
 
         @media print { body { display: none; } }
+
+        /* Flechita de situación por vendedor + ventana emergente */
+        .vend-flecha { display:inline-block; cursor:pointer; font-weight:bold; margin-right:6px; font-size:11px; }
+        .vend-flecha:hover { opacity:0.65; }
+        .vend-atraso { color:#e53e3e; }
+        .vend-aldia { color:#2b7a78; }
+        .vsit-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; }
+        .vsit-overlay.open { display:flex; }
+        .vsit-box { background:#fff; border-radius:10px; max-width:460px; width:92%; max-height:88vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
+        .vsit-head { padding:16px 20px; border-bottom:1px solid var(--gray-border); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+        .vsit-head h3 { margin:0; font-size:16px; color:#1a2c42; }
+        .vsit-canal { font-size:12px; color:var(--text-muted); margin-top:3px; }
+        .vsit-close { cursor:pointer; font-size:24px; line-height:1; color:var(--text-muted); background:none; border:none; }
+        .vsit-body { padding:14px 20px 20px; }
+        .vsit-row { display:flex; justify-content:space-between; gap:14px; padding:8px 0; border-bottom:1px dashed var(--gray-border); font-size:13px; }
+        .vsit-row .lbl { color:#4a5568; }
+        .vsit-row .val { font-weight:bold; text-align:right; white-space:nowrap; }
+        .vsit-destacado { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px 14px; margin-top:14px; }
+        .vsit-destacado .big { font-size:20px; font-weight:bold; color:#dd6b20; margin-top:2px; }
     </style>
 </head>
 <body>
@@ -2410,6 +2429,7 @@
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
 
             let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hDirV = ""; let hRepV = "";
+            window.__vendSit = []; // registro de situación por vendedor para la ventana emergente
             let canalesSegmentos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
             
             canalesSegmentos.forEach(canal => {
@@ -2441,7 +2461,14 @@
                         subNet += net; subNC += acumVendPorCanal[canal][v].nc; subEsp += esp; subObj += obj;
 
                         let cumplida = (obj > 0 && net >= obj) ? ' class="row-cumplida"' : '';
-                        let rowHtml = `<tr${cumplida}><td>${escapeHtml(v)}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(acumVendPorCanal[canal][v].nc)}">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
+                        let flecha = '', clasePctEsp = '';
+                        if (obj > 0) {
+                            let sidx = window.__vendSit.push({ nombre: v, canal: canal, net: net, obj: obj, dMes: dMes, dTr: dTr }) - 1;
+                            let claseFl = (net < esp) ? 'vend-atraso' : 'vend-aldia';
+                            flecha = `<span class="vend-flecha ${claseFl}" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx})">▶</span>`;
+                            clasePctEsp = claseFl;
+                        }
+                        let rowHtml = `<tr${cumplida}><td>${flecha}${escapeHtml(v)}</td><td class="text-right">₲ ${net.toLocaleString('es-PY')}</td><td class="text-right ${claseNC(acumVendPorCanal[canal][v].nc)}">₲ ${acumVendPorCanal[canal][v].nc.toLocaleString('es-PY')}</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center ${clasePctEsp}">${esp>0?((net/esp)*100).toFixed(0)+'%':'0%'}</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">${obj>0?((net/obj)*100).toFixed(0)+'%':'0%'}</td></tr>`;
                         if (canal === "E-commerce") hEcomV += rowHtml; 
                         else if (canal === "Mayoristas") hMayV += rowHtml; 
                         else if (canal === "Venta Externa") hExtV += rowHtml; 
@@ -2465,7 +2492,9 @@
                         if (obj > 0) {
                             let esp = Math.round((obj / dMes) * dTr);
                             subEsp += esp; subObj += obj;
-                            let rowHtml = `<tr><td>${escapeHtml(v)}</td><td class="text-right">₲ 0</td><td class="text-right num-cero">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
+                            let sidx0 = window.__vendSit.push({ nombre: v, canal: canal, net: 0, obj: obj, dMes: dMes, dTr: dTr }) - 1;
+                            let flecha0 = `<span class="vend-flecha vend-atraso" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx0})">▶</span>`;
+                            let rowHtml = `<tr><td>${flecha0}${escapeHtml(v)}</td><td class="text-right">₲ 0</td><td class="text-right num-cero">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center vend-atraso">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
                             if (canal === "E-commerce") hEcomV += rowHtml; 
                             else if (canal === "Mayoristas") hMayV += rowHtml; 
                             else if (canal === "Venta Externa") hExtV += rowHtml; 
@@ -3166,6 +3195,68 @@
         }
 
         iniciarSincronizacion();
+    </script>
+
+    <!-- Ventana emergente: situación detallada de un vendedor -->
+    <div id="vsit-overlay" class="vsit-overlay" onclick="if(event.target===this)cerrarVendModal()">
+        <div class="vsit-box">
+            <div class="vsit-head">
+                <div><h3 id="vsit-nombre">Vendedor</h3><div class="vsit-canal" id="vsit-canal"></div></div>
+                <button class="vsit-close" onclick="cerrarVendModal()" title="Cerrar">×</button>
+            </div>
+            <div class="vsit-body" id="vsit-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // === Situación por vendedor (ventana emergente) ===
+        // Muestra cuánto lleva facturado, cuánto debería llevar hoy, y cuánto tiene que
+        // facturar por día (y mañana) para ponerse al día / llegar al objetivo del mes.
+        function vsitFmt(n) { return '₲ ' + Math.round(n).toLocaleString('es-PY'); }
+        function vsitDias(n) { return (n % 1 === 0) ? String(n) : n.toFixed(1).replace('.', ','); }
+        function abrirVendModal(idx) {
+            let d = (window.__vendSit || [])[idx];
+            if (!d) return;
+            let ritmo = d.dMes > 0 ? d.obj / d.dMes : 0;      // ritmo diario objetivo
+            let esperadoHoy = ritmo * d.dTr;                   // lo que debería tener facturado a hoy
+            let atraso = d.net - esperadoHoy;                  // negativo = atrasado
+            let diasRest = d.dMes - d.dTr;
+            let faltaObj = d.obj - d.net;
+            let porDiaObj = diasRest > 0 ? faltaObj / diasRest : faltaObj;   // por día para llegar al objetivo
+            let paraAlDiaManana = ritmo * (d.dTr + 1) - d.net;              // facturar mañana para quedar al día
+
+            document.getElementById('vsit-nombre').textContent = d.nombre;
+            document.getElementById('vsit-canal').textContent = d.canal + ' · corte ' + vsitDias(d.dTr) + ' de ' + vsitDias(d.dMes) + ' días hábiles';
+
+            let sitTxt = atraso < 0
+                ? `<span class="vend-atraso">${vsitFmt(atraso)} · ATRASADO</span>`
+                : `<span class="vend-aldia">${vsitFmt(atraso)} · al día</span>`;
+
+            let html = '';
+            html += `<div class="vsit-row"><span class="lbl">Facturado (neto) a hoy</span><span class="val">${vsitFmt(d.net)}</span></div>`;
+            html += `<div class="vsit-row"><span class="lbl">Debería tener facturado hoy</span><span class="val">${vsitFmt(esperadoHoy)}</span></div>`;
+            html += `<div class="vsit-row"><span class="lbl">Situación</span><span class="val">${sitTxt}</span></div>`;
+            html += `<div class="vsit-row"><span class="lbl">Objetivo del mes</span><span class="val">${vsitFmt(d.obj)}</span></div>`;
+            html += `<div class="vsit-row"><span class="lbl">Falta para el objetivo</span><span class="val">${vsitFmt(Math.max(0, faltaObj))}</span></div>`;
+            html += `<div class="vsit-row"><span class="lbl">Días hábiles restantes</span><span class="val">${vsitDias(diasRest)}</span></div>`;
+
+            if (d.obj > 0 && faltaObj > 0) {
+                html += `<div class="vsit-destacado">`;
+                html += `<span class="lbl">A facturar por día para llegar al objetivo</span>`;
+                html += `<div class="big">${vsitFmt(porDiaObj)} / día</div>`;
+                if (paraAlDiaManana > 0) {
+                    html += `<div class="vsit-row" style="border:none; padding:8px 0 0;"><span class="lbl">Para quedar AL DÍA mañana, facturar</span><span class="val vend-atraso">${vsitFmt(paraAlDiaManana)}</span></div>`;
+                }
+                html += `</div>`;
+            } else if (d.obj > 0) {
+                html += `<div class="vsit-destacado"><div class="big vend-aldia">✓ Objetivo del mes alcanzado</div></div>`;
+            }
+
+            document.getElementById('vsit-body').innerHTML = html;
+            document.getElementById('vsit-overlay').classList.add('open');
+        }
+        function cerrarVendModal() { document.getElementById('vsit-overlay').classList.remove('open'); }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarVendModal(); });
     </script>
 </body>
 </html>
