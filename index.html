@@ -311,7 +311,7 @@
                 </div>
                 <div class="chart-wrapper">
                     <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
-                    <div class="container-pie" data-canales="" style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
+                    <div class="container-pie" data-canales="" data-modo="canal" style="height: 250px; width: 100%; position: relative;" id="container-pieChart">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
@@ -391,8 +391,12 @@
                     <div class="container-line" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
-                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN POR VENDEDOR (EN BASE A VENTAS)</span>
+                    <div class="container-pie" data-modo="vendedor" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                </div>
+                <div class="chart-wrapper">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN POR CANAL (EN BASE A VENTAS)</span>
+                    <div class="container-pie" data-modo="canal" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
                 </div>
             </div>
             <div class="excel-container">
@@ -485,8 +489,8 @@
                     <div class="container-line" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
                 </div>
                 <div class="chart-wrapper">
-                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN DE CADA CANAL EN BASE A VENTAS</span>
-                    <div class="container-pie" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:10px;">📊 CONTRIBUCIÓN POR VENDEDOR (EN BASE A VENTAS)</span>
+                    <div class="container-pie" data-modo="vendedor" style="height: 250px; width: 100%; position: relative;"><canvas></canvas></div>
                 </div>
             </div>
             <div class="excel-container">
@@ -2963,27 +2967,54 @@
                 });
             } catch (e) { console.error("Error al renderizar curva", e); }
 
-            // === TORTA: cada contenedor .container-pie según los canales de su pestaña ===
+            // === TORTA: cada contenedor .container-pie según su pestaña y su modo ===
+            // data-modo="canal"    → una porción por canal (por defecto)
+            // data-modo="vendedor" → una porción por vendedor (suma neta en los canales del scope)
+            // Todas las tortas se ordenan de mayor a menor (descendente).
             try {
                 (window.__pieCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
                 window.__pieCharts = [];
+                // Paleta amplia (se repite si hay más porciones que colores).
+                const PIE_PALETA = ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169',
+                                    '#e53e3e', '#d69e2e', '#00838f', '#805ad5', '#c53030', '#2f855a', '#2c5282',
+                                    '#b7791f', '#4a5568', '#6b46c1', '#319795'];
                 document.querySelectorAll('.container-pie').forEach(cont => {
                     let scope = scopeDeContenedor(cont);
                     let canales = (scope && scope.length) ? scope : Object.keys(acumCanales);
-                    let labels = [], dataArr = [];
-                    canales.forEach(c => { let net = netDe(c); if (net !== 0) { labels.push(c); dataArr.push(net); } });
+                    let modo = cont.dataset.modo || 'canal';
+                    let pares = []; // { label, value }
+                    if (modo === 'vendedor') {
+                        // Sumamos la venta neta de cada vendedor a través de los canales del scope.
+                        let porVend = {};
+                        canales.forEach(c => {
+                            let m = acumVendPorCanal[c]; if (!m) return;
+                            Object.keys(m).forEach(v => { porVend[v] = (porVend[v] || 0) + (m[v].bruto + m[v].nc); });
+                        });
+                        pares = Object.keys(porVend).map(v => ({ label: v, value: porVend[v] }));
+                    } else {
+                        pares = canales.map(c => ({ label: c, value: netDe(c) }));
+                    }
+                    // Descartamos ceros y ordenamos de mayor a menor.
+                    pares = pares.filter(p => p.value !== 0).sort((a, b) => b.value - a.value);
                     cont.innerHTML = '<canvas></canvas>';
-                    if (!labels.length) return;
+                    if (!pares.length) return;
+                    let labels = pares.map(p => p.label), dataArr = pares.map(p => p.value);
+                    let colores = labels.map((_, i) => PIE_PALETA[i % PIE_PALETA.length]);
+                    let msId = (modo === 'vendedor') ? 'ms-vendedor' : 'ms-canal';
                     let pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } },
                         onClick: (e, elements) => {
                             if (elements.length > 0) {
                                 let cc = labels[elements[0].index];
-                                let panel = document.querySelector('#ms-canal .ms-panel');
-                                if (panel) { let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]')).find(x => x.value === cc); if (chk) { chk.checked = !chk.checked; msCambio('ms-canal'); } }
+                                let panel = document.querySelector('#' + msId + ' .ms-panel');
+                                if (panel) {
+                                    let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]'))
+                                        .find(x => x.value === cc || limpiarNombre(x.value) === limpiarNombre(cc));
+                                    if (chk) { chk.checked = !chk.checked; msCambio(msId); }
+                                }
                             }
                         }
                     };
-                    window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: dataArr, backgroundColor: ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169'] }] }, options: pieOpts }));
+                    window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: dataArr, backgroundColor: colores }] }, options: pieOpts }));
                 });
             } catch (e) { console.error("Error al renderizar pie", e); }
         }
