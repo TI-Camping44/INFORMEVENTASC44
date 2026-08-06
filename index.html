@@ -2254,8 +2254,22 @@
             }
             let hdrDif = hdrNeta - hdrObj; // diferencia contra el objetivo del período (negativo = falta)
             let hdrAvance = hdrObj > 0 ? ((hdrNeta / hdrObj) * 100).toFixed(1) : 0;
+            // Ritmo necesario: cuánto falta facturar por día hábil restante para llegar al objetivo del mes,
+            // a partir de lo ya facturado. Falta = objetivo - neta ; se reparte en los días que quedan.
+            let hdrFalta = hdrObj - hdrNeta;
+            let hdrDiasRest = dMes - dTr;
+            let ritmoHtml = '';
+            if (hdrObj > 0) {
+                if (hdrFalta <= 0) {
+                    ritmoHtml = ` &nbsp;·&nbsp; <span style="color:#2b7a78; font-weight:bold;">✓ Objetivo del mes alcanzado</span>`;
+                } else {
+                    let porDia = hdrDiasRest > 0 ? (hdrFalta / hdrDiasRest) : hdrFalta;
+                    let drTxt = (hdrDiasRest % 1 === 0) ? String(hdrDiasRest) : hdrDiasRest.toFixed(1).replace('.', ',');
+                    ritmoHtml = ` &nbsp;·&nbsp; A FACTURAR POR DÍA: <span style="color:#dd6b20; font-weight:bold;">₲ ${Math.round(porDia).toLocaleString('es-PY')}</span> <span style="font-size:11px; color:var(--text-muted);">(faltan ${drTxt} días hábiles para el objetivo)</span>`;
+                }
+            }
             document.getElementById('txt-meta-global').innerText = `${hdrTitulo}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
-            document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA AL OBJETIVO: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>`;
+            document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA AL OBJETIVO: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>${ritmoHtml}`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
             
