@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -217,6 +217,21 @@
         .vsit-row .val { font-weight:bold; text-align:right; white-space:nowrap; }
         .vsit-destacado { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px 14px; margin-top:14px; }
         .vsit-destacado .big { font-size:20px; font-weight:bold; color:#dd6b20; margin-top:2px; }
+
+        /* Vista matriz: marca (filas) × comercial (columnas) */
+        .btn-vista { background:#2b7a78; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer; margin-bottom:12px; }
+        .btn-vista:hover { opacity:0.9; }
+        .matriz-wrap { width:100%; overflow-x:auto; }
+        table.mtz { border-collapse:collapse; font-size:11px; }
+        table.mtz th, table.mtz td { border:1px solid var(--gray-border); padding:5px 8px; white-space:nowrap; }
+        table.mtz thead th { background:#1a2c42; color:#fff; }
+        table.mtz th.mtz-vend { border-left:2px solid #2b7a78; }
+        table.mtz .mtz-marca { position:sticky; left:0; background:#fff; text-align:left; font-weight:bold; z-index:2; border-right:2px solid var(--gray-border); }
+        table.mtz thead .mtz-marca { background:#1a2c42; z-index:3; }
+        table.mtz .mtz-sec { background:#eef2f7; font-weight:bold; text-align:left; color:#1a2c42; }
+        table.mtz tbody tr:nth-child(even) td { background:#fbfcfd; }
+        table.mtz tbody tr:nth-child(even) td.mtz-marca { background:#fbfcfd; }
+        table.mtz .mtz-total td { background:#eef2f7; font-weight:bold; border-top:2px solid #1a2c42; }
     </style>
 </head>
 <body>
@@ -469,17 +484,23 @@
 
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
+                <button type="button" class="btn-vista" onclick="toggleVistaMarca('salon', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
+                <div class="matriz-wrap" id="grid-matriz-salon" style="display:none;"></div>
             </div>
 
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO ONLINE</h3>
+                <button type="button" class="btn-vista" onclick="toggleVistaMarca('online', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-online"></div>
+                <div class="matriz-wrap" id="grid-matriz-online" style="display:none;"></div>
             </div>
 
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🚗 DESGLOSE DETALLADO POR MARCA - VENTA EXTERNA</h3>
+                <button type="button" class="btn-vista" onclick="toggleVistaMarca('externa', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-externa"></div>
+                <div class="matriz-wrap" id="grid-matriz-externa" style="display:none;"></div>
             </div>
 
             <div class="excel-container">
@@ -563,7 +584,9 @@
 
             <div class="excel-container">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO DE MARCAS - MAYORISTAS</h3>
+                <button type="button" class="btn-vista" onclick="toggleVistaMarca('mayoristas', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-mayoristas"></div>
+                <div class="matriz-wrap" id="grid-matriz-mayoristas" style="display:none;"></div>
             </div>
         </div>
 
@@ -2842,6 +2865,12 @@
             setHtmlSafe('grid-fichas-externa', hFichasExt);
             setHtmlSafe('grid-fichas-directorio', hFichasDir);
             setHtmlSafe('grid-fichas-reparaciones', hFichasRep);
+
+            // Vista matriz (marca × comercial) por equipo — alternativa a las tarjetas.
+            setHtmlSafe('grid-matriz-salon', construirMatrizCanal('Salon', dataFichasVend, METAS_ACTIVAS));
+            setHtmlSafe('grid-matriz-online', construirMatrizCanal('Online', dataFichasVend, METAS_ACTIVAS));
+            setHtmlSafe('grid-matriz-externa', construirMatrizCanal('Venta Externa', dataFichasVend, METAS_ACTIVAS));
+            setHtmlSafe('grid-matriz-mayoristas', construirMatrizCanal('Mayoristas', dataFichasVend, METAS_ACTIVAS));
             
             // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
@@ -3192,6 +3221,97 @@
             let m = construir(OBJ_MARCAS_ANUAL), a = construir(OBJ_AYM_ANUAL);
             elM.innerHTML = m.html; document.getElementById('foot-anual-marcas').innerHTML = m.foot;
             elA.innerHTML = a.html; document.getElementById('foot-anual-aym').innerHTML = a.foot;
+        }
+
+        // === Vista matriz: marca (filas) × comercial (columnas), con Vendido/Obj/% ===
+        function toggleVistaMarca(key, btn) {
+            let fichas = document.getElementById('grid-fichas-' + key);
+            let matriz = document.getElementById('grid-matriz-' + key);
+            if (!fichas || !matriz) return;
+            let verMatriz = (matriz.style.display === 'none' || matriz.style.display === '');
+            matriz.style.display = verMatriz ? 'block' : 'none';
+            fichas.style.display = verMatriz ? 'none' : 'grid';
+            if (btn) btn.textContent = verMatriz ? '🔀 Ver como tarjetas' : '🔀 Ver como matriz (marca × comercial)';
+        }
+        function construirMatrizCanal(canal, dataFichas, metas) {
+            let esBasura = (n) => { let u = limpiarNombre(n); return ["TOTAL","CONSUM. FINAL","CONSUMIDOR","MAYORISTA 25","33","120","100","LICITACION","SIN VENDEDOR","ONLINE","SALON","MAYORISTA","DIRECTORIO","REPARACIONES","EXTERNA","E-COMMERCE"].some(b => u === b || u.startsWith(b)); };
+            let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v)).sort();
+            if (!vends.length) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin comerciales para mostrar en este equipo.</div>';
+
+            // Objetivo por vendedor -> marca (nombre limpio)
+            let objMap = {}; vends.forEach(v => objMap[v] = {});
+            if (metas && metas.vendedorMarca) {
+                for (let k in metas.vendedorMarca) {
+                    let parts = String(k).split('|||'); if (parts.length !== 2) continue;
+                    let ov = metas.vendedorMarca[k]; if (!(ov > 0)) continue;
+                    let mc = limpiarNombre(parts[1]);
+                    vends.forEach(v => { if (sonElMismoVendedor(parts[0], v)) objMap[v][mc] = (objMap[v][mc] || 0) + ov; });
+                }
+            }
+            let vendidoDe = (v, mc) => (dataFichas[v].marcas && dataFichas[v].marcas[mc]) ? dataFichas[v].marcas[mc] : 0;
+            let objDe = (v, mc) => objMap[v][mc] || 0;
+
+            // Marcas presentes (con venta u objetivo) en el equipo
+            let set = new Set();
+            vends.forEach(v => {
+                let d = dataFichas[v];
+                if (d.marcas) Object.keys(d.marcas).forEach(mk => { if (d.marcas[mk] > 0) set.add(limpiarNombre(mk)); });
+                Object.keys(objMap[v]).forEach(mc => set.add(mc));
+            });
+            if (!set.size) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin marcas con ventas u objetivo en este equipo.</div>';
+
+            let clavesM = LISTA_MARCAS.map(m => claveMarca(m));
+            let clavesA = LISTA_ARMAS.map(a => claveMarca(a));
+            let grales = [], armas = [], resto = [];
+            Array.from(set).forEach(mc => { let ck = claveMarca(mc); if (clavesM.includes(ck)) grales.push(mc); else if (clavesA.includes(ck)) armas.push(mc); else resto.push(mc); });
+            grales.sort(); armas.sort(); resto.sort();
+
+            let pretty = (mc) => {
+                let fromList = LISTA_MARCAS.concat(LISTA_ARMAS).find(x => claveMarca(x) === claveMarca(mc));
+                if (fromList) return fromList;
+                for (let v of vends) { let d = dataFichas[v]; if (d.marcas) { let o = Object.keys(d.marcas).find(x => limpiarNombre(x) === mc); if (o) return o; } }
+                return mc.charAt(0) + mc.slice(1).toLowerCase();
+            };
+
+            let nCols = 1 + vends.length * 3;
+            let thead = '<thead><tr><th class="mtz-marca" rowspan="2">Marca</th>';
+            vends.forEach(v => { thead += `<th colspan="3" class="text-center mtz-vend">${escapeHtml(v)}</th>`; });
+            thead += '</tr><tr>';
+            vends.forEach(() => { thead += '<th class="text-right">Vend.</th><th class="text-right">Obj.</th><th class="text-center">%</th>'; });
+            thead += '</tr></thead>';
+
+            let filaMarca = (mc) => {
+                let tds = `<td class="mtz-marca">${escapeHtml(pretty(mc))}</td>`;
+                vends.forEach(v => {
+                    let val = vendidoDe(v, mc), obj = objDe(v, mc);
+                    let pct = obj > 0 ? ((val / obj) * 100).toFixed(0) + '%' : '-';
+                    let clsPct = obj > 0 ? (val >= obj ? 'num-positivo' : 'num-negativo') : 'num-cero';
+                    tds += `<td class="text-right" style="color:${val > 0 ? '#2b7a78' : '#cbd5e0'}; font-weight:${val > 0 ? 'bold' : 'normal'};">${val > 0 ? '₲ ' + val.toLocaleString('es-PY') : '-'}</td>`;
+                    tds += `<td class="text-right" style="color:${obj > 0 ? '#4a5568' : '#cbd5e0'};">${obj > 0 ? '₲ ' + obj.toLocaleString('es-PY') : '-'}</td>`;
+                    tds += `<td class="text-center ${clsPct}">${pct}</td>`;
+                });
+                return `<tr>${tds}</tr>`;
+            };
+
+            let body = '';
+            let seccion = (titulo, arr) => { if (!arr.length) return; body += `<tr><td class="mtz-sec" colspan="${nCols}">${titulo}</td></tr>`; arr.forEach(mc => body += filaMarca(mc)); };
+            seccion('MARCAS GRALES.', grales);
+            seccion('ARMAS Y MUNICIONES', armas);
+            seccion('OTRAS MARCAS', resto);
+
+            let totTds = '<td class="mtz-marca">TOTAL</td>';
+            vends.forEach(v => {
+                let tv = 0, to = 0;
+                set.forEach(mc => { tv += vendidoDe(v, mc); to += objDe(v, mc); });
+                let pct = to > 0 ? ((tv / to) * 100).toFixed(0) + '%' : '-';
+                let clsPct = to > 0 ? (tv >= to ? 'num-positivo' : 'num-negativo') : 'num-cero';
+                totTds += `<td class="text-right" style="font-weight:bold; color:#2b7a78;">₲ ${tv.toLocaleString('es-PY')}</td>`;
+                totTds += `<td class="text-right" style="font-weight:bold;">₲ ${to.toLocaleString('es-PY')}</td>`;
+                totTds += `<td class="text-center ${clsPct}">${pct}</td>`;
+            });
+            body += `<tr class="mtz-total">${totTds}</tr>`;
+
+            return `<table class="mtz">${thead}<tbody>${body}</tbody></table>`;
         }
 
         iniciarSincronizacion();
