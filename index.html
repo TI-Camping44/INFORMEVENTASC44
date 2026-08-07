@@ -2064,6 +2064,9 @@
                     if (t < tDesde || t > tHasta) return;
                 } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
 
+                // Bucket fantasma "SALON": facturas sin vendedor real (internas de Camping 44 SA, etc.) NO suman.
+                if (limpiarNombre(r.vendedor) === "SALON") return;
+
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
                 if (!marcaPasaFiltro(r.marcaFinal)) return;
