@@ -232,6 +232,12 @@
         table.mtz tbody tr:nth-child(even) td { background:#fbfcfd; }
         table.mtz tbody tr:nth-child(even) td.mtz-marca { background:#fbfcfd; }
         table.mtz .mtz-total td { background:#eef2f7; font-weight:bold; border-top:2px solid #1a2c42; }
+        table.mtz td.hl { background:#fff9c4 !important; }
+        .mtz-seccion { margin-bottom:22px; }
+        .mtz-titulo { font-weight:bold; color:#1a2c42; font-size:12px; margin:6px 0; background:#eef2f7; padding:6px 10px; border-left:4px solid #2b7a78; }
+        .matriz-scroll { overflow-x:auto; }
+        .mtz-resumen { display:flex; flex-wrap:wrap; gap:18px; padding:8px 4px 0; font-size:12px; }
+        .mtz-resumen b { color:#1a2c42; }
     </style>
 </head>
 <body>
@@ -2867,10 +2873,10 @@
             setHtmlSafe('grid-fichas-reparaciones', hFichasRep);
 
             // Vista matriz (marca × comercial) por equipo — alternativa a las tarjetas.
-            setHtmlSafe('grid-matriz-salon', construirMatrizCanal('Salon', dataFichasVend, METAS_ACTIVAS));
-            setHtmlSafe('grid-matriz-online', construirMatrizCanal('Online', dataFichasVend, METAS_ACTIVAS));
-            setHtmlSafe('grid-matriz-externa', construirMatrizCanal('Venta Externa', dataFichasVend, METAS_ACTIVAS));
-            setHtmlSafe('grid-matriz-mayoristas', construirMatrizCanal('Mayoristas', dataFichasVend, METAS_ACTIVAS));
+            setHtmlSafe('grid-matriz-salon', construirMatrizCanal('Salon', dataFichasVend, METAS_ACTIVAS, dMes, dTr));
+            setHtmlSafe('grid-matriz-online', construirMatrizCanal('Online', dataFichasVend, METAS_ACTIVAS, dMes, dTr));
+            setHtmlSafe('grid-matriz-externa', construirMatrizCanal('Venta Externa', dataFichasVend, METAS_ACTIVAS, dMes, dTr));
+            setHtmlSafe('grid-matriz-mayoristas', construirMatrizCanal('Mayoristas', dataFichasVend, METAS_ACTIVAS, dMes, dTr));
             
             // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
@@ -3233,7 +3239,7 @@
             fichas.style.display = verMatriz ? 'none' : 'grid';
             if (btn) btn.textContent = verMatriz ? '🔀 Ver como tarjetas' : '🔀 Ver como matriz (marca × comercial)';
         }
-        function construirMatrizCanal(canal, dataFichas, metas) {
+        function construirMatrizCanal(canal, dataFichas, metas, dMes, dTr) {
             let esBasura = (n) => { let u = limpiarNombre(n); return ["TOTAL","CONSUM. FINAL","CONSUMIDOR","MAYORISTA 25","33","120","100","LICITACION","SIN VENDEDOR","ONLINE","SALON","MAYORISTA","DIRECTORIO","REPARACIONES","EXTERNA","E-COMMERCE"].some(b => u === b || u.startsWith(b)); };
             let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v)).sort();
             if (!vends.length) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin comerciales para mostrar en este equipo.</div>';
@@ -3273,45 +3279,71 @@
                 return mc.charAt(0) + mc.slice(1).toLowerCase();
             };
 
-            let nCols = 1 + vends.length * 3;
-            let thead = '<thead><tr><th class="mtz-marca" rowspan="2">Marca</th>';
-            vends.forEach(v => { thead += `<th colspan="3" class="text-center mtz-vend">${escapeHtml(v)}</th>`; });
-            thead += '</tr><tr>';
-            vends.forEach(() => { thead += '<th class="text-right">Vend.</th><th class="text-right">Obj.</th><th class="text-center">%</th>'; });
-            thead += '</tr></thead>';
+            let gs = (n) => '₲ ' + Math.round(n).toLocaleString('es-PY');
 
-            let filaMarca = (mc) => {
-                let tds = `<td class="mtz-marca">${escapeHtml(pretty(mc))}</td>`;
-                vends.forEach(v => {
-                    let val = vendidoDe(v, mc), obj = objDe(v, mc);
-                    let pct = obj > 0 ? ((val / obj) * 100).toFixed(0) + '%' : '-';
-                    let clsPct = obj > 0 ? (val >= obj ? 'num-positivo' : 'num-negativo') : 'num-cero';
-                    tds += `<td class="text-right" style="color:${val > 0 ? '#2b7a78' : '#cbd5e0'}; font-weight:${val > 0 ? 'bold' : 'normal'};">${val > 0 ? '₲ ' + val.toLocaleString('es-PY') : '-'}</td>`;
-                    tds += `<td class="text-right" style="color:${obj > 0 ? '#4a5568' : '#cbd5e0'};">${obj > 0 ? '₲ ' + obj.toLocaleString('es-PY') : '-'}</td>`;
+            // Cada tipo de marca va en su PROPIA tabla: Obj/Venta/Alcanzada/% del canal + Obj/Vta por comercial.
+            let tablaSeccion = (titulo, arr) => {
+                if (!arr.length) return '';
+                let thead = '<thead><tr>';
+                thead += '<th class="mtz-marca" rowspan="2">Marca</th>';
+                thead += `<th class="text-right" rowspan="2">Obj. ${escapeHtml(canal)}</th>`;
+                thead += `<th class="text-right" rowspan="2">Venta ${escapeHtml(canal)}</th>`;
+                thead += '<th class="text-center" rowspan="2">Alc.</th>';
+                thead += '<th class="text-center" rowspan="2">%</th>';
+                vends.forEach(v => { thead += `<th colspan="2" class="text-center mtz-vend">${escapeHtml(v)}</th>`; });
+                thead += '</tr><tr>';
+                vends.forEach(() => { thead += '<th class="text-right">Obj.</th><th class="text-right">Vta.</th>'; });
+                thead += '</tr></thead>';
+
+                let vObj = {}, vVta = {}; vends.forEach(v => { vObj[v] = 0; vVta[v] = 0; });
+                let totObj = 0, totVta = 0, marcasAlc = 0, marcasConObj = 0;
+                let body = '';
+                arr.forEach(mc => {
+                    let cObj = 0, cVta = 0;
+                    vends.forEach(v => { cObj += objDe(v, mc); cVta += vendidoDe(v, mc); });
+                    let alc = (cObj > 0 && cVta >= cObj) ? 1 : 0;
+                    if (cObj > 0) { marcasConObj++; if (alc) marcasAlc++; }
+                    totObj += cObj; totVta += cVta;
+                    let pct = cObj > 0 ? ((cVta / cObj) * 100).toFixed(0) + '%' : '-';
+                    let clsPct = cObj > 0 ? (cVta >= cObj ? 'num-positivo' : 'num-negativo') : 'num-cero';
+                    let tds = `<td class="mtz-marca">${escapeHtml(pretty(mc))}</td>`;
+                    tds += `<td class="text-right" style="color:${cObj > 0 ? '#4a5568' : '#cbd5e0'};">${cObj > 0 ? gs(cObj) : '-'}</td>`;
+                    tds += `<td class="text-right ${cVta > 0 ? 'hl' : ''}" style="font-weight:bold; color:${cVta > 0 ? '#2b7a78' : '#cbd5e0'};">${cVta > 0 ? gs(cVta) : '-'}</td>`;
+                    tds += `<td class="text-center">${cObj > 0 ? alc : '-'}</td>`;
                     tds += `<td class="text-center ${clsPct}">${pct}</td>`;
+                    vends.forEach(v => {
+                        let o = objDe(v, mc), val = vendidoDe(v, mc); vObj[v] += o; vVta[v] += val;
+                        tds += `<td class="text-right" style="color:${o > 0 ? '#4a5568' : '#cbd5e0'};">${o > 0 ? gs(o) : '-'}</td>`;
+                        tds += `<td class="text-right ${val > 0 ? 'hl' : ''}" style="color:${val > 0 ? '#2b7a78' : '#cbd5e0'};">${val > 0 ? gs(val) : '-'}</td>`;
+                    });
+                    body += `<tr>${tds}</tr>`;
                 });
-                return `<tr>${tds}</tr>`;
+
+                let pctTot = totObj > 0 ? ((totVta / totObj) * 100).toFixed(0) + '%' : '-';
+                let clsTot = totObj > 0 ? (totVta >= totObj ? 'num-positivo' : 'num-negativo') : 'num-cero';
+                let tr = '<tr class="mtz-total"><td class="mtz-marca">TOTAL</td>';
+                tr += `<td class="text-right">${gs(totObj)}</td>`;
+                tr += `<td class="text-right">${gs(totVta)}</td>`;
+                tr += `<td class="text-center">${marcasAlc}</td>`;
+                tr += `<td class="text-center ${clsTot}">${pctTot}</td>`;
+                vends.forEach(v => { tr += `<td class="text-right">${gs(vObj[v])}</td><td class="text-right" style="color:#2b7a78;">${gs(vVta[v])}</td>`; });
+                tr += '</tr>';
+                body += tr;
+
+                let proy = dTr > 0 ? (totVta / dTr) * dMes : totVta;
+                let difProy = proy - totObj;
+                let resumen = `<div class="mtz-resumen">`;
+                resumen += `<span><b>% alcanzado:</b> <span class="${clsTot}">${pctTot}</span></span>`;
+                resumen += `<span><b>Marcas alcanzadas:</b> ${marcasAlc} de ${marcasConObj}</span>`;
+                resumen += `<span><b>Proyección lineal:</b> ${gs(proy)}</span>`;
+                resumen += `<span><b>Diferencia proyectada:</b> <span class="${difProy >= 0 ? 'num-positivo' : 'num-negativo'}">${gs(difProy)}</span></span>`;
+                resumen += `</div>`;
+
+                return `<div class="mtz-seccion"><div class="mtz-titulo">${titulo}</div><div class="matriz-scroll"><table class="mtz">${thead}<tbody>${body}</tbody></table></div>${resumen}</div>`;
             };
 
-            let body = '';
-            let seccion = (titulo, arr) => { if (!arr.length) return; body += `<tr><td class="mtz-sec" colspan="${nCols}">${titulo}</td></tr>`; arr.forEach(mc => body += filaMarca(mc)); };
-            seccion('MARCAS GRALES.', grales);
-            seccion('ARMAS Y MUNICIONES', armas);
-            seccion('OTRAS MARCAS', resto);
-
-            let totTds = '<td class="mtz-marca">TOTAL</td>';
-            vends.forEach(v => {
-                let tv = 0, to = 0;
-                set.forEach(mc => { tv += vendidoDe(v, mc); to += objDe(v, mc); });
-                let pct = to > 0 ? ((tv / to) * 100).toFixed(0) + '%' : '-';
-                let clsPct = to > 0 ? (tv >= to ? 'num-positivo' : 'num-negativo') : 'num-cero';
-                totTds += `<td class="text-right" style="font-weight:bold; color:#2b7a78;">₲ ${tv.toLocaleString('es-PY')}</td>`;
-                totTds += `<td class="text-right" style="font-weight:bold;">₲ ${to.toLocaleString('es-PY')}</td>`;
-                totTds += `<td class="text-center ${clsPct}">${pct}</td>`;
-            });
-            body += `<tr class="mtz-total">${totTds}</tr>`;
-
-            return `<table class="mtz">${thead}<tbody>${body}</tbody></table>`;
+            let out = tablaSeccion('MARCAS GENERALES', grales) + tablaSeccion('ARMAS Y MUNICIONES', armas) + tablaSeccion('OTRAS MARCAS', resto);
+            return out || '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin datos.</div>';
         }
 
         iniciarSincronizacion();
