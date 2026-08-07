@@ -2121,7 +2121,10 @@
                     // Item 7: agrupamos e-commerce POR CLIENTE (ventas, NC y marcas de cada cliente)
                     // Contimarket: nuevo equipo de ventas que entra como E-commerce, pero se agrupa/muestra
                     // bajo "Contimarket" (no el nombre del cliente al que se factura).
-                    let cliKey = r.contimarket ? "Contimarket" : (r.cliente || "SIN CLIENTE");
+                    // E-commerce: Tupi y Porter van con su propio nombre; TODO lo demás (contactos/
+                    // consumidores, tenga o no la etiqueta) entra por Contimarket y se agrupa ahí.
+                    let cliUp = String(r.cliente || "").toUpperCase();
+                    let cliKey = cliUp.includes("TUPI") ? r.cliente : (cliUp.includes("PORTER") ? r.cliente : "Contimarket");
                     if (!ecomPorCliente[cliKey]) ecomPorCliente[cliKey] = { bruto: 0, nc: 0, marcas: {}, productos: {}, clientes: {} };
                     if (esNC) ecomPorCliente[cliKey].nc += m; else ecomPorCliente[cliKey].bruto += m;
                     if (!esNC && r.marcaFinal && !String(r.marcaFinal).includes("Intereses")) {
