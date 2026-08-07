@@ -238,6 +238,9 @@
         .matriz-scroll { overflow-x:auto; }
         .mtz-resumen { display:flex; flex-wrap:wrap; gap:18px; padding:8px 4px 0; font-size:12px; }
         .mtz-resumen b { color:#1a2c42; }
+        .mtz-leyenda { font-size:11.5px; color:#4a5568; background:#f7fafc; border:1px solid var(--gray-border); border-radius:6px; padding:8px 12px; margin-bottom:14px; }
+        .mtz-leyenda b { color:#1a2c42; }
+        .mtz-lg-box { display:inline-block; width:13px; height:13px; background:#fff9c4; border:1px solid #d4c94a; border-radius:2px; vertical-align:middle; }
     </style>
 </head>
 <body>
@@ -3343,7 +3346,9 @@
             };
 
             let out = tablaSeccion('MARCAS GENERALES', grales) + tablaSeccion('ARMAS Y MUNICIONES', armas) + tablaSeccion('OTRAS MARCAS', resto);
-            return out || '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin datos.</div>';
+            if (!out) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin datos.</div>';
+            let leyenda = `<div class="mtz-leyenda"><span class="mtz-lg-box"></span> <b>Amarillo</b> = hay venta registrada en esa marca &nbsp;·&nbsp; <b>Alc.</b> = 1 si alcanzó el objetivo de la marca, 0 si no &nbsp;·&nbsp; <b>%</b> = venta ÷ objetivo</div>`;
+            return leyenda + out;
         }
 
         iniciarSincronizacion();
