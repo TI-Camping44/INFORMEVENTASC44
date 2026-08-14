@@ -3065,6 +3065,29 @@
                 const PIE_PALETA = ['#2b7a78', '#3182ce', '#dd6b20', '#1a2c42', '#718096', '#9f7aea', '#38a169',
                                     '#e53e3e', '#d69e2e', '#00838f', '#805ad5', '#c53030', '#2f855a', '#2c5282',
                                     '#b7791f', '#4a5568', '#6b46c1', '#319795'];
+                // Plugin propio: dibuja el % encima de cada porción de la torta (sin librerías externas).
+                const pieDataLabels = {
+                    id: 'pieDataLabels',
+                    afterDatasetsDraw(chart) {
+                        let ctx = chart.ctx, meta = chart.getDatasetMeta(0), ds = chart.data.datasets[0];
+                        if (!ds) return;
+                        let total = ds.data.reduce((a, b) => a + (Number(b) || 0), 0);
+                        if (total <= 0) return;
+                        ctx.save();
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        meta.data.forEach((arc, i) => {
+                            let val = Number(ds.data[i]) || 0;
+                            let pct = (val / total) * 100;
+                            if (pct < 4) return; // porciones muy chicas: se solaparían, se omiten (igual está en la leyenda)
+                            let pos = arc.getCenterPoint();
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(pct.toFixed(0) + '%', pos.x, pos.y);
+                        });
+                        ctx.restore();
+                    }
+                };
                 document.querySelectorAll('.container-pie').forEach(cont => {
                     let scope = scopeDeContenedor(cont);
                     let canales = (scope && scope.length) ? scope : Object.keys(acumCanales);
@@ -3120,7 +3143,7 @@
                             }
                         }
                     };
-                    window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: dataArr, backgroundColor: colores }] }, options: pieOpts }));
+                    window.__pieCharts.push(new Chart(cont.querySelector('canvas').getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: dataArr, backgroundColor: colores }] }, options: pieOpts, plugins: [pieDataLabels] }));
                 });
             } catch (e) { console.error("Error al renderizar pie", e); }
         }
