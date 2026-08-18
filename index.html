@@ -2066,6 +2066,8 @@
 
                 // Bucket fantasma "SALON": facturas sin vendedor real (internas de Camping 44 SA, etc.) NO suman.
                 if (limpiarNombre(r.vendedor) === "SALON") return;
+                // Guillermo Augusto Morel Candia: administrativo (sin cargo/sin comisión), no debe sumar.
+                if (limpiarNombre(r.vendedor).includes("MOREL CANDIA")) return;
 
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
