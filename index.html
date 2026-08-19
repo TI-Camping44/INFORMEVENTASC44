@@ -2068,6 +2068,8 @@
                 if (limpiarNombre(r.vendedor) === "SALON") return;
                 // Guillermo Augusto Morel Candia: administrativo (sin cargo/sin comisión), no debe sumar.
                 if (limpiarNombre(r.vendedor).includes("MOREL CANDIA")) return;
+                // Cesar Fabian Aguilera Inostroza: excluido (NO confundir con Cesar Alejandro Rahi, que sí va).
+                if (limpiarNombre(r.vendedor).includes("CESAR FABIAN")) return;
 
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
