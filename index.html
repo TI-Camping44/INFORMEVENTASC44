@@ -2489,10 +2489,15 @@
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
-                        let obj = 0;
+                        let obj = 0, canalCfgV = "";
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
-                            if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k];
+                            if (sonElMismoVendedor(k, v)) { obj = METAS_ACTIVAS.vendedoresTotales[k]; if (VENDEDOR_CANAL_CFG[k]) canalCfgV = VENDEDOR_CANAL_CFG[k]; }
                         });
+                        // Evita DUPLICAR el objetivo cuando un vendedor aparece en 2 canales:
+                        //  - si tiene canal FIJO configurado (columna K) y no es este canal → no carga objetivo acá;
+                        //  - si en este canal solo tiene devoluciones (sin venta bruta y neto negativo) → tampoco.
+                        if (canalCfgV && canalCfgV !== canal) obj = 0;
+                        else if (!canalCfgV && acumVendPorCanal[canal][v].bruto <= 0 && net < 0) obj = 0;
                         // 🛒 Julia Olmedo es la vendedora de TODO e-commerce (Tupi + Porter + Contimarket):
                         // su objetivo = el objetivo total del canal E-commerce.
                         if (canal === "E-commerce" && limpiarNombre(v).includes("JULIA OLMEDO")) {
