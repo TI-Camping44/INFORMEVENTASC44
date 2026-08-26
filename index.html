@@ -2070,6 +2070,9 @@
                 if (limpiarNombre(r.vendedor).includes("MOREL CANDIA")) return;
                 // Cesar Fabian Aguilera Inostroza: excluido (NO confundir con Cesar Alejandro Rahi, que sí va).
                 if (limpiarNombre(r.vendedor).includes("CESAR FABIAN")) return;
+                // RRHH / equipo "Sin Comisión": Iliana González Vallejos y Jorge Pineda Vallejos, no suman.
+                if (limpiarNombre(r.vendedor).includes("GONZALEZ VALLEJOS")) return;
+                if (limpiarNombre(r.vendedor).includes("PINEDA VALLEJOS")) return;
 
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
