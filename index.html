@@ -561,7 +561,26 @@
                     </table>
                 </div>
             </div>
-            
+
+            <div class="excel-container" style="margin-top:20px;">
+                <div class="excel-title">🧾 CARTERA DE CLIENTES MAYORISTAS (actividad)</div>
+                <div id="kpi-mayoristas-clientes"></div>
+                <div class="table-responsive-wrapper" style="margin-top:14px;">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Clientes totales</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Activos (últ. 3 meses)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">% activos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grid-mayoristas-clientes"></tbody>
+                    </table>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); margin:12px 2px 0;">Criterio: se considera <b>cliente mayorista</b> a quien facturó en el canal Mayoristas. <b>Total</b> = compró en los últimos 12 meses · <b>Activo</b> = compró en los últimos 3 meses. El vendedor mostrado es el de su factura más reciente. Este bloque es independiente de los filtros de mes/fecha de arriba.</p>
+            </div>
+
             <div class="excel-container" style="margin-top:20px;">
                 <div class="excel-title mkl-toggle" onclick="toggleMkl(this)" style="cursor:pointer;"><span class="mkl-caret">▶</span> ⚔️ MARCAS Y LÍNEAS — MAYORISTAS (general del canal)</div>
                 <div class="mkl-body" style="display:none;">
@@ -1734,6 +1753,82 @@
             } catch(e) { console.error("Error al leer metas de marcas", e); }
         }
 
+        // === Cartera de clientes MAYORISTAS (actividad por vendedor) ===
+        // Bloque ADITIVO: se calcula sobre TODO el histórico, independiente de los filtros de mes/fecha.
+        //  - Cliente mayorista = facturó en el canal "Mayoristas".
+        //  - Total  = compró en los últimos 12 meses.
+        //  - Activo = compró en los últimos 3 meses.
+        //  - Vendedor asignado = el de su factura más reciente en el canal.
+        function renderMayoristaClientes() {
+            try {
+                if (!Array.isArray(lineasDeDatosGlobales)) return;
+                let hoy = new Date();
+                let lim3 = new Date(hoy);  lim3.setMonth(lim3.getMonth() - 3);
+                let lim12 = new Date(hoy); lim12.setMonth(lim12.getMonth() - 12);
+                let t3 = lim3.getTime(), t12 = lim12.getTime();
+
+                // claveCliente -> { last, vendorLast }
+                let clientes = {};
+                lineasDeDatosGlobales.forEach(d => {
+                    if (!d || d.canal !== "Mayoristas") return;
+                    let cliKey = limpiarNombre(d.cliente);
+                    if (!cliKey || cliKey.includes("CONSUMIDOR") || cliKey.includes("CONSUM. FINAL") || cliKey === "SIN CLIENTE") return;
+                    let t = parseDateToTime(d.fecha);
+                    if (!t) return;
+                    if (!clientes[cliKey] || t > clientes[cliKey].last) {
+                        clientes[cliKey] = { last: t, vendorLast: d.vendedor || "" };
+                    }
+                });
+
+                let totG = 0, actG = 0;
+                let porVend = {}; // vendedorLimpio -> { nombre, tot, act }
+                Object.keys(clientes).forEach(k => {
+                    let c = clientes[k];
+                    if (c.last < t12) return; // fuera de la cartera vigente (últimos 12 meses)
+                    let activo = c.last >= t3;
+                    totG++; if (activo) actG++;
+                    let vNom = (c.vendorLast && esVendedorReal(c.vendorLast)) ? limpiarNombre(c.vendorLast) : "(Sin vendedor)";
+                    if (!porVend[vNom]) porVend[vNom] = { nombre: vNom, tot: 0, act: 0 };
+                    porVend[vNom].tot++; if (activo) porVend[vNom].act++;
+                });
+
+                let pctG = totG > 0 ? Math.round(actG / totG * 100) : 0;
+                let colDe = (p) => p >= 60 ? '#16a34a' : (p >= 40 ? '#d97706' : '#dc2626');
+
+                let card = (titulo, valor, color) =>
+                    `<div style="flex:1; min-width:150px; background:var(--bg-card,#fff); border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; padding:14px 16px;">
+                        <div style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px;">${titulo}</div>
+                        <div style="font-size:26px; font-weight:800; color:${color}; margin-top:4px;">${valor}</div>
+                    </div>`;
+                setHtmlSafe('kpi-mayoristas-clientes',
+                    `<div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        ${card('Clientes mayoristas totales', totG.toLocaleString('es-PY'), 'var(--navy-main,#1e293b)')}
+                        ${card('Activos (últ. 3 meses)', actG.toLocaleString('es-PY'), '#16a34a')}
+                        ${card('% de clientes activos', pctG + '%', colDe(pctG))}
+                    </div>`);
+
+                let filas = Object.values(porVend).sort((a, b) => b.tot - a.tot);
+                let html = "";
+                filas.forEach(v => {
+                    let pct = v.tot > 0 ? Math.round(v.act / v.tot * 100) : 0;
+                    html += `<tr>
+                        <td>${v.nombre}</td>
+                        <td class="text-right">${v.tot.toLocaleString('es-PY')}</td>
+                        <td class="text-right">${v.act.toLocaleString('es-PY')}</td>
+                        <td class="text-right" style="font-weight:bold; color:${colDe(pct)};">${pct}%</td>
+                    </tr>`;
+                });
+                if (!html) html = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:14px;">Sin clientes mayoristas con actividad en los últimos 12 meses.</td></tr>`;
+                html += `<tr style="font-weight:bold; background:var(--bg-total,#f1f5f9);">
+                    <td>TOTAL</td>
+                    <td class="text-right">${totG.toLocaleString('es-PY')}</td>
+                    <td class="text-right">${actG.toLocaleString('es-PY')}</td>
+                    <td class="text-right" style="color:${colDe(pctG)};">${pctG}%</td>
+                </tr>`;
+                setHtmlSafe('grid-mayoristas-clientes', html);
+            } catch (e) { console.error("renderMayoristaClientes", e); }
+        }
+
         function procesarVentasData(filas) {
             lineasDeDatosGlobales = [];
             let vendedoresSet = new Set();
@@ -1794,6 +1889,7 @@
 
             fechasGlobalesOrdenadas = Array.from(new Set(lineasDeDatosGlobales.map(d=>d.fecha))).sort((a,b) => parseDateToTime(a) - parseDateToTime(b));
             popularDropdownFiltros(vendedoresSet, canalesSet, marcasSet);
+            renderMayoristaClientes(); // bloque aditivo de cartera de clientes mayoristas (independiente de filtros)
 
             const urlParams = new URLSearchParams(window.location.search);
             const vendorQuery = urlParams.get('vendedor');
