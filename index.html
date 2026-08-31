@@ -1767,7 +1767,7 @@
                 let lim12 = new Date(hoy); lim12.setMonth(lim12.getMonth() - 12);
                 let t3 = lim3.getTime(), t12 = lim12.getTime();
 
-                // claveCliente -> { last, vendorLast }
+                // claveCliente -> { nombre, last, vendorLast, totalGs, prods:{ pKey:{producto,marca,gs,n} } }
                 let clientes = {};
                 lineasDeDatosGlobales.forEach(d => {
                     if (!d || d.canal !== "Mayoristas") return;
@@ -1775,13 +1775,21 @@
                     if (!cliKey || cliKey.includes("CONSUMIDOR") || cliKey.includes("CONSUM. FINAL") || cliKey === "SIN CLIENTE") return;
                     let t = parseDateToTime(d.fecha);
                     if (!t) return;
-                    if (!clientes[cliKey] || t > clientes[cliKey].last) {
-                        clientes[cliKey] = { last: t, vendorLast: d.vendedor || "" };
-                    }
+                    let c = clientes[cliKey];
+                    if (!c) c = clientes[cliKey] = { nombre: d.cliente || cliKey, last: 0, vendorLast: "", totalGs: 0, prods: {} };
+                    if (t > c.last) { c.last = t; c.vendorLast = d.vendedor || ""; c.nombre = d.cliente || c.nombre; }
+                    let gs = Number(d.totalGs) || 0;
+                    c.totalGs += gs;
+                    let prodName = (d.producto && String(d.producto).trim()) ? String(d.producto).trim() : (d.marcaFinal || "(sin producto)");
+                    let pKey = limpiarNombre(prodName) || "(SIN PRODUCTO)";
+                    if (!c.prods[pKey]) c.prods[pKey] = { producto: prodName, marca: d.marcaFinal || "", gs: 0, n: 0 };
+                    c.prods[pKey].gs += gs;
+                    c.prods[pKey].n += 1;
                 });
 
                 let totG = 0, actG = 0;
                 let porVend = {}; // vendedorLimpio -> { nombre, tot, act }
+                window.__mayoDet = {}; // vendedorLimpio -> { nombre, clientes:[{nombre,activo,last,totalGs,prods:[...]}] }
                 Object.keys(clientes).forEach(k => {
                     let c = clientes[k];
                     if (c.last < t12) return; // fuera de la cartera vigente (últimos 12 meses)
@@ -1790,6 +1798,12 @@
                     let vNom = (c.vendorLast && esVendedorReal(c.vendorLast)) ? limpiarNombre(c.vendorLast) : "(Sin vendedor)";
                     if (!porVend[vNom]) porVend[vNom] = { nombre: vNom, tot: 0, act: 0 };
                     porVend[vNom].tot++; if (activo) porVend[vNom].act++;
+
+                    if (!window.__mayoDet[vNom]) window.__mayoDet[vNom] = { nombre: vNom, clientes: [] };
+                    window.__mayoDet[vNom].clientes.push({
+                        nombre: c.nombre, activo: activo, last: c.last, totalGs: c.totalGs,
+                        prods: Object.values(c.prods).sort((a, b) => b.gs - a.gs)
+                    });
                 });
 
                 let pctG = totG > 0 ? Math.round(actG / totG * 100) : 0;
@@ -1812,7 +1826,7 @@
                 filas.forEach(v => {
                     let pct = v.tot > 0 ? Math.round(v.act / v.tot * 100) : 0;
                     html += `<tr>
-                        <td>${v.nombre}</td>
+                        <td><span style="color:var(--navy-main,#1e293b); cursor:pointer; font-weight:600; text-decoration:underline dotted;" title="Ver clientes y productos" onclick="abrirMayoVend('${encodeURIComponent(v.nombre)}')">${v.nombre}</span></td>
                         <td class="text-right">${v.tot.toLocaleString('es-PY')}</td>
                         <td class="text-right">${v.act.toLocaleString('es-PY')}</td>
                         <td class="text-right" style="font-weight:bold; color:${colDe(pct)};">${pct}%</td>
@@ -1827,6 +1841,72 @@
                 </tr>`;
                 setHtmlSafe('grid-mayoristas-clientes', html);
             } catch (e) { console.error("renderMayoristaClientes", e); }
+        }
+
+        // === Drill-down de la cartera mayorista: vendedor -> clientes -> productos ===
+        function fmtGsMayo(n) { return '₲ ' + (Math.round(Number(n) || 0)).toLocaleString('es-PY'); }
+        function fechaCortaMayo(t) {
+            if (!t) return '—';
+            let d = new Date(t);
+            return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+        }
+        function cerrarMayoVend() { let o = document.getElementById('mayo-overlay'); if (o) o.classList.remove('open'); }
+        function toggleMayoCli(i) {
+            let el = document.getElementById('mayo-cli-' + i);
+            let c = document.getElementById('mayo-caret-' + i);
+            if (!el) return;
+            let show = el.style.display === 'none';
+            el.style.display = show ? 'block' : 'none';
+            if (c) c.textContent = show ? '▼' : '▶';
+        }
+        function abrirMayoVend(venc) {
+            try {
+                let vNom = decodeURIComponent(venc);
+                let reg = (window.__mayoDet || {})[vNom];
+                if (!reg) return;
+                let clientes = (reg.clientes || []).slice().sort((a, b) => b.totalGs - a.totalGs);
+                let act = clientes.filter(c => c.activo).length;
+                document.getElementById('mayo-nombre').textContent = vNom;
+                document.getElementById('mayo-sub').textContent = clientes.length + ' clientes mayoristas · ' + act + ' activos · tocá un cliente para ver sus productos';
+
+                let html = '';
+                clientes.forEach((c, i) => {
+                    let badge = c.activo
+                        ? '<span style="font-size:10px;font-weight:bold;color:#16a34a;background:#dcfce7;padding:2px 7px;border-radius:10px;white-space:nowrap;">ACTIVO</span>'
+                        : '<span style="font-size:10px;font-weight:bold;color:#dc2626;background:#fee2e2;padding:2px 7px;border-radius:10px;white-space:nowrap;">INACTIVO</span>';
+                    let filasProd = (c.prods || []).map(p =>
+                        `<tr><td style="padding:5px 8px;border-top:1px solid #eef2f7;">${p.producto}${p.marca ? ' <span style="color:#94a3b8;">· ' + p.marca + '</span>' : ''}</td>
+                             <td style="padding:5px 8px;border-top:1px solid #eef2f7;text-align:right;color:#64748b;">${p.n}</td>
+                             <td style="padding:5px 8px;border-top:1px solid #eef2f7;text-align:right;font-weight:bold;">${fmtGsMayo(p.gs)}</td></tr>`
+                    ).join('');
+                    html += `<div style="border:1px solid var(--gray-border);border-radius:8px;margin-bottom:8px;overflow:hidden;">
+                        <div onclick="toggleMayoCli(${i})" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;">
+                            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                                <span class="mayo-caret" id="mayo-caret-${i}" style="color:#94a3b8;font-size:11px;">▶</span>
+                                <span style="font-weight:bold;font-size:13px;color:#1a2c42;overflow:hidden;text-overflow:ellipsis;">${c.nombre}</span>
+                                ${badge}
+                            </div>
+                            <div style="text-align:right;white-space:nowrap;">
+                                <div style="font-weight:bold;font-size:13px;">${fmtGsMayo(c.totalGs)}</div>
+                                <div style="font-size:10px;color:#94a3b8;">últ. compra ${fechaCortaMayo(c.last)}</div>
+                            </div>
+                        </div>
+                        <div id="mayo-cli-${i}" style="display:none;">
+                            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                                <thead><tr style="background:#fff;color:#64748b;font-size:10px;text-transform:uppercase;">
+                                    <th style="text-align:left;padding:5px 8px;">Producto</th>
+                                    <th style="text-align:right;padding:5px 8px;"># comp.</th>
+                                    <th style="text-align:right;padding:5px 8px;">GS</th>
+                                </tr></thead>
+                                <tbody>${filasProd || '<tr><td colspan="3" style="padding:8px;color:#94a3b8;">Sin detalle de productos.</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                });
+                if (!html) html = '<div style="color:#94a3b8;padding:10px;">Este vendedor no tiene clientes mayoristas.</div>';
+                document.getElementById('mayo-body').innerHTML = html;
+                document.getElementById('mayo-overlay').classList.add('open');
+            } catch (e) { console.error('abrirMayoVend', e); }
         }
 
         function procesarVentasData(filas) {
@@ -3518,6 +3598,16 @@
                 <button class="vsit-close" onclick="cerrarVendModal()" title="Cerrar">×</button>
             </div>
             <div class="vsit-body" id="vsit-body"></div>
+        </div>
+    </div>
+
+    <div id="mayo-overlay" class="vsit-overlay" onclick="if(event.target===this)cerrarMayoVend()">
+        <div class="vsit-box" style="max-width:720px;">
+            <div class="vsit-head">
+                <div><h3 id="mayo-nombre">Vendedor</h3><div class="vsit-canal" id="mayo-sub"></div></div>
+                <button class="vsit-close" onclick="cerrarMayoVend()" title="Cerrar">×</button>
+            </div>
+            <div class="vsit-body" id="mayo-body"></div>
         </div>
     </div>
 
