@@ -217,6 +217,22 @@
         .vsit-row .val { font-weight:bold; text-align:right; white-space:nowrap; }
         .vsit-destacado { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px 14px; margin-top:14px; }
         .vsit-destacado .big { font-size:20px; font-weight:bold; color:#dd6b20; margin-top:2px; }
+        /* Fila de vendedor clickable (cartera mayorista) */
+        .mayo-vrow { cursor:pointer; transition:background .12s; }
+        .mayo-vrow:hover { background:#eff6ff; }
+        .mayo-vchev { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:#e0f2fe; color:#0369a1; font-size:9px; flex:none; transition:all .12s; }
+        .mayo-vrow:hover .mayo-vchev { background:#0369a1; color:#fff; }
+        .mayo-vhint { font-size:10px; font-weight:700; color:#0369a1; text-transform:uppercase; letter-spacing:.3px; opacity:0; transition:opacity .12s; }
+        .mayo-vrow:hover .mayo-vhint { opacity:1; }
+        /* Modal de cartera */
+        .mayo-fbtn { border:1px solid var(--gray-border,#e2e8f0); background:#fff; color:#475569; font-size:11px; font-weight:bold; padding:5px 13px; border-radius:20px; cursor:pointer; }
+        .mayo-fbtn.on { background:var(--navy-main,#1e293b); color:#fff; border-color:var(--navy-main,#1e293b); }
+        .mayo-ccard { border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+        .mayo-chead { cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 13px; }
+        .mayo-chead:hover { background:#f8fafc; }
+        .mayo-ini { flex:none; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#fff; }
+        .mayo-bar { height:6px; border-radius:4px; background:#e2e8f0; overflow:hidden; }
+        .mayo-bar > span { display:block; height:100%; background:#3b82f6; }
 
         /* Vista matriz: marca (filas) × comercial (columnas) */
         .btn-vista { background:#2b7a78; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer; margin-bottom:12px; }
@@ -1850,8 +1866,8 @@
                 let html = "";
                 filas.forEach(v => {
                     let pct = v.tot > 0 ? Math.round(v.act / v.tot * 100) : 0;
-                    html += `<tr>
-                        <td><span style="color:var(--navy-main,#1e293b); cursor:pointer; font-weight:600; text-decoration:underline dotted;" title="Ver clientes y productos" onclick="abrirMayoVend('${encodeURIComponent(v.nombre)}')">${v.nombre}</span></td>
+                    html += `<tr class="mayo-vrow" onclick="abrirMayoVend('${encodeURIComponent(v.nombre)}')" title="Ver clientes y productos">
+                        <td><span style="display:inline-flex; align-items:center; gap:9px;"><span class="mayo-vchev">▶</span><span style="font-weight:600; color:var(--navy-main,#1e293b);">${v.nombre}</span><span class="mayo-vhint">ver clientes ›</span></span></td>
                         <td class="text-right">${v.tot.toLocaleString('es-PY')}</td>
                         <td class="text-right">${v.act.toLocaleString('es-PY')}</td>
                         <td class="text-right" style="font-weight:bold; color:${colDe(pct)};">${pct}%</td>
@@ -1882,6 +1898,19 @@
             let d = new Date(t);
             return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
         }
+        // Separa "NOMBRE - 80162932-2" en { nombre, ruc }.
+        function splitClienteRuc(nombre) {
+            let s = String(nombre || '').trim();
+            let m = s.match(/^(.*?)[\s]*[-–][\s]*(\d[\d.]*-?[\dkK]?)$/);
+            if (m && m[1].trim().length >= 2) return { nombre: m[1].trim(), ruc: m[2].trim() };
+            return { nombre: s, ruc: '' };
+        }
+        function iniColorMayo(txt) {
+            let paleta = ['#2563eb', '#0891b2', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#0d9488', '#4f46e5', '#c026d3', '#65a30d'];
+            let s = String(txt || ''); let h = 0;
+            for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+            return paleta[h % paleta.length];
+        }
         function cerrarMayoVend() { let o = document.getElementById('mayo-overlay'); if (o) o.classList.remove('open'); }
         function toggleMayoCli(i) {
             let el = document.getElementById('mayo-cli-' + i);
@@ -1889,56 +1918,103 @@
             if (!el) return;
             let show = el.style.display === 'none';
             el.style.display = show ? 'block' : 'none';
-            if (c) c.textContent = show ? '▼' : '▶';
+            if (c) c.style.transform = show ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+        function setMayoModalFiltro(f, btn) {
+            window.__mayoModalFiltro = f;
+            document.querySelectorAll('#mayo-sub-bar .mayo-fbtn').forEach(b => b.classList.remove('on'));
+            if (btn) btn.classList.add('on');
+            pintarMayoModalClientes();
         }
         function abrirMayoVend(venc) {
             try {
                 let vNom = decodeURIComponent(venc);
                 let reg = (window.__mayoDet || {})[vNom];
                 if (!reg) return;
-                let clientes = (reg.clientes || []).slice().sort((a, b) => b.totalGs - a.totalGs);
+                window.__mayoModalVend = vNom;
+                window.__mayoModalFiltro = 'todos';
+                let clientes = reg.clientes || [];
                 let act = clientes.filter(c => c.activo).length;
+                let inact = clientes.length - act;
+                let W = window.__mayoVentana || 3;
                 document.getElementById('mayo-nombre').textContent = vNom;
-                document.getElementById('mayo-sub').textContent = clientes.length + ' clientes mayoristas · ' + act + ' activos · tocá un cliente para ver sus productos';
+                document.getElementById('mayo-sub').innerHTML =
+                    `<span style="display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                        <span style="background:#eef2f7;color:#475569;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:12px;">${clientes.length} clientes</span>
+                        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:12px;">${act} activos</span>
+                        <span style="background:#fee2e2;color:#dc2626;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:12px;">${inact} inactivos</span>
+                        <span style="color:#94a3b8;font-size:11px;">· activo = compró en los últ. ${W} meses</span>
+                     </span>
+                     <div id="mayo-sub-bar" style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap;">
+                        <button type="button" class="mayo-fbtn on" onclick="setMayoModalFiltro('todos', this)">Todos</button>
+                        <button type="button" class="mayo-fbtn" onclick="setMayoModalFiltro('act', this)">Solo activos</button>
+                        <button type="button" class="mayo-fbtn" onclick="setMayoModalFiltro('inact', this)">Solo inactivos</button>
+                     </div>`;
+                pintarMayoModalClientes();
+                document.getElementById('mayo-overlay').classList.add('open');
+            } catch (e) { console.error('abrirMayoVend', e); }
+        }
+        function pintarMayoModalClientes() {
+            try {
+                let reg = (window.__mayoDet || {})[window.__mayoModalVend];
+                if (!reg) return;
+                let filtro = window.__mayoModalFiltro || 'todos';
+                let clientes = (reg.clientes || []).slice()
+                    .filter(c => filtro === 'todos' ? true : (filtro === 'act' ? c.activo : !c.activo))
+                    .sort((a, b) => b.totalGs - a.totalGs);
+                let maxGs = clientes.reduce((m, c) => Math.max(m, c.totalGs), 0) || 1;
 
                 let html = '';
                 clientes.forEach((c, i) => {
+                    let cr = splitClienteRuc(c.nombre);
+                    let ini = ((cr.nombre.match(/[A-Za-zÁÉÍÓÚÑ]/g) || []).slice(0, 2).join('') || '?').toUpperCase();
                     let badge = c.activo
-                        ? '<span style="font-size:10px;font-weight:bold;color:#16a34a;background:#dcfce7;padding:2px 7px;border-radius:10px;white-space:nowrap;">ACTIVO</span>'
-                        : '<span style="font-size:10px;font-weight:bold;color:#dc2626;background:#fee2e2;padding:2px 7px;border-radius:10px;white-space:nowrap;">INACTIVO</span>';
+                        ? '<span style="font-size:9px;font-weight:bold;color:#16a34a;background:#dcfce7;padding:2px 7px;border-radius:10px;white-space:nowrap;">ACTIVO</span>'
+                        : '<span style="font-size:9px;font-weight:bold;color:#dc2626;background:#fee2e2;padding:2px 7px;border-radius:10px;white-space:nowrap;">INACTIVO</span>';
+                    let nProds = (c.prods || []).length;
+                    let barPct = Math.max(3, Math.round(c.totalGs / maxGs * 100));
                     let filasProd = (c.prods || []).map(p =>
-                        `<tr><td style="padding:5px 8px;border-top:1px solid #eef2f7;">${p.producto}${p.marca ? ' <span style="color:#94a3b8;">· ' + p.marca + '</span>' : ''}</td>
-                             <td style="padding:5px 8px;border-top:1px solid #eef2f7;text-align:right;color:#64748b;">${p.n}</td>
-                             <td style="padding:5px 8px;border-top:1px solid #eef2f7;text-align:right;font-weight:bold;">${fmtGsMayo(p.gs)}</td></tr>`
+                        `<tr>
+                            <td style="padding:6px 10px;border-top:1px solid #eef2f7;font-size:12px;color:#334155;">${p.producto}${p.marca ? ' <span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:1px 6px;border-radius:8px;white-space:nowrap;">' + p.marca + '</span>' : ''}</td>
+                            <td style="padding:6px 10px;border-top:1px solid #eef2f7;text-align:right;color:#94a3b8;font-size:11px;">×${p.n}</td>
+                            <td style="padding:6px 10px;border-top:1px solid #eef2f7;text-align:right;font-weight:bold;font-size:12px;white-space:nowrap;">${fmtGsMayo(p.gs)}</td>
+                        </tr>`
                     ).join('');
-                    html += `<div style="border:1px solid var(--gray-border);border-radius:8px;margin-bottom:8px;overflow:hidden;">
-                        <div onclick="toggleMayoCli(${i})" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;">
-                            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-                                <span class="mayo-caret" id="mayo-caret-${i}" style="color:#94a3b8;font-size:11px;">▶</span>
-                                <span style="font-weight:bold;font-size:13px;color:#1a2c42;overflow:hidden;text-overflow:ellipsis;">${c.nombre}</span>
-                                ${badge}
+                    html += `<div class="mayo-ccard">
+                        <div class="mayo-chead" onclick="toggleMayoCli(${i})">
+                            <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+                                <span class="mayo-ini" style="background:${iniColorMayo(cr.nombre)};">${ini}</span>
+                                <div style="min-width:0;">
+                                    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                                        <span style="font-weight:bold;font-size:13px;color:#1a2c42;">${cr.nombre}</span>
+                                        ${badge}
+                                    </div>
+                                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${cr.ruc ? 'RUC ' + cr.ruc + ' · ' : ''}${nProds} producto${nProds === 1 ? '' : 's'} · últ. compra ${fechaCortaMayo(c.last)}</div>
+                                </div>
                             </div>
-                            <div style="text-align:right;white-space:nowrap;">
-                                <div style="font-weight:bold;font-size:13px;">${fmtGsMayo(c.totalGs)}</div>
-                                <div style="font-size:10px;color:#94a3b8;">últ. compra ${fechaCortaMayo(c.last)}</div>
+                            <div style="text-align:right;white-space:nowrap;display:flex;align-items:center;gap:10px;">
+                                <div>
+                                    <div style="font-weight:800;font-size:14px;color:#0f172a;">${fmtGsMayo(c.totalGs)}</div>
+                                    <div class="mayo-bar" style="width:90px;margin-top:4px;margin-left:auto;"><span style="width:${barPct}%;"></span></div>
+                                </div>
+                                <span class="mayo-caret" id="mayo-caret-${i}" style="color:#94a3b8;font-size:12px;transition:transform .15s;display:inline-block;">▶</span>
                             </div>
                         </div>
-                        <div id="mayo-cli-${i}" style="display:none;">
-                            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                                <thead><tr style="background:#fff;color:#64748b;font-size:10px;text-transform:uppercase;">
-                                    <th style="text-align:left;padding:5px 8px;">Producto</th>
-                                    <th style="text-align:right;padding:5px 8px;"># comp.</th>
-                                    <th style="text-align:right;padding:5px 8px;">GS</th>
+                        <div id="mayo-cli-${i}" style="display:none;background:#fbfdff;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <thead><tr style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:.4px;">
+                                    <th style="text-align:left;padding:6px 10px;">Producto</th>
+                                    <th style="text-align:right;padding:6px 10px;">Comp.</th>
+                                    <th style="text-align:right;padding:6px 10px;">GS</th>
                                 </tr></thead>
-                                <tbody>${filasProd || '<tr><td colspan="3" style="padding:8px;color:#94a3b8;">Sin detalle de productos.</td></tr>'}</tbody>
+                                <tbody>${filasProd || '<tr><td colspan="3" style="padding:10px;color:#94a3b8;font-size:12px;">Sin detalle de productos.</td></tr>'}</tbody>
                             </table>
                         </div>
                     </div>`;
                 });
-                if (!html) html = '<div style="color:#94a3b8;padding:10px;">Este vendedor no tiene clientes mayoristas.</div>';
+                if (!html) html = '<div style="color:#94a3b8;padding:16px;text-align:center;">No hay clientes para este filtro.</div>';
                 document.getElementById('mayo-body').innerHTML = html;
-                document.getElementById('mayo-overlay').classList.add('open');
-            } catch (e) { console.error('abrirMayoVend', e); }
+            } catch (e) { console.error('pintarMayoModalClientes', e); }
         }
 
         function procesarVentasData(filas) {
