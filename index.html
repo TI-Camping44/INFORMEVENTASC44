@@ -207,7 +207,7 @@
         .vsit-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; }
         .vsit-overlay.open { display:flex; }
         .vsit-box { background:#fff; border-radius:10px; max-width:460px; width:92%; max-height:88vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
-        .vsit-head { padding:16px 20px; border-bottom:1px solid var(--gray-border); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+        .vsit-head { padding:16px 20px; border-bottom:1px solid var(--gray-border); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; position:sticky; top:0; background:#fff; z-index:5; }
         .vsit-head h3 { margin:0; font-size:16px; color:#1a2c42; }
         .vsit-canal { font-size:12px; color:var(--text-muted); margin-top:3px; }
         .vsit-close { cursor:pointer; font-size:24px; line-height:1; color:var(--text-muted); background:none; border:none; }
@@ -1912,6 +1912,15 @@
             return paleta[h % paleta.length];
         }
         function cerrarMayoVend() { let o = document.getElementById('mayo-overlay'); if (o) o.classList.remove('open'); }
+        // Cerrar cualquier modal con la tecla Escape.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                let mo = document.getElementById('mayo-overlay');
+                if (mo && mo.classList.contains('open')) { cerrarMayoVend(); return; }
+                let vo = document.getElementById('vsit-overlay');
+                if (vo && vo.classList.contains('open') && typeof cerrarVendModal === 'function') { cerrarVendModal(); return; }
+            }
+        });
         function toggleMayoCli(i) {
             let el = document.getElementById('mayo-cli-' + i);
             let c = document.getElementById('mayo-caret-' + i);
