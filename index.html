@@ -1789,12 +1789,16 @@
             try {
                 if (!Array.isArray(lineasDeDatosGlobales)) return;
                 let clientes = {}; // claveCliente -> { nombre, last, vendorLast, totalGs, prods:{ pKey:{producto,marca,gs,n} } }
+                let minT = Infinity, maxT = 0, nLineas = 0;
                 lineasDeDatosGlobales.forEach(d => {
                     if (!d || d.canal !== "Mayoristas") return;
                     let cliKey = limpiarNombre(d.cliente);
                     if (!cliKey || cliKey.includes("CONSUMIDOR") || cliKey.includes("CONSUM. FINAL") || cliKey === "SIN CLIENTE") return;
                     let t = parseDateToTime(d.fecha);
                     if (!t) return;
+                    nLineas++;
+                    if (t < minT) minT = t;
+                    if (t > maxT) maxT = t;
                     let c = clientes[cliKey];
                     if (!c) c = clientes[cliKey] = { nombre: d.cliente || cliKey, last: 0, vendorLast: "", totalGs: 0, prods: {} };
                     if (t > c.last) { c.last = t; c.vendorLast = d.vendedor || ""; c.nombre = d.cliente || c.nombre; }
@@ -1811,6 +1815,7 @@
                     let vNom = (c.vendorLast && esVendedorReal(c.vendorLast)) ? limpiarNombre(c.vendorLast) : "(Sin vendedor)";
                     return { nombre: c.nombre, last: c.last, totalGs: c.totalGs, vendedor: vNom, prods: Object.values(c.prods).sort((a, b) => b.gs - a.gs) };
                 });
+                window.__mayoRango = { minT: isFinite(minT) ? minT : 0, maxT: maxT, nLineas: nLineas, nClientes: window.__mayoClientes.length };
                 pintarMayoristas();
             } catch (e) { console.error("renderMayoristaClientes", e); }
         }
@@ -1855,12 +1860,22 @@
                         <div style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px;">${titulo}</div>
                         <div style="font-size:26px; font-weight:800; color:${color}; margin-top:4px;">${valor}</div>
                     </div>`;
+                let rango = window.__mayoRango || {};
+                let diag = '';
+                if (rango.minT) {
+                    let cinco = new Date(hoy); cinco.setMonth(cinco.getMonth() - 5);
+                    let incompleta = rango.minT > cinco.getTime();
+                    diag = `<div style="margin-top:10px; font-size:11px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; color:${incompleta ? '#b45309' : '#94a3b8'};">
+                        <span>${incompleta ? '⚠️' : '🛈'} Data cargada: <b>${fechaCortaMayo(rango.minT)} → ${fechaCortaMayo(rango.maxT)}</b> · ${(rango.nLineas || 0).toLocaleString('es-PY')} líneas mayoristas · ${rango.nClientes || 0} clientes</span>
+                        ${incompleta ? '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:8px; font-weight:bold;">La data no llega a inicio de año — parece incompleta. Recargá (Ctrl+F5) en 1-2 min.</span>' : ''}
+                    </div>`;
+                }
                 setHtmlSafe('kpi-mayoristas-clientes',
                     `<div style="display:flex; gap:12px; flex-wrap:wrap;">
                         ${card('Clientes mayoristas totales', totG.toLocaleString('es-PY'), 'var(--navy-main,#1e293b)')}
                         ${card('Activos (últ. ' + W + ' meses)', actG.toLocaleString('es-PY'), '#16a34a')}
                         ${card('% de clientes activos', pctG + '%', colDe(pctG))}
-                    </div>`);
+                    </div>${diag}`);
 
                 let filas = Object.values(porVend).sort((a, b) => b.tot - a.tot);
                 let html = "";
