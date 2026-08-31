@@ -564,6 +564,13 @@
 
             <div class="excel-container" style="margin-top:20px;">
                 <div class="excel-title">🧾 CARTERA DE CLIENTES MAYORISTAS (actividad)</div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:12px 0 4px;">
+                    <span style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px;">Activo = compró en:</span>
+                    <div style="display:inline-flex; border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; overflow:hidden;">
+                        <button type="button" id="btn-mayo-3" onclick="setMayoVentana(3)" style="border:none; background:#16a34a; color:#fff; font-size:12px; font-weight:bold; padding:7px 14px; cursor:pointer;">Últimos 3 meses</button>
+                        <button type="button" id="btn-mayo-12" onclick="setMayoVentana(12)" style="border:none; background:#fff; color:var(--navy-main,#1e293b); font-size:12px; font-weight:bold; padding:7px 14px; cursor:pointer; border-left:1px solid var(--gray-border,#e2e8f0);">Últimos 12 meses</button>
+                    </div>
+                </div>
                 <div id="kpi-mayoristas-clientes"></div>
                 <div class="table-responsive-wrapper" style="margin-top:14px;">
                     <table class="excel-table">
@@ -571,14 +578,14 @@
                             <tr>
                                 <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
                                 <th class="text-right th-sort" onclick="ordenarTabla(this)">Clientes totales</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Activos (últ. 3 meses)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)" id="th-mayo-activos">Activos (últ. 3 meses)</th>
                                 <th class="text-right th-sort" onclick="ordenarTabla(this)">% activos</th>
                             </tr>
                         </thead>
                         <tbody id="grid-mayoristas-clientes"></tbody>
                     </table>
                 </div>
-                <p style="font-size:11px; color:var(--text-muted); margin:12px 2px 0;">Criterio: se considera <b>cliente mayorista</b> a quien facturó en el canal Mayoristas. <b>Total</b> = compró en los últimos 12 meses · <b>Activo</b> = compró en los últimos 3 meses. El vendedor mostrado es el de su factura más reciente. Este bloque es independiente de los filtros de mes/fecha de arriba.</p>
+                <p style="font-size:11px; color:var(--text-muted); margin:12px 2px 0;">Criterio: se considera <b>cliente mayorista</b> a quien facturó en el canal Mayoristas. <b>Total</b> = todos los clientes mayoristas del histórico disponible · <b>Activo</b> = compró dentro de la ventana seleccionada (3 o 12 meses). El vendedor mostrado es el de su factura más reciente. Este bloque es independiente de los filtros de mes/fecha de arriba.</p>
             </div>
 
             <div class="excel-container" style="margin-top:20px;">
@@ -1754,21 +1761,18 @@
         }
 
         // === Cartera de clientes MAYORISTAS (actividad por vendedor) ===
-        // Bloque ADITIVO: se calcula sobre TODO el histórico, independiente de los filtros de mes/fecha.
+        // Bloque ADITIVO, independiente de los filtros de mes/fecha.
         //  - Cliente mayorista = facturó en el canal "Mayoristas".
-        //  - Total  = compró en los últimos 12 meses.
-        //  - Activo = compró en los últimos 3 meses.
+        //  - Total  = todos los clientes mayoristas del histórico disponible.
+        //  - Activo = compró dentro de la ventana seleccionada (3 o 12 meses).
         //  - Vendedor asignado = el de su factura más reciente en el canal.
+        window.__mayoVentana = 3; // meses; lo cambia el selector
+
+        // 1) CÁLCULO (una sola vez): junta todos los clientes mayoristas con su detalle.
         function renderMayoristaClientes() {
             try {
                 if (!Array.isArray(lineasDeDatosGlobales)) return;
-                let hoy = new Date();
-                let lim3 = new Date(hoy);  lim3.setMonth(lim3.getMonth() - 3);
-                let lim12 = new Date(hoy); lim12.setMonth(lim12.getMonth() - 12);
-                let t3 = lim3.getTime(), t12 = lim12.getTime();
-
-                // claveCliente -> { nombre, last, vendorLast, totalGs, prods:{ pKey:{producto,marca,gs,n} } }
-                let clientes = {};
+                let clientes = {}; // claveCliente -> { nombre, last, vendorLast, totalGs, prods:{ pKey:{producto,marca,gs,n} } }
                 lineasDeDatosGlobales.forEach(d => {
                     if (!d || d.canal !== "Mayoristas") return;
                     let cliKey = limpiarNombre(d.cliente);
@@ -1786,28 +1790,49 @@
                     c.prods[pKey].gs += gs;
                     c.prods[pKey].n += 1;
                 });
+                window.__mayoClientes = Object.keys(clientes).map(k => {
+                    let c = clientes[k];
+                    let vNom = (c.vendorLast && esVendedorReal(c.vendorLast)) ? limpiarNombre(c.vendorLast) : "(Sin vendedor)";
+                    return { nombre: c.nombre, last: c.last, totalGs: c.totalGs, vendedor: vNom, prods: Object.values(c.prods).sort((a, b) => b.gs - a.gs) };
+                });
+                pintarMayoristas();
+            } catch (e) { console.error("renderMayoristaClientes", e); }
+        }
+
+        // 2) PINTADO: aplica la ventana seleccionada (3 o 12 meses) a KPIs, tabla y modal.
+        function pintarMayoristas() {
+            try {
+                let lista = window.__mayoClientes;
+                if (!Array.isArray(lista)) return;
+                let W = window.__mayoVentana || 3;
+                let hoy = new Date();
+                let lim = new Date(hoy); lim.setMonth(lim.getMonth() - W);
+                let tLim = lim.getTime();
+                let colDe = (p) => p >= 60 ? '#16a34a' : (p >= 40 ? '#d97706' : '#dc2626');
 
                 let totG = 0, actG = 0;
-                let porVend = {}; // vendedorLimpio -> { nombre, tot, act }
-                window.__mayoDet = {}; // vendedorLimpio -> { nombre, clientes:[{nombre,activo,last,totalGs,prods:[...]}] }
-                Object.keys(clientes).forEach(k => {
-                    let c = clientes[k];
-                    if (c.last < t12) return; // fuera de la cartera vigente (últimos 12 meses)
-                    let activo = c.last >= t3;
+                let porVend = {}; // vNom -> { nombre, tot, act }
+                window.__mayoDet = {}; // vNom -> { nombre, clientes:[...] }
+                lista.forEach(c => {
+                    let activo = c.last >= tLim;
                     totG++; if (activo) actG++;
-                    let vNom = (c.vendorLast && esVendedorReal(c.vendorLast)) ? limpiarNombre(c.vendorLast) : "(Sin vendedor)";
+                    let vNom = c.vendedor;
                     if (!porVend[vNom]) porVend[vNom] = { nombre: vNom, tot: 0, act: 0 };
                     porVend[vNom].tot++; if (activo) porVend[vNom].act++;
-
                     if (!window.__mayoDet[vNom]) window.__mayoDet[vNom] = { nombre: vNom, clientes: [] };
-                    window.__mayoDet[vNom].clientes.push({
-                        nombre: c.nombre, activo: activo, last: c.last, totalGs: c.totalGs,
-                        prods: Object.values(c.prods).sort((a, b) => b.gs - a.gs)
-                    });
+                    window.__mayoDet[vNom].clientes.push({ nombre: c.nombre, activo: activo, last: c.last, totalGs: c.totalGs, prods: c.prods });
                 });
-
                 let pctG = totG > 0 ? Math.round(actG / totG * 100) : 0;
-                let colDe = (p) => p >= 60 ? '#16a34a' : (p >= 40 ? '#d97706' : '#dc2626');
+
+                // Estado visual del selector
+                let b3 = document.getElementById('btn-mayo-3'), b12 = document.getElementById('btn-mayo-12');
+                if (b3 && b12) {
+                    let on = (b) => { b.style.background = '#16a34a'; b.style.color = '#fff'; };
+                    let off = (b) => { b.style.background = '#fff'; b.style.color = 'var(--navy-main,#1e293b)'; };
+                    if (W === 3) { on(b3); off(b12); } else { on(b12); off(b3); }
+                }
+                let thA = document.getElementById('th-mayo-activos');
+                if (thA) thA.textContent = 'Activos (últ. ' + W + ' meses)';
 
                 let card = (titulo, valor, color) =>
                     `<div style="flex:1; min-width:150px; background:var(--bg-card,#fff); border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; padding:14px 16px;">
@@ -1817,7 +1842,7 @@
                 setHtmlSafe('kpi-mayoristas-clientes',
                     `<div style="display:flex; gap:12px; flex-wrap:wrap;">
                         ${card('Clientes mayoristas totales', totG.toLocaleString('es-PY'), 'var(--navy-main,#1e293b)')}
-                        ${card('Activos (últ. 3 meses)', actG.toLocaleString('es-PY'), '#16a34a')}
+                        ${card('Activos (últ. ' + W + ' meses)', actG.toLocaleString('es-PY'), '#16a34a')}
                         ${card('% de clientes activos', pctG + '%', colDe(pctG))}
                     </div>`);
 
@@ -1832,7 +1857,7 @@
                         <td class="text-right" style="font-weight:bold; color:${colDe(pct)};">${pct}%</td>
                     </tr>`;
                 });
-                if (!html) html = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:14px;">Sin clientes mayoristas con actividad en los últimos 12 meses.</td></tr>`;
+                if (!html) html = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:14px;">Sin clientes mayoristas.</td></tr>`;
                 html += `<tr style="font-weight:bold; background:var(--bg-total,#f1f5f9);">
                     <td>TOTAL</td>
                     <td class="text-right">${totG.toLocaleString('es-PY')}</td>
@@ -1840,7 +1865,14 @@
                     <td class="text-right" style="color:${colDe(pctG)};">${pctG}%</td>
                 </tr>`;
                 setHtmlSafe('grid-mayoristas-clientes', html);
-            } catch (e) { console.error("renderMayoristaClientes", e); }
+            } catch (e) { console.error("pintarMayoristas", e); }
+        }
+
+        // 3) Cambio de ventana desde el selector.
+        function setMayoVentana(w) {
+            window.__mayoVentana = w;
+            pintarMayoristas();
+            cerrarMayoVend(); // el modal, si estaba abierto, cambia sus badges según la ventana
         }
 
         // === Drill-down de la cartera mayorista: vendedor -> clientes -> productos ===
