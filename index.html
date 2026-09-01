@@ -507,28 +507,28 @@
                 </div>
             </div>
 
-            <div class="excel-container">
+            <div class="excel-container" id="sec-fichas-salon">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO SALÓN</h3>
                 <button type="button" class="btn-vista" onclick="toggleVistaMarca('salon', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-salon"></div>
                 <div class="matriz-wrap" id="grid-matriz-salon" style="display:none;"></div>
             </div>
 
-            <div class="excel-container">
+            <div class="excel-container" id="sec-fichas-online">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🔍 DESGLOSE DETALLADO POR MARCA - EQUIPO ONLINE</h3>
                 <button type="button" class="btn-vista" onclick="toggleVistaMarca('online', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-online"></div>
                 <div class="matriz-wrap" id="grid-matriz-online" style="display:none;"></div>
             </div>
 
-            <div class="excel-container">
+            <div class="excel-container" id="sec-fichas-externa">
                 <h3 style="margin-top:0px; margin-bottom: 10px; color: var(--navy-main); border-bottom: 2px solid var(--gray-border); padding-bottom: 8px; font-size: 13px;">🚗 DESGLOSE DETALLADO POR MARCA - VENTA EXTERNA</h3>
                 <button type="button" class="btn-vista" onclick="toggleVistaMarca('externa', this)">🔀 Ver como matriz (marca × comercial)</button>
                 <div class="fichas-grid" id="grid-fichas-externa"></div>
                 <div class="matriz-wrap" id="grid-matriz-externa" style="display:none;"></div>
             </div>
 
-            <div class="excel-container">
+            <div class="excel-container" id="sec-fichas-ecommerce">
                 <div class="excel-title">🛒 DESGLOSE DETALLADO DE E-COMMERCE (por Cliente / Distribuidor)</div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table" style="margin-bottom: 25px;">
@@ -3218,6 +3218,19 @@
             setHtmlSafe('grid-fichas-externa', hFichasExt);
             setHtmlSafe('grid-fichas-directorio', hFichasDir);
             setHtmlSafe('grid-fichas-reparaciones', hFichasRep);
+
+            // Si hay un canal seleccionado en el filtro de arriba, mostramos SOLO la sección de
+            // desglose de ese canal (así la vista queda limpia y no se satura con los demás).
+            (function () {
+                let normC = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
+                let sel = (filtrosActivos.canales || []).map(normC);
+                let mostrarTodo = sel.length === 0;
+                let secciones = { 'sec-fichas-salon': 'SALON', 'sec-fichas-online': 'ONLINE', 'sec-fichas-externa': 'VENTA EXTERNA', 'sec-fichas-ecommerce': 'E-COMMERCE' };
+                Object.keys(secciones).forEach(id => {
+                    let elx = document.getElementById(id);
+                    if (elx) elx.style.display = (mostrarTodo || sel.includes(secciones[id])) ? '' : 'none';
+                });
+            })();
 
             // Vista matriz (marca × comercial) por equipo — alternativa a las tarjetas.
             setHtmlSafe('grid-matriz-salon', construirMatrizCanal('Salon', dataFichasVend, METAS_ACTIVAS, dMes, dTr));
