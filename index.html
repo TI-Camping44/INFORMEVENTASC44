@@ -1399,6 +1399,7 @@
             if (!m) return m;
             let c = claveMarca(m);
             if (c === "BWC" || c.startsWith("WALKER")) return "GSM";
+            if (c.includes("AITOR")) return "Aitor";
             return m;
         }
         // ¿La marca entra en el desglose de "Marcas y Líneas"?
@@ -3225,10 +3226,21 @@
                 let normC = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
                 let sel = (filtrosActivos.canales || []).map(normC);
                 let mostrarTodo = sel.length === 0;
-                let secciones = { 'sec-fichas-salon': 'SALON', 'sec-fichas-online': 'ONLINE', 'sec-fichas-externa': 'VENTA EXTERNA', 'sec-fichas-ecommerce': 'E-COMMERCE' };
+                // [id sección] -> [canal normalizado, sufijo del grid de fichas]
+                let secciones = {
+                    'sec-fichas-salon': ['SALON', 'salon'],
+                    'sec-fichas-online': ['ONLINE', 'online'],
+                    'sec-fichas-externa': ['VENTA EXTERNA', 'externa'],
+                    'sec-fichas-ecommerce': ['E-COMMERCE', 'ecommerce']
+                };
                 Object.keys(secciones).forEach(id => {
                     let elx = document.getElementById(id);
-                    if (elx) elx.style.display = (mostrarTodo || sel.includes(secciones[id])) ? '' : 'none';
+                    if (!elx) return;
+                    let canalOK = mostrarTodo || sel.includes(secciones[id][0]);
+                    // Ocultamos también las secciones que quedaron vacías (ej. al filtrar un solo vendedor).
+                    let grid = document.getElementById('grid-fichas-' + secciones[id][1]);
+                    let tieneFichas = grid && grid.innerHTML.trim() !== '';
+                    elx.style.display = (canalOK && tieneFichas) ? '' : 'none';
                 });
             })();
 
