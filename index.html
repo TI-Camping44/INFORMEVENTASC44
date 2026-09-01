@@ -3490,61 +3490,6 @@
         // 🏆 RANKING 37/10 — se calcula sobre el acumulado del AÑO (YTD), independiente
         // del filtro de mes. Ventas del DATA + objetivos anuales de RANKING_ANUAL.
         // =========================================================================
-        // Objetivos DINÁMICOS del ranking: vendedores con objetivos cargados (plataforma/CONFIG,
-        // mensuales) que NO están en la lista fija RANKING_ANUAL. Se agregan sin tocar a los
-        // existentes. Objetivo = suma de los meses cargados del año (YTD).
-        function inferCanalVendedorRanking(v) {
-            let cnt = {};
-            (lineasDeDatosGlobales || []).forEach(r => {
-                if (r && sonElMismoVendedor(r.vendedor, v)) {
-                    let c = limpiarNombre(r.canal); if (c.startsWith("MAYORISTA")) c = "MAYORISTAS";
-                    cnt[c] = (cnt[c] || 0) + 1;
-                }
-            });
-            let best = '', bestN = 0;
-            Object.keys(cnt).forEach(c => { if (cnt[c] > bestN) { bestN = cnt[c]; best = c; } });
-            return best;
-        }
-        function objetivosDinamicosRanking() {
-            let res = [];
-            try {
-                let normCanal = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
-                let clavesM = LISTA_MARCAS.map(m => claveMarca(m));
-                let clavesA = LISTA_ARMAS.map(a => claveMarca(a));
-                let esMarca = (mk) => { let c = claveMarca(mk); return clavesM.includes(c) || clavesA.includes(c); };
-
-                // Fuentes de objetivos mensuales: histórico archivado + mes actual (sin duplicar).
-                let fuentes = [];
-                Object.keys(HISTORICO_METAS || {}).forEach(m => { if (HISTORICO_METAS[m]) fuentes.push(HISTORICO_METAS[m]); });
-                let mesAct = String((filtrosActivos && filtrosActivos.mesActualLive) || '');
-                if (!(HISTORICO_METAS && HISTORICO_METAS[mesAct])) fuentes.push(METAS_LIVE);
-
-                let acumTot = {}, acumMarca = {};
-                fuentes.forEach(src => {
-                    if (!src) return;
-                    Object.keys(src.vendedoresTotales || {}).forEach(v => {
-                        acumTot[v] = (acumTot[v] || 0) + (Number(src.vendedoresTotales[v]) || 0);
-                    });
-                    Object.keys(src.vendedorMarca || {}).forEach(key => {
-                        let p = key.split('|||'); let v = p[0], marca = p[1] || '';
-                        if (esMarca(marca)) acumMarca[v] = (acumMarca[v] || 0) + (Number(src.vendedorMarca[key]) || 0);
-                    });
-                });
-
-                let mapGrupo = (cn) => cn === "MAYORISTAS" ? "Mayoristas" : (cn === "ONLINE" ? "Online" : (cn === "SALON" ? "Salon" : null));
-                Object.keys(acumTot).forEach(v => {
-                    if (!(acumTot[v] > 0)) return;
-                    // Si ya está en la lista fija (cualquier canal), no lo tocamos.
-                    if (RANKING_ANUAL.some(cfg => sonElMismoVendedor(cfg.nombre, v))) return;
-                    let canalRaw = VENDEDOR_CANAL_CFG[v] || inferCanalVendedorRanking(v);
-                    let grupo = mapGrupo(normCanal(canalRaw || ''));
-                    if (!grupo) return; // solo Salon / Online / Mayoristas
-                    res.push({ canal: grupo, nombre: v, objAno: acumTot[v], objMarcas: acumMarca[v] || 0, dinamico: true });
-                });
-            } catch (e) { console.error('objetivosDinamicosRanking', e); }
-            return res;
-        }
-
         function renderRanking() {
             let el = document.getElementById('grid-ranking');
             if (!el) return;
@@ -3554,8 +3499,7 @@
             let normCanal = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
 
             let grupos = { "Salon": [], "Online": [], "Mayoristas": [] };
-            let listaRk = RANKING_ANUAL.concat(objetivosDinamicosRanking());
-            listaRk.forEach(cfg => {
+            RANKING_ANUAL.forEach(cfg => {
                 // El ranking es anual (YTD): solo aplican los filtros de Canal y Vendedor.
                 // Marca y rango de fechas no aplican (los objetivos del ranking son anuales fijos).
                 if (filtrosActivos.canales.length && !filtrosActivos.canales.some(c => normCanal(c) === normCanal(cfg.canal))) return;
@@ -3592,7 +3536,7 @@
                     let clsMar = f.tieneObjM ? (f.pctMarcas >= 1 ? 'num-positivo' : 'num-negativo') : 'num-cero';
                     let clsRank = f.califica ? 'num-positivo' : 'num-negativo';
                     html += `<tr ${f.califica ? 'style="background:#e6fffa;"' : ''}>
-                        <td><strong>${escapeHtml(f.cfg.nombre)}</strong>${f.cfg.dinamico ? ' <span style="font-size:9px;font-weight:bold;color:#0369a1;background:#e0f2fe;padding:1px 6px;border-radius:8px;vertical-align:middle;white-space:nowrap;" title="Objetivo tomado de lo que cargaste, acumulado de los meses del año (YTD)">obj. cargado · YTD</span>' : ''}</td>
+                        <td><strong>${escapeHtml(f.cfg.nombre)}</strong></td>
                         <td class="text-right">${G(f.vGen)}</td>
                         <td class="text-right">${G(f.cfg.objAno)}</td>
                         <td class="text-center ${clsGen}">${P(f.pctGen)}</td>
