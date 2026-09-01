@@ -3705,7 +3705,7 @@
         }
         function construirMatrizCanal(canal, dataFichas, metas, dMes, dTr) {
             let esBasura = (n) => { let u = limpiarNombre(n); return ["TOTAL","CONSUM. FINAL","CONSUMIDOR","MAYORISTA 25","33","120","100","LICITACION","SIN VENDEDOR","ONLINE","SALON","MAYORISTA","DIRECTORIO","REPARACIONES","EXTERNA","E-COMMERCE"].some(b => u === b || u.startsWith(b)); };
-            let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v)).sort();
+            let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v) && vendedorPasaFiltro(v)).sort();
             if (!vends.length) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin comerciales para mostrar en este equipo.</div>';
 
             // Objetivo por vendedor -> marca (nombre limpio)
