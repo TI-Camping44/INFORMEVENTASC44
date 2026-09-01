@@ -3009,6 +3009,7 @@
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
                 if(!vData) return;
+                if(!vendedorPasaFiltro(v)) return; // al filtrar un vendedor, solo su ficha
 
                 let marcasUnicas = new Set();
                 
