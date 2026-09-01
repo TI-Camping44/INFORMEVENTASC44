@@ -2803,8 +2803,12 @@
             let hCons = ""; let hEcomV = ""; let hMayV = ""; let hExtV = ""; let hDirV = ""; let hRepV = "";
             window.__vendSit = []; // registro de situación por vendedor para la ventana emergente
             let canalesSegmentos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
-            
+            // Si hay un canal seleccionado en el filtro, solo armamos ese segmento (no todos).
+            let __normCanalF = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
+            let __canalesSel = (filtrosActivos.canales || []).map(__normCanalF);
+
             canalesSegmentos.forEach(canal => {
+                if (__canalesSel.length && !__canalesSel.includes(__normCanalF(canal))) return;
                 let headHtml = `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
                 if (canal === "E-commerce") hEcomV += headHtml; 
                 else if (canal === "Mayoristas") hMayV += headHtml; 
