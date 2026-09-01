@@ -2822,6 +2822,7 @@
                 // Mostrar vendedores reales
                 if (acumVendPorCanal[canal]) {
                     Object.keys(acumVendPorCanal[canal]).sort().forEach(v => {
+                        if (!vendedorPasaFiltro(v)) return;
                         let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
                         let obj = 0, canalCfgV = "";
                         Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => {
@@ -2861,6 +2862,7 @@
                 
                 // Mostrar vendedores con meta pero 0 ventas (evitando duplicar a los ya listados arriba)
                 Object.keys(dataFichasVend).forEach(v => {
+                    if (!vendedorPasaFiltro(v)) return;
                     let yaListado = acumVendPorCanal[canal] && acumVendPorCanal[canal][v];
                     if (!yaListado && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
                         let obj = 0;
@@ -2943,6 +2945,7 @@
                     let filas = [];
                     if (acumVendPorCanal[canal]) {
                         Object.keys(acumVendPorCanal[canal]).forEach(v => {
+                            if (!vendedorPasaFiltro(v)) return;
                             let net = acumVendPorCanal[canal][v].bruto + acumVendPorCanal[canal][v].nc;
                             let obj = 0;
                             Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(k => { if (sonElMismoVendedor(k, v)) obj = METAS_ACTIVAS.vendedoresTotales[k]; });
@@ -2950,6 +2953,7 @@
                         });
                     }
                     Object.keys(dataFichasVend).forEach(v => {
+                        if (!vendedorPasaFiltro(v)) return;
                         let yaListado = acumVendPorCanal[canal] && acumVendPorCanal[canal][v];
                         if (!yaListado && dataFichasVend[v].canal === canal && dataFichasVend[v].bruto === 0 && dataFichasVend[v].nc === 0) {
                             let obj = 0;
