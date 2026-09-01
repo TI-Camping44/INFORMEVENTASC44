@@ -1531,6 +1531,9 @@
             let vUpper = limpiarNombre(vendedor);
             let cUpper = limpiarNombre(canalCSV);
 
+            // Barbara Casco: todo lo suyo (facturado en cualquier canal) cuenta como Mayoristas.
+            if (vUpper.includes("BARBARA") && vUpper.includes("CASCO")) return "Mayoristas";
+
             if (vUpper.includes("CONTIMARKET") || cUpper.includes("CONTIMARKET")) return "E-commerce";
 
             if (vUpper.includes("DIRECTORIO")) return "Directorio";
@@ -1736,6 +1739,8 @@
                         if (row[10] && String(row[10]).trim() !== "") {
                             VENDEDOR_CANAL_CFG[vClean] = obtenerCanalReal("", String(row[10]).trim());
                         }
+                        // Barbara Casco: su objetivo va al canal Mayoristas (igual que sus ventas).
+                        if (vClean.includes("BARBARA") && vClean.includes("CASCO")) VENDEDOR_CANAL_CFG[vClean] = "Mayoristas";
                     }
                 });
 
@@ -2062,6 +2067,7 @@
 
         function procesarVentasData(filas) {
             lineasDeDatosGlobales = [];
+            window.__ventasVendMes = {}; // mesIdx -> Set(vendedor limpio) que facturó ese mes
             let vendedoresSet = new Set();
             let canalesSet = new Set();
             let marcasSet = new Set();
@@ -2106,6 +2112,13 @@
                 let dp = String(d.fecha).split(' ')[0];
                 if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
                 else if(dp.includes('-')) d.mesIdx = parseInt(dp.split('-')[1], 10);
+
+                // Registrar que este vendedor FACTURÓ en este mes (venta positiva), para poder
+                // anular su objetivo en los meses que ya no facturó (ej. vendedor que se fue).
+                if (d.vendedor && d.mesIdx && d.totalGs > 0) {
+                    if (!window.__ventasVendMes[d.mesIdx]) window.__ventasVendMes[d.mesIdx] = new Set();
+                    window.__ventasVendMes[d.mesIdx].add(limpiarNombre(d.vendedor));
+                }
 
                 if(d.vendedor) vendedoresSet.add(d.vendedor);
                 if(d.canal) canalesSet.add(d.canal);
@@ -2219,7 +2232,7 @@
         }
 
         const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Mirage"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Mirage", "CCI"];
 
         // =========================================================================
         // 🏆 EVALUACIÓN 37/10 — objetivos ANUALES por vendedor (editable cada año).
@@ -2303,12 +2316,23 @@
         };
 
         // Suma las metas de un rango de meses [m1..m2] (usado por YTD y por el filtro de rango de fechas).
+        // ¿El vendedor facturó (venta positiva) en ese mes? Si no, su objetivo de ese mes se anula.
+        function vendedorFacturoEnMes(v, mes) {
+            let set = window.__ventasVendMes && window.__ventasVendMes[mes];
+            if (!set || !set.size) return false;
+            let vk = limpiarNombre(v);
+            if (set.has(vk)) return true;
+            for (let n of set) { if (sonElMismoVendedor(n, vk)) return true; }
+            return false;
+        }
+
         function sumarMesesMetas(m1, m2) {
             let liveMonth = filtrosActivos.mesActualLive;
             let acc = { global: 0, diasMes: 0, diasTranscurridos: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
             for (let m = m1; m <= m2; m++) {
                 let mData = (m === liveMonth) ? METAS_LIVE : HISTORICO_METAS[String(m)];
                 if (!mData) continue;
+                let esPasado = (m !== liveMonth); // el mes actual no se anula (todavía puede facturar)
                 acc.global += (mData.global || 0);
                 acc.diasMes += (mData.diasMes || 0);
                 let transVal = (m === liveMonth && simulacionDiasTrans !== null) ? simulacionDiasTrans : (mData.diasTranscurridos || 0);
@@ -2317,8 +2341,14 @@
                 // así en YTD/rango el objetivo por canal ACUMULA por mes (y no queda en un solo mes → 703%).
                 let canalesMes = (mData.canales && Object.keys(mData.canales).length) ? mData.canales : ((typeof METAS_LIVE !== 'undefined' && METAS_LIVE.canales) ? METAS_LIVE.canales : {});
                 Object.keys(canalesMes).forEach(c => { acc.canales[c] = (acc.canales[c] || 0) + (canalesMes[c] || 0); });
-                if (mData.vendedoresTotales) Object.keys(mData.vendedoresTotales).forEach(v => { acc.vendedoresTotales[v] = (acc.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0); });
-                if (mData.vendedorMarca) Object.keys(mData.vendedorMarca).forEach(vm => { acc.vendedorMarca[vm] = (acc.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0); });
+                if (mData.vendedoresTotales) Object.keys(mData.vendedoresTotales).forEach(v => {
+                    if (esPasado && !vendedorFacturoEnMes(v, m)) return; // anula objetivo del mes sin facturación
+                    acc.vendedoresTotales[v] = (acc.vendedoresTotales[v] || 0) + (mData.vendedoresTotales[v] || 0);
+                });
+                if (mData.vendedorMarca) Object.keys(mData.vendedorMarca).forEach(vm => {
+                    if (esPasado && !vendedorFacturoEnMes(String(vm).split('|||')[0], m)) return;
+                    acc.vendedorMarca[vm] = (acc.vendedorMarca[vm] || 0) + (mData.vendedorMarca[vm] || 0);
+                });
             }
             return acc;
         }
@@ -3539,20 +3569,25 @@
                 return canales.some(c => u === c);
             };
 
-            // 1) OBJETIVOS = lo que se cargó, ACUMULADO del año (YTD): histórico + mes actual (sin duplicar).
-            let fuentes = [];
-            Object.keys(HISTORICO_METAS || {}).forEach(m => { if (HISTORICO_METAS[m]) fuentes.push(HISTORICO_METAS[m]); });
-            let mesAct = String((filtrosActivos && filtrosActivos.mesActualLive) || '');
-            if (!(HISTORICO_METAS && HISTORICO_METAS[mesAct])) fuentes.push(METAS_LIVE);
+            // 1) OBJETIVOS = lo cargado, ACUMULADO del año (YTD). Se anula el objetivo del mes en
+            //    que el vendedor ya no facturó (ej. se fue). El mes actual no se anula.
+            let liveMonthRk = filtrosActivos.mesActualLive || 0;
             let objTot = {}, objMar = {};
-            fuentes.forEach(src => {
-                if (!src) return;
-                Object.keys(src.vendedoresTotales || {}).forEach(v => { objTot[v] = (objTot[v] || 0) + (Number(src.vendedoresTotales[v]) || 0); });
-                Object.keys(src.vendedorMarca || {}).forEach(key => {
-                    let p = key.split('|||'); let vv = p[0], marca = p[1] || '';
-                    if (esMarca(marca)) objMar[vv] = (objMar[vv] || 0) + (Number(src.vendedorMarca[key]) || 0);
+            for (let m = 1; m <= liveMonthRk; m++) {
+                let mData = (m === liveMonthRk) ? METAS_LIVE : HISTORICO_METAS[String(m)];
+                if (!mData) continue;
+                let esPasado = (m !== liveMonthRk);
+                Object.keys(mData.vendedoresTotales || {}).forEach(v => {
+                    if (esPasado && !vendedorFacturoEnMes(v, m)) return;
+                    objTot[v] = (objTot[v] || 0) + (Number(mData.vendedoresTotales[v]) || 0);
                 });
-            });
+                Object.keys(mData.vendedorMarca || {}).forEach(key => {
+                    let p = key.split('|||'); let vv = p[0], marca = p[1] || '';
+                    if (!esMarca(marca)) return;
+                    if (esPasado && !vendedorFacturoEnMes(vv, m)) return;
+                    objMar[vv] = (objMar[vv] || 0) + (Number(mData.vendedorMarca[key]) || 0);
+                });
+            }
 
             // 2) VENTAS YTD por vendedor (netas, todas sus líneas). Clave = vendedor "limpio".
             let ventasTot = {}, ventasMar = {}, canalVend = {}, nombreOrig = {};
@@ -3705,7 +3740,7 @@
         }
         function construirMatrizCanal(canal, dataFichas, metas, dMes, dTr) {
             let esBasura = (n) => { let u = limpiarNombre(n); return ["TOTAL","CONSUM. FINAL","CONSUMIDOR","MAYORISTA 25","33","120","100","LICITACION","SIN VENDEDOR","ONLINE","SALON","MAYORISTA","DIRECTORIO","REPARACIONES","EXTERNA","E-COMMERCE"].some(b => u === b || u.startsWith(b)); };
-            let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v)).sort();
+            let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v) && vendedorPasaFiltro(v)).sort();
             if (!vends.length) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin comerciales para mostrar en este equipo.</div>';
 
             // Objetivo por vendedor -> marca (nombre limpio)
