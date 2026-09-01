@@ -696,7 +696,7 @@
             <div class="excel-container">
                 <div class="excel-title">🏆 EVALUACIÓN 37/10 — RANKING ANUAL POR VENDEDOR</div>
                 <div style="padding: 12px 15px; background: #ebf8ff; border: 1px solid #bee3f8; margin-bottom: 15px; font-size: 11.5px; color: #2c5282; border-radius: 6px; border-left: 5px solid #3182ce;">
-                    <strong>📐 Fórmula del Ranking:</strong> 80% × (% Logrado Ventas Generales) + 20% × (% Logrado Venta de Marcas), sobre el <strong>objetivo anual</strong>. Las ventas son <strong>acumuladas del año (YTD)</strong>. <strong>A partir de 90% califica al 37/10</strong> ✅.
+                    <strong>📐 Fórmula del Ranking:</strong> 80% × (% Logrado Ventas Generales) + 20% × (% Logrado Venta de Marcas). El <strong>objetivo</strong> es el que cargás cada mes, <strong>acumulado del año (YTD)</strong>, y las ventas también son <strong>acumuladas del año (YTD)</strong>. Aparecen todos los vendedores con objetivo cargado. <strong>A partir de 90% califica al 37/10</strong> ✅.
                 </div>
                 <div class="table-responsive-wrapper">
                     <table class="excel-table">
@@ -704,10 +704,10 @@
                             <tr>
                                 <th class="th-sort" onclick="ordenarTabla(this)">Vendedor</th>
                                 <th class="text-right th-sort" onclick="ordenarTabla(this)">Ventas Generales (YTD)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Año</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo YTD</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
                                 <th class="text-right th-sort" onclick="ordenarTabla(this)">Venta de Marcas (YTD)</th>
-                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Objetivo Marcas</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Obj. Marcas (YTD)</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">% Logrado</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">80%</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">20%</th>
@@ -2218,7 +2218,7 @@
         }
 
         const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Descuentos"];
-        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal"];
+        const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Mirage"];
 
         // =========================================================================
         // 🏆 EVALUACIÓN 37/10 — objetivos ANUALES por vendedor (editable cada año).
@@ -3497,38 +3497,79 @@
             let clavesA = LISTA_ARMAS.map(a => claveMarca(a));
             let esMarca = (mk) => { let c = claveMarca(mk); return clavesM.includes(c) || clavesA.includes(c); };
             let normCanal = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
+            // Filas que NO son vendedores reales (canales/etiquetas que a veces se cargan como fila de objetivo).
+            let noEsVendedor = (v) => {
+                if (!esVendedorReal(v)) return true;
+                let u = limpiarNombre(v);
+                let canales = ["SALON", "ONLINE", "MAYORISTAS", "MAYORISTA", "E-COMMERCE", "ECOMMERCE", "VENTA EXTERNA", "EXTERNA", "DIRECTORIO", "REPARACIONES", "CONTIMARKET", "LICITACION", "LICITACIONES"];
+                return canales.some(c => u === c);
+            };
 
-            let grupos = { "Salon": [], "Online": [], "Mayoristas": [] };
-            RANKING_ANUAL.forEach(cfg => {
-                // El ranking es anual (YTD): solo aplican los filtros de Canal y Vendedor.
-                // Marca y rango de fechas no aplican (los objetivos del ranking son anuales fijos).
-                if (filtrosActivos.canales.length && !filtrosActivos.canales.some(c => normCanal(c) === normCanal(cfg.canal))) return;
-                if (filtrosActivos.vendedores.length && !filtrosActivos.vendedores.some(v => sonElMismoVendedor(cfg.nombre, v))) return;
-                let vGen = 0, vMarcas = 0;
-                lineasDeDatosGlobales.forEach(r => {
-                    if (normCanal(r.canal) !== normCanal(cfg.canal)) return;
-                    if (!sonElMismoVendedor(r.vendedor, cfg.nombre)) return;
-                    vGen += r.totalGs;
-                    if (r.marcaFinal && esMarca(r.marcaFinal)) vMarcas += r.totalGs;
+            // 1) OBJETIVOS = lo que se cargó, ACUMULADO del año (YTD): histórico + mes actual (sin duplicar).
+            let fuentes = [];
+            Object.keys(HISTORICO_METAS || {}).forEach(m => { if (HISTORICO_METAS[m]) fuentes.push(HISTORICO_METAS[m]); });
+            let mesAct = String((filtrosActivos && filtrosActivos.mesActualLive) || '');
+            if (!(HISTORICO_METAS && HISTORICO_METAS[mesAct])) fuentes.push(METAS_LIVE);
+            let objTot = {}, objMar = {};
+            fuentes.forEach(src => {
+                if (!src) return;
+                Object.keys(src.vendedoresTotales || {}).forEach(v => { objTot[v] = (objTot[v] || 0) + (Number(src.vendedoresTotales[v]) || 0); });
+                Object.keys(src.vendedorMarca || {}).forEach(key => {
+                    let p = key.split('|||'); let vv = p[0], marca = p[1] || '';
+                    if (esMarca(marca)) objMar[vv] = (objMar[vv] || 0) + (Number(src.vendedorMarca[key]) || 0);
                 });
-                let pctGen = cfg.objAno > 0 ? vGen / cfg.objAno : 0;
-                let tieneObjM = cfg.objMarcas > 0;
-                let pctMarcas = tieneObjM ? vMarcas / cfg.objMarcas : 0;
+            });
+
+            // 2) VENTAS YTD por vendedor (netas, todas sus líneas). Clave = vendedor "limpio".
+            let ventasTot = {}, ventasMar = {}, canalVend = {}, nombreOrig = {};
+            lineasDeDatosGlobales.forEach(r => {
+                if (!r || !r.vendedor) return;
+                let vk = limpiarNombre(r.vendedor);
+                if (!nombreOrig[vk]) nombreOrig[vk] = r.vendedor;
+                ventasTot[vk] = (ventasTot[vk] || 0) + r.totalGs;
+                if (r.marcaFinal && esMarca(r.marcaFinal)) ventasMar[vk] = (ventasMar[vk] || 0) + r.totalGs;
+                if (r.canal) { if (!canalVend[vk]) canalVend[vk] = {}; let cn = normCanal(r.canal); canalVend[vk][cn] = (canalVend[vk][cn] || 0) + 1; }
+            });
+            let canalDe = (vk) => {
+                if (VENDEDOR_CANAL_CFG[vk]) return normCanal(VENDEDOR_CANAL_CFG[vk]);
+                let m = canalVend[vk] || {}, best = '', bn = 0;
+                Object.keys(m).forEach(c => { if (m[c] > bn) { bn = m[c]; best = c; } });
+                return best;
+            };
+            let nombreGrupo = (cn) => ({ "SALON": "Salon", "ONLINE": "Online", "MAYORISTAS": "Mayoristas", "VENTA EXTERNA": "Venta Externa", "DIRECTORIO": "Directorio", "E-COMMERCE": "E-commerce", "REPARACIONES": "Reparaciones" }[cn] || (cn ? (cn.charAt(0) + cn.slice(1).toLowerCase()) : "Otros"));
+            let mostrar = (vk) => nombreOrig[vk] || vk.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
+            // 3) Filas: TODOS los que tienen objetivo cargado (>0) y son vendedores reales.
+            let grupos = {};
+            Object.keys(objTot).forEach(vk => {
+                if (!(objTot[vk] > 0)) return;
+                if (noEsVendedor(vk)) return;
+                let cn = canalDe(vk);
+                let grupo = nombreGrupo(cn);
+                if (filtrosActivos.canales.length && !filtrosActivos.canales.some(c => normCanal(c) === cn)) return;
+                if (filtrosActivos.vendedores.length && !filtrosActivos.vendedores.some(v => sonElMismoVendedor(v, vk))) return;
+
+                let vGen = ventasTot[vk] || 0, vMarcas = ventasMar[vk] || 0;
+                let oGen = objTot[vk], oMar = objMar[vk] || 0;
+                let pctGen = oGen > 0 ? vGen / oGen : 0;
+                let tieneObjM = oMar > 0;
+                let pctMarcas = tieneObjM ? vMarcas / oMar : 0;
                 let f80 = pctGen * 0.8;
                 let f20 = tieneObjM ? pctMarcas * 0.2 : 0;
                 let ranking = f80 + f20;
                 let califica = ranking >= 0.90;
-                if (!grupos[cfg.canal]) grupos[cfg.canal] = [];
-                grupos[cfg.canal].push({ cfg, vGen, vMarcas, pctGen, pctMarcas, tieneObjM, f80, f20, ranking, califica });
+                if (!grupos[grupo]) grupos[grupo] = [];
+                grupos[grupo].push({ nombre: mostrar(vk), vGen, vMarcas, oGen, oMar, pctGen, pctMarcas, tieneObjM, f80, f20, ranking, califica });
             });
 
             const P = x => (x * 100).toFixed(0) + '%';
             const G = x => '₲ ' + Math.round(x).toLocaleString('es-PY');
             let html = "";
-            ["Salon", "Online", "Mayoristas"].forEach(canal => {
+            let ordenCanales = ["Salon", "Online", "Mayoristas", "Venta Externa", "Directorio", "E-commerce", "Reparaciones"];
+            Object.keys(grupos).forEach(g => { if (!ordenCanales.includes(g)) ordenCanales.push(g); });
+            ordenCanales.forEach(canal => {
                 let filas = grupos[canal] || [];
                 if (!filas.length) return;
-                // Orden por defecto: de mayor a menor Ranking (%) dentro de cada canal.
                 filas.sort((a, b) => b.ranking - a.ranking);
                 html += `<tr class="header-segmento"><td colspan="11">--- VENDEDORES ${canal.toUpperCase()} ---</td></tr>`;
                 filas.forEach(f => {
@@ -3536,12 +3577,12 @@
                     let clsMar = f.tieneObjM ? (f.pctMarcas >= 1 ? 'num-positivo' : 'num-negativo') : 'num-cero';
                     let clsRank = f.califica ? 'num-positivo' : 'num-negativo';
                     html += `<tr ${f.califica ? 'style="background:#e6fffa;"' : ''}>
-                        <td><strong>${escapeHtml(f.cfg.nombre)}</strong></td>
+                        <td><strong>${escapeHtml(f.nombre)}</strong></td>
                         <td class="text-right">${G(f.vGen)}</td>
-                        <td class="text-right">${G(f.cfg.objAno)}</td>
+                        <td class="text-right">${G(f.oGen)}</td>
                         <td class="text-center ${clsGen}">${P(f.pctGen)}</td>
                         <td class="text-right">${G(f.vMarcas)}</td>
-                        <td class="text-right">${f.tieneObjM ? G(f.cfg.objMarcas) : '-'}</td>
+                        <td class="text-right">${f.tieneObjM ? G(f.oMar) : '-'}</td>
                         <td class="text-center ${clsMar}">${f.tieneObjM ? P(f.pctMarcas) : 'N/A'}</td>
                         <td class="text-center">${P(f.f80)}</td>
                         <td class="text-center">${f.tieneObjM ? P(f.f20) : '-'}</td>
@@ -3550,7 +3591,7 @@
                     </tr>`;
                 });
             });
-            el.innerHTML = html || `<tr><td colspan="11" class="text-center num-cero">Sin datos para el ranking.</td></tr>`;
+            el.innerHTML = html || `<tr><td colspan="11" class="text-center num-cero">Sin objetivos cargados para el ranking.</td></tr>`;
         }
 
         // =========================================================================
