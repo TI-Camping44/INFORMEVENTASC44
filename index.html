@@ -2839,6 +2839,12 @@
 
             canalesSegmentos.forEach(canal => {
                 if (__canalesSel.length && !__canalesSel.includes(__normCanalF(canal))) return;
+                // Si ningún vendedor de este canal pasa el filtro (ej. al filtrar un vendedor de otro
+                // canal), no mostramos el segmento vacío.
+                let __hayVend = false;
+                if (acumVendPorCanal[canal]) { for (let vv of Object.keys(acumVendPorCanal[canal])) { if (vendedorPasaFiltro(vv)) { __hayVend = true; break; } } }
+                if (!__hayVend) { for (let vv of Object.keys(dataFichasVend)) { if (dataFichasVend[vv].canal === canal && vendedorPasaFiltro(vv)) { __hayVend = true; break; } } }
+                if (!__hayVend) return;
                 let headHtml = `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${canal.toUpperCase()} ---</td></tr>`;
                 if (canal === "E-commerce") hEcomV += headHtml; 
                 else if (canal === "Mayoristas") hMayV += headHtml; 
@@ -3404,8 +3410,16 @@
                 let a = {}; scope.forEach(c => { let dd = acumDiasPorCanal[c]; if (dd) Object.keys(dd).forEach(f => a[f] = (a[f] || 0) + dd[f]); }); return a;
             };
             let objetivoScope = (scope) => {
+                // Si hay un VENDEDOR filtrado, la línea de objetivo es la de ese/esos vendedor(es)
+                // (así la línea se mueve con el filtro y coincide con lo que se muestra).
+                if (filtrosActivos.vendedores && filtrosActivos.vendedores.length) {
+                    let o = 0; Object.keys(METAS_ACTIVAS.vendedoresTotales || {}).forEach(k => { if (vendedorPasaFiltro(k)) o += (METAS_ACTIVAS.vendedoresTotales[k] || 0); }); return o;
+                }
                 if (!scope || !scope.length) return objetivoFiltrado; // Resumen: objetivo global/filtrado
-                let o = 0; scope.forEach(c => { if (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) o += METAS_ACTIVAS.canales[c]; }); return o;
+                // Respeta también el filtro de canal (intersecta el scope del tab con lo seleccionado).
+                let sc = scope;
+                if (filtrosActivos.canales && filtrosActivos.canales.length) sc = scope.filter(c => filtrosActivos.canales.some(fc => __normCanalF(fc) === __normCanalF(c)));
+                let o = 0; sc.forEach(c => { if (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales[c]) o += METAS_ACTIVAS.canales[c]; }); return o;
             };
             let puntosDesde = (acDias) => {
                 let pts = [];
