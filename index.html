@@ -319,7 +319,7 @@
                     <button type="button" class="rot-btn" data-rot="A" onclick="setRotacion('A', this)">A</button>
                     <button type="button" class="rot-btn" data-rot="B" onclick="setRotacion('B', this)">B</button>
                     <button type="button" class="rot-btn" data-rot="C" onclick="setRotacion('C', this)">C</button>
-                    <button type="button" class="rot-btn" data-rot="D" onclick="setRotacion('D', this)">D</button>
+                    <button type="button" class="rot-btn" data-rot="SIN" onclick="setRotacion('SIN', this)">Sin categoría</button>
                 </div>
             </div>
             <div class="filter-group">
@@ -1373,8 +1373,14 @@
         function vendedorPasaFiltro(v) { return filtrosActivos.vendedores.length === 0 || filtrosActivos.vendedores.some(x => sonElMismoVendedor(v, x)); }
         function canalPasaFiltro(c) { return filtrosActivos.canales.length === 0 || filtrosActivos.canales.includes(c); }
         function marcaPasaFiltro(mk) { return filtrosActivos.marcas.length === 0 || filtrosActivos.marcas.some(x => limpiarNombre(x) === limpiarNombre(mk)); }
-        // Filtro por Categoría de Rotación (Mercadería A/B/C/D). Sin selección = pasa todo.
-        function rotacionPasaFiltro(rot) { return !filtrosActivos.rotaciones || filtrosActivos.rotaciones.length === 0 || filtrosActivos.rotaciones.includes(String(rot || "").toUpperCase().trim()); }
+        // Filtro por Categoría de Rotación (Mercadería A/B/C · Sin categoría). Sin selección = pasa todo.
+        // "Sin categoría" agrupa todo lo que no es A/B/C (incluida la D y lo que no tiene rotación cargada).
+        function rotacionPasaFiltro(rot) {
+            if (!filtrosActivos.rotaciones || filtrosActivos.rotaciones.length === 0) return true;
+            let r = String(rot || "").toUpperCase().trim();
+            let key = (r === "A" || r === "B" || r === "C") ? r : "SIN";
+            return filtrosActivos.rotaciones.includes(key);
+        }
         function setRotacion(letra, btn) {
             if (!filtrosActivos.rotaciones) filtrosActivos.rotaciones = [];
             if (letra === "") { filtrosActivos.rotaciones = []; }
