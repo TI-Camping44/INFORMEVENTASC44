@@ -227,6 +227,9 @@
         /* Modal de cartera */
         .mayo-fbtn { border:1px solid var(--gray-border,#e2e8f0); background:#fff; color:#475569; font-size:11px; font-weight:bold; padding:5px 13px; border-radius:20px; cursor:pointer; }
         .mayo-fbtn.on { background:var(--navy-main,#1e293b); color:#fff; border-color:var(--navy-main,#1e293b); }
+        /* Botones de filtro por Rotación (Mercadería A/B/C/D) */
+        .rot-btn { border:1px solid var(--gray-border,#e2e8f0); background:#fff; color:#475569; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:8px; cursor:pointer; }
+        .rot-btn.on { background:var(--navy-main,#1e293b); color:#fff; border-color:var(--navy-main,#1e293b); }
         .mayo-ccard { border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; margin-bottom:8px; overflow:hidden; }
         .mayo-chead { cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 13px; }
         .mayo-chead:hover { background:#f8fafc; }
@@ -307,6 +310,16 @@
                 <div class="multi-select" id="ms-marca">
                     <button type="button" class="ms-btn" onclick="toggleMs('ms-marca')">-- Todas las Marcas --</button>
                     <div class="ms-panel"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>📦 Mercadería (Rotación)</label>
+                <div id="rot-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button type="button" class="rot-btn on" data-rot="" onclick="setRotacion('', this)">Todas</button>
+                    <button type="button" class="rot-btn" data-rot="A" onclick="setRotacion('A', this)">A</button>
+                    <button type="button" class="rot-btn" data-rot="B" onclick="setRotacion('B', this)">B</button>
+                    <button type="button" class="rot-btn" data-rot="C" onclick="setRotacion('C', this)">C</button>
+                    <button type="button" class="rot-btn" data-rot="D" onclick="setRotacion('D', this)">D</button>
                 </div>
             </div>
             <div class="filter-group">
@@ -1290,7 +1303,7 @@
         let lineasDeDatosGlobales = [];
         let idxProductoGlobal = -1; // índice de la columna "Producto" en DATA (drill-down por marca)
         let fechasGlobalesOrdenadas = []; 
-        let filtrosActivos = { mes: "7", vendedores: [], canales: [], marcas: [], fecha: "", desde: "", hasta: "", mesActualLive: 7 };
+        let filtrosActivos = { mes: "7", vendedores: [], canales: [], marcas: [], rotaciones: [], fecha: "", desde: "", hasta: "", mesActualLive: 7 };
         // Mapa canal -> Set(vendedores) y listas limpias, para poblar los filtros según la pestaña activa.
         let vendedoresPorCanalGlobal = {};
         let vendedoresLimpiosGlobal = [];
@@ -1360,6 +1373,19 @@
         function vendedorPasaFiltro(v) { return filtrosActivos.vendedores.length === 0 || filtrosActivos.vendedores.some(x => sonElMismoVendedor(v, x)); }
         function canalPasaFiltro(c) { return filtrosActivos.canales.length === 0 || filtrosActivos.canales.includes(c); }
         function marcaPasaFiltro(mk) { return filtrosActivos.marcas.length === 0 || filtrosActivos.marcas.some(x => limpiarNombre(x) === limpiarNombre(mk)); }
+        // Filtro por Categoría de Rotación (Mercadería A/B/C/D). Sin selección = pasa todo.
+        function rotacionPasaFiltro(rot) { return !filtrosActivos.rotaciones || filtrosActivos.rotaciones.length === 0 || filtrosActivos.rotaciones.includes(String(rot || "").toUpperCase().trim()); }
+        function setRotacion(letra, btn) {
+            if (!filtrosActivos.rotaciones) filtrosActivos.rotaciones = [];
+            if (letra === "") { filtrosActivos.rotaciones = []; }
+            else { let i = filtrosActivos.rotaciones.indexOf(letra); if (i >= 0) filtrosActivos.rotaciones.splice(i, 1); else filtrosActivos.rotaciones.push(letra); }
+            document.querySelectorAll('#rot-btns .rot-btn').forEach(b => {
+                let r = b.getAttribute('data-rot');
+                if (r === "") b.classList.toggle('on', filtrosActivos.rotaciones.length === 0);
+                else b.classList.toggle('on', filtrosActivos.rotaciones.includes(r));
+            });
+            try { filtrarYRenderizarTodo(); } catch (e) { console.error('setRotacion', e); }
+        }
         let simulacionDiasTrans = null;
 
         let HISTORICO_METAS = {
@@ -2082,11 +2108,13 @@
             // Se busca en la fila de títulos, así funciona sin importar la posición de la columna.
             idxProductoGlobal = -1;
             let idxCategoria = -1;
+            let idxRotacion = -1;
             if (filas[0]) {
                 filas[0].forEach((h, idx) => {
                     let hn = limpiarNombre(h);
                     if (idxProductoGlobal === -1 && hn === "PRODUCTO") idxProductoGlobal = idx;
                     if (idxCategoria === -1 && hn.startsWith("CATEGORIA")) idxCategoria = idx;
+                    if (idxRotacion === -1 && hn === "ROTACION") idxRotacion = idx;
                 });
             }
 
@@ -2106,7 +2134,8 @@
                     unidadNegocio: r[16], vendedor: r[17], canal: cNormalizado, totalGs: handleNum(r[30]),
                     contimarket: esContimarket,
                     producto: (idxProductoGlobal >= 0 ? (r[idxProductoGlobal] || "") : ""),
-                    categoria: (idxCategoria >= 0 ? (r[idxCategoria] || "") : "")
+                    categoria: (idxCategoria >= 0 ? (r[idxCategoria] || "") : ""),
+                    rotacion: (idxRotacion >= 0 ? String(r[idxRotacion] || "").toUpperCase().trim() : "")
                 };
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -2216,7 +2245,9 @@
             if (document.getElementById('select-desde')) document.getElementById('select-desde').value = "";
             if (document.getElementById('select-hasta')) document.getElementById('select-hasta').value = "";
             filtrosActivos.fecha = ""; filtrosActivos.desde = ""; filtrosActivos.hasta = "";
-            filtrosActivos.vendedores = []; filtrosActivos.canales = []; filtrosActivos.marcas = [];
+            filtrosActivos.vendedores = []; filtrosActivos.canales = []; filtrosActivos.marcas = []; filtrosActivos.rotaciones = [];
+            // Reset de los botones de Rotación (Mercadería): deja "Todas" activo.
+            document.querySelectorAll('#rot-btns .rot-btn').forEach(b => b.classList.toggle('on', b.getAttribute('data-rot') === ""));
             // Destildar todas las casillas y restaurar textos
             ['ms-vendedor','ms-canal','ms-marca'].forEach(id => {
                 let panel = document.querySelector('#' + id + ' .ms-panel');
@@ -2449,6 +2480,7 @@
                 if (!vendedorPasaFiltro(r.vendedor)) return;
                 if (!canalPasaFiltro(r.canal)) return;
                 if (!marcaPasaFiltro(r.marcaFinal)) return;
+                if (!rotacionPasaFiltro(r.rotacion)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return;
 
                 let esNC = (r.documento === "Nota de Crédito");
