@@ -2378,6 +2378,21 @@
         function filtrarYRenderizarTodo() {
           try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
+            // Clonamos (canales aparte) para no mutar el histórico cacheado.
+            METAS_ACTIVAS = Object.assign({}, METAS_ACTIVAS, { canales: Object.assign({}, METAS_ACTIVAS.canales || {}) });
+            // Si el período NO trae objetivo por canal pero sí por vendedor (ej. meses viejos que se
+            // cargaron solo por vendedor), derivamos el objetivo de cada canal sumando los objetivos
+            // de sus vendedores. Así esos meses no muestran 0 en la vista por canal.
+            (function completarCanalesDesdeVendedores() {
+                let vt = METAS_ACTIVAS.vendedoresTotales || {};
+                if (!Object.keys(vt).length) return;
+                let normC = (c) => { let x = limpiarNombre(c); return x.startsWith("MAYORISTA") ? "MAYORISTAS" : x; };
+                let porCanal = {};
+                Object.keys(vt).forEach(k => { let cv = VENDEDOR_CANAL_CFG[k]; if (!cv) return; let cn = normC(cv); porCanal[cn] = (porCanal[cn] || 0) + (vt[k] || 0); });
+                ["Salon", "Online", "Venta Externa", "E-commerce", "Mayoristas", "Directorio", "Reparaciones"].forEach(canal => {
+                    if (!(METAS_ACTIVAS.canales[canal] > 0)) { let der = porCanal[normC(canal)] || 0; if (der > 0) METAS_ACTIVAS.canales[canal] = der; }
+                });
+            })();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
             acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
