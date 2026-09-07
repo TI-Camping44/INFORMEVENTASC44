@@ -1740,12 +1740,17 @@
 
             let dMesFinal = 25;
             let dTransFinal = 4.5;
+            let _corteStr = "";
+            let _feriadosSet = new Set();
 
             try {
                 filas.forEach((row, idx) => {
                     if(!row || row.length === 0) return; 
                     
                     let col0 = String(row[0] || "").trim();
+                    if (col0.includes("Fecha Actual (Corte):") && row[1]) _corteStr = String(row[1]).trim();
+                    // Feriados (columna C): juntamos cualquier fecha parseable del bloque de feriados.
+                    if (row[2]) { let _ft = parseDateToTime(String(row[2]).trim()); if (_ft > 0) { let _fd = new Date(_ft); _feriadosSet.add(_fd.getFullYear() + "-" + String(_fd.getMonth() + 1).padStart(2, "0") + "-" + String(_fd.getDate()).padStart(2, "0")); } }
                     if (col0 === "Días Hábiles del Mes:") {
                         let val = parseFloat(String(row[1]).replace(',', '.'));
                         if (val > 0 && val <= 31) dMesFinal = val;
@@ -1775,6 +1780,20 @@
                         if (vClean.includes("BARBARA") && vClean.includes("CASCO")) VENDEDOR_CANAL_CFG[vClean] = "Mayoristas";
                     }
                 });
+
+                // ✅ Días hábiles calculados EN EL NAVEGADOR desde la fecha de corte + feriados
+                // (mismo criterio que la planilla: lun-vie=1, sábado=0,5, feriados se restan).
+                // No depende de leer B6/B7 del CSV, que a veces no llegan y caían en los defaults 25/4,5.
+                let _corteT = parseDateToTime(_corteStr);
+                if (_corteT > 0) {
+                    let _cD = new Date(_corteT); _cD.setHours(0, 0, 0, 0);
+                    let _ini = new Date(_cD.getFullYear(), _cD.getMonth(), 1);
+                    let _finMes = new Date(_cD.getFullYear(), _cD.getMonth() + 1, 0);
+                    let _hab = (a, b) => { let t = 0, d = new Date(a.getTime()); while (d <= b) { let dw = d.getDay(); let k = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); if (!_feriadosSet.has(k)) { if (dw >= 1 && dw <= 5) t += 1; else if (dw === 6) t += 0.5; } d.setDate(d.getDate() + 1); } return t; };
+                    let _dm = _hab(_ini, _finMes), _dt = _hab(_ini, _cD);
+                    if (_dm > 0) dMesFinal = _dm;
+                    if (_dt > 0) dTransFinal = _dt;
+                }
 
                 METAS_LIVE.diasMes = dMesFinal;
                 METAS_LIVE.diasTranscurridos = dTransFinal;
