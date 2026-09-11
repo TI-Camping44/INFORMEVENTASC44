@@ -37,6 +37,7 @@
         .menu-item.active { background-color: var(--teal-accent); color: white; }
         .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: auto; border-left: 3px solid white; }
         .menu-item.bonos-highlight:hover { background-color: #c05621; }
+        .nav-toggle { display: none; }  /* Botón hamburguesa: solo en celular */
 
         /* --- CONTENIDO PRINCIPAL --- */
         .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; width: calc(100% - 220px); }
@@ -175,26 +176,71 @@
            OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
         @media (max-width: 992px) {
-            body { flex-direction: column; overflow-y: auto; } 
-            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
+            body { flex-direction: column; overflow-y: auto; }
+            /* Menú superior tipo HAMBURGUESA: barra compacta (logo + botón) y lista desplegable */
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+            .sidebar-logo { display: block; width: 44px; margin: 0; }
             .sidebar h2 { display: none; }
-            .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
-            
-            .main-content { padding: 10px; width: 100%; overflow: visible; }
+            .nav-toggle { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.28); border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: bold; cursor: pointer; }
+            .nav-toggle:active { background: rgba(255,255,255,0.28); }
+            /* Ítems ocultos por defecto; se despliegan full-width al abrir */
+            .sidebar .menu-item { display: none; flex: 1 1 100%; max-width: 100%; margin: 0; font-size: 12.5px; padding: 12px 14px; justify-content: flex-start; text-align: left; border-radius: 8px; }
+            .sidebar.menu-open .menu-item { display: flex; }
+            .sidebar .menu-item.bonos-highlight { margin-top: 0; }
+
+            .main-content { padding: 12px; width: 100%; overflow: visible; }
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
             .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
-            
-            .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
-            .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
-            
-            .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
-            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
-            table.excel-table { min-width: 700px; }
+
+            .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; gap: 14px; }
+            .fichas-grid { grid-template-columns: 1fr; gap: 15px; }
+            .chart-wrapper { padding: 10px; }
+
+            /* Tablas: compactas para que entre más en pantalla; las anchas hacen scroll horizontal suave */
+            .excel-container { padding: 10px; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 8px; }
+            table.excel-table { min-width: 0; font-size: 10.5px; }
+            table.excel-table th { padding: 7px 8px; font-size: 10px; }
+            table.excel-table td { padding: 6px 8px; }
+            table.excel-table tr.header-segmento td { font-size: 11px; padding: 8px 10px; }
+        }
+
+        /* Teléfonos angostos: aún más compacto */
+        @media (max-width: 480px) {
+            .sidebar-logo { width: 36px; }
+            .nav-toggle { padding: 7px 12px; font-size: 12px; }
+            .sidebar .menu-item { font-size: 12px; padding: 11px 12px; }
+            .main-content { padding: 8px; }
+            .excel-container { padding: 8px; margin-bottom: 16px; }
+            table.excel-table { font-size: 10px; }
+            table.excel-table th { padding: 6px 6px; font-size: 9.5px; }
+            table.excel-table td { padding: 5px 6px; }
+        }
+
+        /* =========================================================
+           CELULAR: TABLAS EN MODO TARJETA (cada fila apilada, sin scroll horizontal)
+           Las etiquetas (data-label) las agrega el JS aplicarTablasResponsive().
+           ========================================================= */
+        @media (max-width: 600px) {
+            .excel-container { overflow-x: visible; }
+            table.excel-table, table.excel-table tbody { display: block; width: 100%; min-width: 0; }
+            table.excel-table thead { display: none; }
+            table.excel-table tr { display: block; margin: 0 0 12px; border: 1px solid var(--gray-border); border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+            table.excel-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: right; padding: 9px 12px; border: none; border-bottom: 1px solid #eef2f7; white-space: normal; word-break: break-word; }
+            table.excel-table td:last-child { border-bottom: none; }
+            table.excel-table td[data-label]::before { content: attr(data-label); font-weight: 600; color: #64748b; text-align: left; flex: 0 0 42%; }
+            /* Primera celda = título de la tarjeta (nombre del vendedor / concepto) */
+            table.excel-table td.card-title { background: #eef4fb; font-weight: bold; color: var(--navy-main); font-size: 12.5px; text-align: left; justify-content: flex-start; }
+            table.excel-table td.card-title::before { content: none; }
+            /* Filas de sección (--- EQUIPO X ---): barra completa, como separador */
+            table.excel-table tr.header-segmento, table.excel-table tr.fila-full { border: none; box-shadow: none; margin: 10px 0 6px; }
+            table.excel-table tr.header-segmento td, table.excel-table tr.fila-full td { display: block; text-align: center; border-bottom: none; }
+            table.excel-table tr.header-segmento td::before, table.excel-table tr.fila-full td::before { content: none; }
+            table.excel-table tr.total-segmento { border: 2px solid var(--navy-main); background: #f7fafc; }
         }
 
         @media print { body { display: none; } }
@@ -272,6 +318,7 @@
     <div class="sidebar" id="main-sidebar">
         <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
+        <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-label="Abrir menú">☰ Menú</button>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
@@ -812,6 +859,11 @@
     </div>
 
     <script>
+        // Menú hamburguesa (celular): abre/cierra la lista de pestañas.
+        function toggleNav() {
+            let sb = document.getElementById('main-sidebar');
+            if (sb) sb.classList.toggle('menu-open');
+        }
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -819,6 +871,9 @@
             if (targetTab) targetTab.classList.add('active');
             if (element) element.classList.add('active');
             tabActivaId = tabId;
+            // Celular: al elegir una pestaña, cierro el menú desplegable.
+            let sb = document.getElementById('main-sidebar');
+            if (sb) sb.classList.remove('menu-open');
             ajustarFiltrosPorTab(tabId);
             // Re-render para que la META del encabezado se agrupe según la pestaña activa.
             try { filtrarYRenderizarTodo(); } catch (e) {}
@@ -2466,8 +2521,23 @@
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
             // 💰 Anticipos por vendedor (dedup por Nº de orden): para el detalle en el pop-up del vendedor.
             // Se expone en window porque el pop-up se arma en renderizarEstructuraVisual (otra función).
+            // Se calcula sobre TODOS los datos del vendedor (no depende del mes filtrado): los anticipos
+            // pendientes de cobro son un pendiente vivo, tienen que verse siempre.
             let acumAnticiposVend = {};
             window.__acumAnticiposVend = acumAnticiposVend;
+            (lineasDeDatosGlobales || []).forEach(r => {
+                if (r && r.esAnticipo && r.nroOrden && r.vendedor) {
+                    if (!acumAnticiposVend[r.vendedor]) acumAnticiposVend[r.vendedor] = { orders: {}, ventaCompleta: 0, cobrado: 0, pendiente: 0, cant: 0 };
+                    let _av = acumAnticiposVend[r.vendedor];
+                    if (!_av.orders[r.nroOrden]) {
+                        _av.orders[r.nroOrden] = true;
+                        _av.ventaCompleta += r.ventaCompletaAnt;
+                        _av.cobrado += r.cobradoAnt;
+                        _av.pendiente += r.pendienteAnt;
+                        _av.cant += 1;
+                    }
+                }
+            });
             acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
             acumMarcasCanalVendGlobal = {}; // se recalcula por canal+vendedor en cada render
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
@@ -2524,20 +2594,6 @@
                 if (!marcaPasaFiltro(r.marcaFinal)) return;
                 if (!rotacionPasaFiltro(r.rotacion)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return;
-
-                // 💰 Anticipos: acumulo por vendedor, deduplicando por Nº de orden (las filas de desglose
-                //    repiten Venta Completa / Cobrado / Pendiente por cada producto de la misma orden).
-                if (r.esAnticipo && r.nroOrden && r.vendedor) {
-                    if (!acumAnticiposVend[r.vendedor]) acumAnticiposVend[r.vendedor] = { orders: {}, ventaCompleta: 0, cobrado: 0, pendiente: 0, cant: 0 };
-                    let _av = acumAnticiposVend[r.vendedor];
-                    if (!_av.orders[r.nroOrden]) {
-                        _av.orders[r.nroOrden] = true;
-                        _av.ventaCompleta += r.ventaCompletaAnt;
-                        _av.cobrado += r.cobradoAnt;
-                        _av.pendiente += r.pendienteAnt;
-                        _av.cant += 1;
-                    }
-                }
 
                 let esNC = (r.documento === "Nota de Crédito");
                 let m = r.totalGs;
@@ -4048,6 +4104,38 @@
         }
         function cerrarVendModal() { document.getElementById('vsit-overlay').classList.remove('open'); }
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarVendModal(); });
+
+        // === CELULAR: convierte las tablas anchas en tarjetas apiladas ===
+        // Le pone a cada celda su etiqueta (data-label = título de la columna) para que el CSS
+        // móvil la muestre como "Etiqueta: valor". En escritorio los data-label son invisibles.
+        function aplicarTablasResponsive() {
+            document.querySelectorAll('table.excel-table').forEach(function (tabla) {
+                var ths = tabla.querySelectorAll('thead th');
+                if (!ths.length) return;
+                var labels = Array.prototype.map.call(ths, function (th) { return th.textContent.trim(); });
+                tabla.querySelectorAll('tbody tr').forEach(function (tr) {
+                    var tds = tr.children;
+                    // Fila de sección (una sola celda con colspan) => barra completa, sin etiquetas.
+                    if (tds.length <= 1) { tr.classList.add('fila-full'); return; }
+                    for (var i = 0; i < tds.length; i++) {
+                        if (i === 0) { tds[0].classList.add('card-title'); tds[0].removeAttribute('data-label'); }
+                        else if (labels[i]) tds[i].setAttribute('data-label', labels[i]);
+                    }
+                });
+            });
+        }
+        // Se reaplica en cada re-render (el dashboard reconstruye las tablas al filtrar).
+        (function () {
+            var _tt;
+            var reaplicar = function () { clearTimeout(_tt); _tt = setTimeout(aplicarTablasResponsive, 120); };
+            var mc = document.querySelector('.main-content');
+            if (mc && window.MutationObserver) {
+                new MutationObserver(reaplicar).observe(mc, { childList: true, subtree: true });
+            }
+            window.addEventListener('resize', reaplicar);
+            document.addEventListener('DOMContentLoaded', reaplicar);
+            setTimeout(aplicarTablasResponsive, 800);
+        })();
     </script>
 </body>
 </html>
