@@ -175,26 +175,43 @@
            OPTIMIZACIÓN PARA CELULARES
            ========================================================= */
         @media (max-width: 992px) {
-            body { flex-direction: column; overflow-y: auto; } 
-            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .sidebar-logo { display: block; width: 60px; margin: 0 10px 10px 10px; }
+            body { flex-direction: column; overflow-y: auto; }
+            /* Menú superior: prolijo, 2 por fila, sin amontonarse */
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 10px 10px 12px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+            .sidebar-logo { display: block; width: 44px; margin: 0 6px 0 0; }
             .sidebar h2 { display: none; }
-            .menu-item { font-size: 11px; padding: 8px 12px; margin: 4px; flex: 1 1 auto; justify-content: center; text-align: center; }
-            
-            .main-content { padding: 10px; width: 100%; overflow: visible; }
+            .menu-item { font-size: 11px; padding: 9px 10px; margin: 0; flex: 1 1 42%; max-width: 48%; justify-content: center; text-align: center; border-radius: 8px; }
+
+            .main-content { padding: 12px; width: 100%; overflow: visible; }
             .filter-panel { flex-direction: column; align-items: stretch; }
             .filter-group, .btn-clear-filters, #btn-share-vendor { width: 100%; flex: 1 1 auto; }
             .sheet-header-box { flex-direction: column; align-items: stretch; text-align: center; }
             .header-actions { flex-direction: column; width: 100%; }
             .time-box-table { width: 100%; }
             .btn-sync { justify-content: center; width: 100%; }
-            
-            .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; }
-            .fichas-grid { grid-template-columns: 1fr; gap: 15px; } 
-            
-            .excel-container { padding: 10px; width: 100%; box-sizing: border-box; }
-            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 10px; }
-            table.excel-table { min-width: 700px; }
+
+            .charts-row, .grid-1-2, .three-column-grid { grid-template-columns: 1fr; gap: 14px; }
+            .fichas-grid { grid-template-columns: 1fr; gap: 15px; }
+            .chart-wrapper { padding: 10px; }
+
+            /* Tablas: compactas para que entre más en pantalla; las anchas hacen scroll horizontal suave */
+            .excel-container { padding: 10px; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+            .excel-title { margin: -10px -10px 10px -10px; font-size: 11px; flex-wrap: wrap; gap: 8px; }
+            table.excel-table { min-width: 0; font-size: 10.5px; }
+            table.excel-table th { padding: 7px 8px; font-size: 10px; }
+            table.excel-table td { padding: 6px 8px; }
+            table.excel-table tr.header-segmento td { font-size: 11px; padding: 8px 10px; }
+        }
+
+        /* Teléfonos angostos: aún más compacto */
+        @media (max-width: 480px) {
+            .sidebar-logo { width: 38px; }
+            .menu-item { font-size: 10px; padding: 8px 6px; flex-basis: 46%; }
+            .main-content { padding: 8px; }
+            .excel-container { padding: 8px; margin-bottom: 16px; }
+            table.excel-table { font-size: 10px; }
+            table.excel-table th { padding: 6px 6px; font-size: 9.5px; }
+            table.excel-table td { padding: 5px 6px; }
         }
 
         @media print { body { display: none; } }
