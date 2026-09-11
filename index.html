@@ -2465,7 +2465,9 @@
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
             // 💰 Anticipos por vendedor (dedup por Nº de orden): para el detalle en el pop-up del vendedor.
+            // Se expone en window porque el pop-up se arma en renderizarEstructuraVisual (otra función).
             let acumAnticiposVend = {};
+            window.__acumAnticiposVend = acumAnticiposVend;
             acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
             acumMarcasCanalVendGlobal = {}; // se recalcula por canal+vendedor en cada render
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
@@ -2982,7 +2984,7 @@
                         let cumplida = (obj > 0 && net >= obj) ? ' class="row-cumplida"' : '';
                         let flecha = '', clasePctEsp = '';
                         if (obj > 0) {
-                            let sidx = window.__vendSit.push({ nombre: v, canal: canal, net: net, obj: obj, dMes: dMes, dTr: dTr, ant: acumAnticiposVend[v] || null }) - 1;
+                            let sidx = window.__vendSit.push({ nombre: v, canal: canal, net: net, obj: obj, dMes: dMes, dTr: dTr, ant: (window.__acumAnticiposVend || {})[v] || null }) - 1;
                             let claseFl = (net < esp) ? 'vend-atraso' : 'vend-aldia';
                             flecha = `<span class="vend-flecha ${claseFl}" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx})">▶</span>`;
                             clasePctEsp = claseFl;
@@ -3012,7 +3014,7 @@
                         if (obj > 0) {
                             let esp = Math.round((obj / dMes) * dTr);
                             subEsp += esp; subObj += obj;
-                            let sidx0 = window.__vendSit.push({ nombre: v, canal: canal, net: 0, obj: obj, dMes: dMes, dTr: dTr, ant: acumAnticiposVend[v] || null }) - 1;
+                            let sidx0 = window.__vendSit.push({ nombre: v, canal: canal, net: 0, obj: obj, dMes: dMes, dTr: dTr, ant: (window.__acumAnticiposVend || {})[v] || null }) - 1;
                             let flecha0 = `<span class="vend-flecha vend-atraso" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx0})">▶</span>`;
                             let rowHtml = `<tr><td>${flecha0}${escapeHtml(v)}</td><td class="text-right">₲ 0</td><td class="text-right num-cero">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center vend-atraso">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
                             if (canal === "E-commerce") hEcomV += rowHtml; 
