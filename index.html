@@ -2134,12 +2134,19 @@
             idxProductoGlobal = -1;
             let idxCategoria = -1;
             let idxRotacion = -1;
+            // 💰 Columnas de anticipo (Paso 2): detección por nombre de encabezado.
+            let idxEsAnt = -1, idxNroOrden = -1, idxVtaComp = -1, idxMontoAnt = -1, idxPendCli = -1;
             if (filas[0]) {
                 filas[0].forEach((h, idx) => {
                     let hn = limpiarNombre(h);
                     if (idxProductoGlobal === -1 && hn === "PRODUCTO") idxProductoGlobal = idx;
                     if (idxCategoria === -1 && hn.startsWith("CATEGORIA")) idxCategoria = idx;
                     if (idxRotacion === -1 && hn === "ROTACION") idxRotacion = idx;
+                    if (idxEsAnt === -1 && hn === "ES ANTICIPO") idxEsAnt = idx;
+                    if (idxNroOrden === -1 && hn.includes("ORDEN")) idxNroOrden = idx;
+                    if (idxVtaComp === -1 && hn === "VENTA COMPLETA") idxVtaComp = idx;
+                    if (idxMontoAnt === -1 && hn === "MONTO ANTICIPO") idxMontoAnt = idx;
+                    if (idxPendCli === -1 && hn === "PENDIENTE CLIENTE") idxPendCli = idx;
                 });
             }
 
@@ -2160,7 +2167,13 @@
                     contimarket: esContimarket,
                     producto: (idxProductoGlobal >= 0 ? (r[idxProductoGlobal] || "") : ""),
                     categoria: (idxCategoria >= 0 ? (r[idxCategoria] || "") : ""),
-                    rotacion: (idxRotacion >= 0 ? String(r[idxRotacion] || "").toUpperCase().trim() : "")
+                    rotacion: (idxRotacion >= 0 ? String(r[idxRotacion] || "").toUpperCase().trim() : ""),
+                    // 💰 Anticipo (Paso 2)
+                    esAnticipo: (idxEsAnt >= 0 ? String(r[idxEsAnt] || "").toUpperCase().trim() === "SI" : false),
+                    nroOrden: (idxNroOrden >= 0 ? String(r[idxNroOrden] || "").trim() : ""),
+                    ventaCompletaAnt: (idxVtaComp >= 0 ? handleNum(r[idxVtaComp]) : 0),
+                    cobradoAnt: (idxMontoAnt >= 0 ? handleNum(r[idxMontoAnt]) : 0),
+                    pendienteAnt: (idxPendCli >= 0 ? handleNum(r[idxPendCli]) : 0)
                 };
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -2451,6 +2464,8 @@
             })();
             let data = { bruta: 0, nc: 0, neta: 0 };
             let acumDias = {}, acumCanales = {}, acumVendPorCanal = {}, acumMarcas = {}, acumClientesNC = {}, acumFechasNC = {}, acumVendedorNC = {};
+            // 💰 Anticipos por vendedor (dedup por Nº de orden): para el detalle en el pop-up del vendedor.
+            let acumAnticiposVend = {};
             acumMarcasPorCanalGlobal = {}; // se recalcula por canal en cada render
             acumMarcasCanalVendGlobal = {}; // se recalcula por canal+vendedor en cada render
             let brutoEco = { TUPI: 0, PORTER: 0, OTROS: 0 }, ncEco = { TUPI: 0, PORTER: 0, OTROS: 0 };
@@ -2507,6 +2522,20 @@
                 if (!marcaPasaFiltro(r.marcaFinal)) return;
                 if (!rotacionPasaFiltro(r.rotacion)) return;
                 if (filtroTime > 0 && parseDateToTime(r.fecha) !== filtroTime) return;
+
+                // 💰 Anticipos: acumulo por vendedor, deduplicando por Nº de orden (las filas de desglose
+                //    repiten Venta Completa / Cobrado / Pendiente por cada producto de la misma orden).
+                if (r.esAnticipo && r.nroOrden && r.vendedor) {
+                    if (!acumAnticiposVend[r.vendedor]) acumAnticiposVend[r.vendedor] = { orders: {}, ventaCompleta: 0, cobrado: 0, pendiente: 0, cant: 0 };
+                    let _av = acumAnticiposVend[r.vendedor];
+                    if (!_av.orders[r.nroOrden]) {
+                        _av.orders[r.nroOrden] = true;
+                        _av.ventaCompleta += r.ventaCompletaAnt;
+                        _av.cobrado += r.cobradoAnt;
+                        _av.pendiente += r.pendienteAnt;
+                        _av.cant += 1;
+                    }
+                }
 
                 let esNC = (r.documento === "Nota de Crédito");
                 let m = r.totalGs;
@@ -2953,7 +2982,7 @@
                         let cumplida = (obj > 0 && net >= obj) ? ' class="row-cumplida"' : '';
                         let flecha = '', clasePctEsp = '';
                         if (obj > 0) {
-                            let sidx = window.__vendSit.push({ nombre: v, canal: canal, net: net, obj: obj, dMes: dMes, dTr: dTr }) - 1;
+                            let sidx = window.__vendSit.push({ nombre: v, canal: canal, net: net, obj: obj, dMes: dMes, dTr: dTr, ant: acumAnticiposVend[v] || null }) - 1;
                             let claseFl = (net < esp) ? 'vend-atraso' : 'vend-aldia';
                             flecha = `<span class="vend-flecha ${claseFl}" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx})">▶</span>`;
                             clasePctEsp = claseFl;
@@ -2983,7 +3012,7 @@
                         if (obj > 0) {
                             let esp = Math.round((obj / dMes) * dTr);
                             subEsp += esp; subObj += obj;
-                            let sidx0 = window.__vendSit.push({ nombre: v, canal: canal, net: 0, obj: obj, dMes: dMes, dTr: dTr }) - 1;
+                            let sidx0 = window.__vendSit.push({ nombre: v, canal: canal, net: 0, obj: obj, dMes: dMes, dTr: dTr, ant: acumAnticiposVend[v] || null }) - 1;
                             let flecha0 = `<span class="vend-flecha vend-atraso" title="Ver situación del vendedor" onclick="event.stopPropagation(); abrirVendModal(${sidx0})">▶</span>`;
                             let rowHtml = `<tr><td>${flecha0}${escapeHtml(v)}</td><td class="text-right">₲ 0</td><td class="text-right num-cero">₲ 0</td><td class="text-right">₲ ${esp.toLocaleString('es-PY')}</td><td class="text-center vend-atraso">0%</td><td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td><td class="text-center">0%</td></tr>`;
                             if (canal === "E-commerce") hEcomV += rowHtml; 
@@ -3999,6 +4028,17 @@
                 html += `</div>`;
             } else if (d.obj > 0) {
                 html += `<div class="vsit-destacado"><div class="big vend-aldia">✓ Objetivo del mes alcanzado</div></div>`;
+            }
+
+            // 💰 Detalle de ANTICIPOS del vendedor (solo si tiene órdenes con anticipo).
+            if (d.ant && d.ant.cant > 0) {
+                html += `<div style="margin-top:14px; padding:12px 14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.35); border-radius:10px;">`;
+                html += `<div style="font-weight:700; font-size:13px; color:var(--text); margin-bottom:8px;">💰 Anticipos · ${d.ant.cant} orden${d.ant.cant > 1 ? 'es' : ''}</div>`;
+                html += `<div class="vsit-row"><span class="lbl">Facturado total (venta completa incluida)</span><span class="val">${vsitFmt(d.net)}</span></div>`;
+                html += `<div class="vsit-row"><span class="lbl">Facturado c/ anticipo (venta completa)</span><span class="val">${vsitFmt(d.ant.ventaCompleta)}</span></div>`;
+                html += `<div class="vsit-row"><span class="lbl">Cobrado de anticipo</span><span class="val">${vsitFmt(d.ant.cobrado)}</span></div>`;
+                html += `<div class="vsit-row" style="border:none;"><span class="lbl">Pendiente de cobro (a gestionar)</span><span class="val vend-atraso">${vsitFmt(d.ant.pendiente)}</span></div>`;
+                html += `</div>`;
             }
 
             document.getElementById('vsit-body').innerHTML = html;
