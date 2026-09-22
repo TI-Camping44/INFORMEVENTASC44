@@ -1487,6 +1487,8 @@
             let c = claveMarca(m);
             if (c === "BWC" || c.startsWith("WALKER")) return "GSM";
             if (c.includes("AITOR")) return "Aitor";
+            if (c.includes("OSIGHT")) return "Osight";     // "Osight HK" y variantes -> Osight
+            if (c.includes("VAULTEK")) return "Vaultek";   // variantes de Vaultek -> Vaultek
             return m;
         }
         // ¿La marca entra en el desglose de "Marcas y Líneas"?
