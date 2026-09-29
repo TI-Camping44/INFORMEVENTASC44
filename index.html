@@ -323,6 +323,7 @@
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
+        <div class="menu-item" onclick="switchTab('tab-concil', this)">🔎 Conciliación Odoo</div>
         <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
         <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
         <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
@@ -852,6 +853,30 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-concil" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">🔎 CONCILIACIÓN CON ODOO (por vendedor)</div>
+                <p style="font-size:12px; color:#4a5568; padding:0 4px 8px;">
+                    Reconstruye el <b>bruto de Odoo</b> a partir de lo que muestra el panel, con esta fórmula por vendedor:<br>
+                    <b>Equivalente Odoo = Contado en panel − Ajuste anticipo + Exclusiones</b>.<br>
+                    Compará la última columna con tu pivot de Odoo <i>"Análisis de facturas"</i> (mismos equipos, mismo mes). Si coinciden, está todo conciliado.
+                    Hacé clic en un vendedor para ver el detalle de qué se excluyó y por qué.
+                </p>
+                <div class="table-responsive-wrapper">
+                    <table class="excel-table" id="tabla-concil">
+                        <thead><tr>
+                            <th>Vendedor (Odoo)</th>
+                            <th class="text-right">Contado en panel</th>
+                            <th class="text-right">(−) Ajuste anticipo</th>
+                            <th class="text-right">(+) Exclusiones</th>
+                            <th class="text-right">= Equivalente Odoo</th>
+                        </tr></thead>
+                        <tbody id="concil-body"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -2202,6 +2227,8 @@
             let idxRotacion = -1;
             // 💰 Columnas de anticipo (Paso 2): detección por nombre de encabezado.
             let idxEsAnt = -1, idxNroOrden = -1, idxVtaComp = -1, idxMontoAnt = -1, idxPendCli = -1;
+            // 🔎 Columnas de conciliación (nuevas): Monto Excluido, Motivo Exclusion, Vendedor Odoo, Nro. Movimiento.
+            let idxMontoExcl = -1, idxMotivoExcl = -1, idxVendOdoo = -1, idxNroMov = -1;
             if (filas[0]) {
                 filas[0].forEach((h, idx) => {
                     let hn = limpiarNombre(h);
@@ -2213,12 +2240,29 @@
                     if (idxVtaComp === -1 && hn === "VENTA COMPLETA") idxVtaComp = idx;
                     if (idxMontoAnt === -1 && hn === "MONTO ANTICIPO") idxMontoAnt = idx;
                     if (idxPendCli === -1 && hn === "PENDIENTE CLIENTE") idxPendCli = idx;
+                    if (idxMontoExcl === -1 && hn.startsWith("MONTO EXCLUIDO")) idxMontoExcl = idx;
+                    if (idxMotivoExcl === -1 && hn.startsWith("MOTIVO EXCLUSION")) idxMotivoExcl = idx;
+                    if (idxVendOdoo === -1 && hn === "VENDEDOR ODOO") idxVendOdoo = idx;
+                    if (idxNroMov === -1 && (hn.startsWith("NRO. MOVIMIENTO") || hn.startsWith("NRO MOVIMIENTO"))) idxNroMov = idx;
                 });
             }
+            window.__reconExcl = []; // 🔎 filas de conciliación (exclusiones) por mes/vendedorOdoo/motivo
 
             for (let i = 1; i < filas.length; i++) {
                 let r = filas[i];
                 if (!r || r.length < 31 || r[1] === "") continue;
+                // 🔎 MODO CONCILIACIÓN: las filas "CONCILIACION" no son ventas (TOTAL GS = 0). NO entran al
+                //   panel: se guardan aparte para reconstruir el bruto de Odoo. Se detectan por Documento.
+                if (String(r[5] || "").toUpperCase() === "CONCILIACION") {
+                    let _mesC = 0; { let _dp = String(r[1]).split(' ')[0]; if (_dp.includes('/')) _mesC = parseInt(_dp.split('/')[1], 10); else if (_dp.includes('-')) _mesC = parseInt(_dp.split('-')[1], 10); }
+                    window.__reconExcl.push({
+                        mes: _mesC,
+                        vendedorOdoo: (idxVendOdoo >= 0 ? String(r[idxVendOdoo] || "").trim() : String(r[17] || "").trim()),
+                        motivo: (idxMotivoExcl >= 0 ? String(r[idxMotivoExcl] || "").trim() : String(r[20] || "").trim()),
+                        monto: (idxMontoExcl >= 0 ? handleNum(r[idxMontoExcl]) : 0)
+                    });
+                    continue;
+                }
                 // Derlis: excluido totalmente del panel (no trae ni suma nada), en cualquier canal.
                 if (limpiarNombre(r[17]).includes("DERLIS")) continue;
 
@@ -2239,7 +2283,10 @@
                     nroOrden: (idxNroOrden >= 0 ? String(r[idxNroOrden] || "").trim() : ""),
                     ventaCompletaAnt: (idxVtaComp >= 0 ? handleNum(r[idxVtaComp]) : 0),
                     cobradoAnt: (idxMontoAnt >= 0 ? handleNum(r[idxMontoAnt]) : 0),
-                    pendienteAnt: (idxPendCli >= 0 ? handleNum(r[idxPendCli]) : 0)
+                    pendienteAnt: (idxPendCli >= 0 ? handleNum(r[idxPendCli]) : 0),
+                    // 🔎 Conciliación: vendedor REAL de Odoo (invoice_user_id) y si es la fila de SALDO de anticipo.
+                    vendedorOdoo: (idxVendOdoo >= 0 && r[idxVendOdoo] ? String(r[idxVendOdoo]).trim() : String(r[17] || "").trim()),
+                    saldoAnticipo: (idxNroMov >= 0 ? String(r[idxNroMov] || "").toUpperCase().startsWith("SALDO") : String(r[6] || "").toUpperCase().startsWith("SALDO"))
                 };
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -2755,9 +2802,66 @@
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente, acumDiasPorCanal);
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
             try { renderAnual(); } catch(e) { console.error("Error anual", e); }
+            try { renderConciliacion(); } catch(e) { console.error("Error conciliacion", e); }
           } catch(e) {
               console.error("FATAL ERROR IN RENDER:", e);
           }
+        }
+
+        // 🔎 MODO CONCILIACIÓN: reconstruye el bruto de Odoo por vendedor real (invoice_user_id):
+        //   Equivalente Odoo = Contado en panel − Ajuste anticipo (saldos sumados) + Exclusiones.
+        //   Usa las filas "CONCILIACION" (TOTAL GS = 0) que emite el Apps Script. Si el panel y el pivot
+        //   de Odoo (mismos equipos, mismo mes) coinciden en la última columna, está todo conciliado.
+        function toggleConcilDet(row) {
+            let d = row.nextElementSibling;
+            if (d && d.classList.contains('concil-det')) d.style.display = (d.style.display === 'none' ? 'table-row' : 'none');
+        }
+        function renderConciliacion() {
+            let tbody = document.getElementById('concil-body');
+            if (!tbody) return;
+            let mesSel = parseInt(filtrosActivos.mes, 10);
+            let usaMes = !isNaN(mesSel) && !(filtrosActivos.desde && filtrosActivos.hasta);
+            let cont = {}, antAj = {}, excl = {};
+            (lineasDeDatosGlobales || []).forEach(d => {
+                if (usaMes && d.mesIdx !== mesSel) return;
+                let v = (d.vendedorOdoo || d.vendedor || "Sin Vendedor");
+                cont[v] = (cont[v] || 0) + (d.totalGs || 0);
+                if (d.saldoAnticipo) antAj[v] = (antAj[v] || 0) + (d.totalGs || 0);
+            });
+            (window.__reconExcl || []).forEach(e => {
+                if (usaMes && e.mes !== mesSel) return;
+                let v = (e.vendedorOdoo || "Sin Vendedor");
+                if (!excl[v]) excl[v] = {};
+                excl[v][e.motivo] = (excl[v][e.motivo] || 0) + (e.monto || 0);
+            });
+            let vendors = {}; Object.keys(cont).forEach(v => vendors[v] = 1); Object.keys(excl).forEach(v => vendors[v] = 1);
+            let arr = Object.keys(vendors).map(v => {
+                let c = cont[v] || 0, a = antAj[v] || 0, exObj = excl[v] || {};
+                let exTot = Object.keys(exObj).reduce((s, k) => s + exObj[k], 0);
+                return { v: v, c: c, a: a, exObj: exObj, exTot: exTot, eq: c - a + exTot };
+            }).filter(r => Math.abs(r.c) > 0 || Math.abs(r.exTot) > 0).sort((a, b) => b.eq - a.eq);
+            let fmt = n => '₲ ' + Math.round(n).toLocaleString('es-PY');
+            let html = "", tC = 0, tA = 0, tE = 0, tEq = 0;
+            arr.forEach(r => {
+                tC += r.c; tA += r.a; tE += r.exTot; tEq += r.eq;
+                let hasDet = Math.abs(r.exTot) > 0 || Math.abs(r.a) > 0;
+                html += '<tr style="cursor:' + (hasDet ? 'pointer' : 'default') + '; font-weight:bold;"' + (hasDet ? ' onclick="toggleConcilDet(this)"' : '') + '>' +
+                    '<td>' + (hasDet ? '▸ ' : '') + escapeHtml(r.v) + '</td>' +
+                    '<td class="text-right">' + fmt(r.c) + '</td>' +
+                    '<td class="text-right" style="color:' + (r.a > 0 ? '#dd6b20' : '#a0aec0') + '">' + (r.a ? '− ' + fmt(r.a) : '—') + '</td>' +
+                    '<td class="text-right" style="color:' + (r.exTot > 0 ? '#2b7a78' : (r.exTot < 0 ? '#c53030' : '#a0aec0')) + '">' + (r.exTot ? '+ ' + fmt(r.exTot) : '—') + '</td>' +
+                    '<td class="text-right" style="font-weight:bold;">' + fmt(r.eq) + '</td></tr>';
+                if (hasDet) {
+                    let det = '';
+                    if (r.a > 0) det += '<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>• Ajuste anticipo (saldo sumado en el panel, no está en Odoo)</span><span style="font-weight:bold; color:#dd6b20;">− ' + fmt(r.a) + '</span></div>';
+                    Object.keys(r.exObj).sort((a, b) => Math.abs(r.exObj[b]) - Math.abs(r.exObj[a])).forEach(m => {
+                        det += '<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>• Excluido: ' + escapeHtml(m) + '</span><span style="font-weight:bold; color:#2b7a78;">+ ' + fmt(r.exObj[m]) + '</span></div>';
+                    });
+                    html += '<tr class="concil-det" style="display:none; background:#f7fafc;"><td colspan="5" style="padding:8px 24px; font-size:11.5px; color:#4a5568;"><b>Cómo se reconstruye el bruto de Odoo de ' + escapeHtml(r.v) + ':</b>' + det + '</td></tr>';
+                }
+            });
+            html += '<tr style="font-weight:bold; background:#e2e8f0;"><td>TOTAL</td><td class="text-right">' + fmt(tC) + '</td><td class="text-right">' + (tA ? '− ' + fmt(tA) : '—') + '</td><td class="text-right">' + (tE ? '+ ' + fmt(tE) : '—') + '</td><td class="text-right">' + fmt(tEq) + '</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="5" style="padding:12px; color:#718096;">Todavía no hay datos de conciliación. Corré <b>"🔄 2. Descargar Ventas Odoo"</b> con el Apps Script nuevo para generar las columnas de exclusión.</td></tr>';
         }
 
         function renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, dTrActivo, dMesActivo, acumVendedorNC, ecomPorCliente, acumDiasPorCanal) {
