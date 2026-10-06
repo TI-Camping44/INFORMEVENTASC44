@@ -65,6 +65,14 @@
 
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        /* Chips de filtros activos (cross-filter tipo Data Studio) */
+        .chip-filtro { display:inline-flex; align-items:center; gap:6px; background:#e6fffa; color:#234e52; border:1px solid #81e6d9; border-radius:14px; padding:3px 10px; font-size:11.5px; }
+        .chip-x { cursor:pointer; font-weight:bold; color:#2c7a7b; border-radius:50%; padding:0 4px; }
+        .chip-x:hover { background:#2c7a7b; color:#fff; }
+        .chip-clear { cursor:pointer; background:#fff5f5; color:#c53030; border:1px solid #feb2b2; border-radius:14px; padding:3px 10px; font-size:11.5px; font-weight:bold; }
+        .chip-clear:hover { background:#c53030; color:#fff; }
+        .ficha-marca-lupa { cursor:pointer; opacity:0.55; font-size:11px; }
+        .ficha-marca-lupa:hover { opacity:1; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- CONTENEDORES Y TABLAS --- */
@@ -393,6 +401,8 @@
         </div>
 
         <div id="status-banner" class="banner-success">Sincronizando canal de datos en vivo...</div>
+
+        <div id="chips-filtros" style="display:none; flex-wrap:wrap; gap:6px; margin:0 0 10px 0; align-items:center;"></div>
 
         <div class="sheet-header-box">
             <div class="sheet-title-main">
@@ -1143,13 +1153,13 @@
             // Cada fila trae el drill-down de productos (▸) y el ícono 👥 de clientes.
             const extra4 = '<td class="text-right">-</td><td class="text-center">-</td>';
             let hM = "", vM = 0, oM = 0;
-            LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; if (v === 0) return; let dh = drill(ck, escapeHtml(m), extra4); hM += `<tr class="ficha-marca-row"${dh.onclick}><td>${dh.caret}${escapeHtml(m)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
+            LISTA_MARCAS.forEach(m => { let ck = claveMarca(m); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vM += v; oM += obj; if (v === 0) return; let dh = drill(ck, escapeHtml(m), extra4); hM += `<tr class="ficha-marca-row"${dh.onclick}><td><span class="ficha-marca-lupa" title="Filtrar todo por ${escapeHtml(m)}" data-marca="${escapeHtml(m)}" onclick="event.stopPropagation(); cruzarFiltro('ms-marca', this.getAttribute('data-marca'))">🔎</span> ${dh.caret}${escapeHtml(m)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
             if (!hM) hM = `<tr><td colspan="4" class="text-center num-cero" style="padding:10px;">Sin ventas en el período</td></tr>`;
             setHtmlSafe('marcas-lista' + suffix, hM);
             setHtmlSafe('marcas-footer' + suffix, `<tr class="total-segmento"><td>Total Marcas</td><td class="text-right">₲ ${vM.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oM.toLocaleString('es-PY')}</td><td class="text-center">${oM > 0 ? ((vM / oM) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
 
             let hA = "", vA = 0, oA = 0;
-            LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; if (v === 0) return; let dh = drill(ck, escapeHtml(a), extra4); hA += `<tr class="ficha-marca-row"${dh.onclick}><td>${dh.caret}${escapeHtml(a)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
+            LISTA_ARMAS.forEach(a => { let ck = claveMarca(a); let v = acumPorClave[ck] || 0; let obj = objPorClaveMarca[ck] || 0; vA += v; oA += obj; if (v === 0) return; let dh = drill(ck, escapeHtml(a), extra4); hA += `<tr class="ficha-marca-row"${dh.onclick}><td><span class="ficha-marca-lupa" title="Filtrar todo por ${escapeHtml(a)}" data-marca="${escapeHtml(a)}" onclick="event.stopPropagation(); cruzarFiltro('ms-marca', this.getAttribute('data-marca'))">🔎</span> ${dh.caret}${escapeHtml(a)}${dh.icono}</td><td class="text-right" style="font-weight:bold; color:${v > 0 ? '#2b7a78' : '#a0aec0'}">₲ ${v.toLocaleString('es-PY')}</td>${celObj(obj)}${celPct(v, obj)}</tr>` + dh.detalle; });
             if (!hA) hA = `<tr><td colspan="4" class="text-center num-cero" style="padding:10px;">Sin ventas en el período</td></tr>`;
             setHtmlSafe('armas-lista' + suffix, hA);
             setHtmlSafe('armas-footer' + suffix, `<tr class="total-segmento"><td>Total A&M</td><td class="text-right">₲ ${vA.toLocaleString('es-PY')}</td><td class="text-right">₲ ${oA.toLocaleString('es-PY')}</td><td class="text-center">${oA > 0 ? ((vA / oA) * 100).toFixed(0) + '%' : '-'}</td></tr>`);
@@ -1501,6 +1511,46 @@
                 d.totalGs = window.__sinIva ? (d._sinIva != null ? d._sinIva : d.totalGs) : (d._conIva != null ? d._conIva : d.totalGs);
             });
             try { filtrarYRenderizarTodo(); } catch (e) { console.error('aplicarModoIva', e); }
+        }
+
+        // 🔗 CROSS-FILTER tipo Data Studio: un clic (en gráfico, tabla o marca) agrega/quita ese valor del
+        //   filtro correspondiente y re-renderiza TODO en cascada. Togglea: clic de nuevo lo saca.
+        //   Permite "varias opciones o una sola" (se van sumando). Reusa el multi-select si está poblado;
+        //   si no (ej. Vendedor oculto en Resumen General), toca filtrosActivos directo.
+        function cruzarFiltro(msId, valor) {
+            valor = String(valor == null ? '' : valor);
+            let panel = document.querySelector('#' + msId + ' .ms-panel');
+            if (panel) {
+                let chk = Array.from(panel.querySelectorAll('input[type="checkbox"][value]'))
+                    .find(x => x.value === valor || limpiarNombre(x.value) === limpiarNombre(valor));
+                if (chk) { chk.checked = !chk.checked; msCambio(msId); return; }
+            }
+            let key = (msId === 'ms-canal') ? 'canales' : (msId === 'ms-vendedor') ? 'vendedores' : 'marcas';
+            let cur = (filtrosActivos[key] || []).slice();
+            let i = cur.findIndex(x => limpiarNombre(x) === limpiarNombre(valor));
+            if (i >= 0) cur.splice(i, 1); else cur.push(valor);
+            filtrosActivos[key] = cur;
+            try { filtrarYRenderizarTodo(); } catch (e) { console.error('cruzarFiltro', e); }
+        }
+        function quitarChip(msId, valor) { cruzarFiltro(msId, valor); } // togglea → lo quita
+
+        // Barra visible de filtros activos (chips con ✕). Hace obvio el cross-filter y permite limpiar.
+        function renderChipsFiltros() {
+            let cont = document.getElementById('chips-filtros');
+            if (!cont) return;
+            let chips = [];
+            (filtrosActivos.canales || []).forEach(c => chips.push({ t: 'Canal', v: c, ms: 'ms-canal' }));
+            (filtrosActivos.vendedores || []).forEach(v => chips.push({ t: 'Vendedor', v: v, ms: 'ms-vendedor' }));
+            (filtrosActivos.marcas || []).forEach(m => chips.push({ t: 'Marca', v: m, ms: 'ms-marca' }));
+            if (!chips.length) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
+            cont.style.display = 'flex';
+            let html = '<span style="font-weight:bold; color:#1a2c42; font-size:12px; align-self:center;">🔍 Filtrando por:</span>';
+            chips.forEach(ch => {
+                let vEsc = escapeHtml(ch.v).replace(/'/g, "\\'");
+                html += `<span class="chip-filtro">${ch.t}: <b>${escapeHtml(ch.v)}</b> <span class="chip-x" title="Quitar" onclick="quitarChip('${ch.ms}','${vEsc}')">✕</span></span>`;
+            });
+            html += `<span class="chip-clear" onclick="limpiarTodosLosFiltros()">Limpiar todo</span>`;
+            cont.innerHTML = html;
         }
         let simulacionDiasTrans = null;
 
@@ -2852,6 +2902,7 @@
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
             try { renderAnual(); } catch(e) { console.error("Error anual", e); }
             try { renderConciliacion(); } catch(e) { console.error("Error conciliacion", e); }
+            try { renderChipsFiltros(); } catch(e) { console.error("Error chips", e); }
           } catch(e) {
               console.error("FATAL ERROR IN RENDER:", e);
           }
@@ -3124,7 +3175,7 @@
                 if (!acumCanales[c]) return;
                 let obj = objDe(c), net = netDe(c);
                 cfNet += net; cfObj += obj;
-                cfSubRows += `<tr class="grpcf pd-detalle" style="display:none; background:#f7fbfa;"><td style="padding-left:26px; color:#4a5568;">${escapeHtml(c)}</td>${celdasCanal(net, obj)}</tr>`;
+                cfSubRows += `<tr class="grpcf pd-detalle" style="display:none; cursor:pointer; background:#f7fbfa;" title="Filtrar por ${escapeHtml(c)}" onclick="cruzarFiltro('ms-canal', '${c}')"><td style="padding-left:26px; color:#4a5568;">${escapeHtml(c)}</td>${celdasCanal(net, obj)}</tr>`;
                 if (net !== 0) { arrCanalesLabels.push(c); arrCanalesData.push(net); }
             });
             if (cfSubRows) {
@@ -3141,14 +3192,14 @@
             sueltos.forEach(s => {
                 if (!acumCanales[s.key]) return;
                 let obj = objDe(s.key), net = netDe(s.key);
-                hCan += `<tr><td><strong>${escapeHtml(s.label)}</strong></td>${celdasCanal(net, obj)}</tr>`;
+                hCan += `<tr style="cursor:pointer;" title="Filtrar por ${escapeHtml(s.label)}" onclick="cruzarFiltro('ms-canal', '${s.key}')"><td><strong>${escapeHtml(s.label)}</strong></td>${celdasCanal(net, obj)}</tr>`;
                 if (net !== 0) { arrCanalesLabels.push(s.key); arrCanalesData.push(net); }
             });
             // Cualquier canal nuevo no contemplado, para no perder datos
             Object.keys(acumCanales).forEach(c => {
                 if (yaListados.has(c)) return;
                 let obj = objDe(c), net = netDe(c);
-                hCan += `<tr><td><strong>${escapeHtml(c)}</strong></td>${celdasCanal(net, obj)}</tr>`;
+                hCan += `<tr style="cursor:pointer;" title="Filtrar por ${escapeHtml(c)}" onclick="cruzarFiltro('ms-canal', '${c}')"><td><strong>${escapeHtml(c)}</strong></td>${celdasCanal(net, obj)}</tr>`;
                 if (net !== 0) { arrCanalesLabels.push(c); arrCanalesData.push(net); }
             });
             document.getElementById('grid-canales-resumen').innerHTML = hCan;
