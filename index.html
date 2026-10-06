@@ -2374,7 +2374,9 @@
                 // 🧾 Monto con IVA (TOTAL GS) y sin IVA (Subtotal real de Odoo). Para filas de SALDO de
                 //   anticipo no hay subtotal real → se estima dividiendo por el IVA estándar.
                 d._conIva = handleNum(r[30]);
-                d._sinIva = (idxSubtotal >= 0 && !d.saldoAnticipo) ? handleNum(r[idxSubtotal]) : (d._conIva / IVA_FACTOR);
+                // Redondeamos: el guaraní no tiene decimales. Sin esto, el Subtotal (con dólar convertido)
+                // y la división por el IVA dejan montos como "…,909" en pantalla.
+                d._sinIva = Math.round((idxSubtotal >= 0 && !d.saldoAnticipo) ? handleNum(r[idxSubtotal]) : (d._conIva / IVA_FACTOR));
                 d.totalGs = window.__sinIva ? d._sinIva : d._conIva;
                 
                 let dp = String(d.fecha).split(' ')[0];
@@ -2655,12 +2657,12 @@
             let _ivaDiv = window.__sinIva ? IVA_FACTOR : 1;
             let _origMA = METAS_ACTIVAS;
             METAS_ACTIVAS = Object.assign({}, _origMA, {
-                global: (_origMA.global || 0) / _ivaDiv,
+                global: Math.round((_origMA.global || 0) / _ivaDiv),
                 canales: {}, vendedoresTotales: {}, vendedorMarca: {}
             });
-            Object.keys(_origMA.canales || {}).forEach(k => METAS_ACTIVAS.canales[k] = (_origMA.canales[k] || 0) / _ivaDiv);
-            Object.keys(_origMA.vendedoresTotales || {}).forEach(k => METAS_ACTIVAS.vendedoresTotales[k] = (_origMA.vendedoresTotales[k] || 0) / _ivaDiv);
-            Object.keys(_origMA.vendedorMarca || {}).forEach(k => METAS_ACTIVAS.vendedorMarca[k] = (_origMA.vendedorMarca[k] || 0) / _ivaDiv);
+            Object.keys(_origMA.canales || {}).forEach(k => METAS_ACTIVAS.canales[k] = Math.round((_origMA.canales[k] || 0) / _ivaDiv));
+            Object.keys(_origMA.vendedoresTotales || {}).forEach(k => METAS_ACTIVAS.vendedoresTotales[k] = Math.round((_origMA.vendedoresTotales[k] || 0) / _ivaDiv));
+            Object.keys(_origMA.vendedorMarca || {}).forEach(k => METAS_ACTIVAS.vendedorMarca[k] = Math.round((_origMA.vendedorMarca[k] || 0) / _ivaDiv));
             // Si el período NO trae objetivo por canal pero sí por vendedor (ej. meses viejos que se
             // cargaron solo por vendedor), derivamos el objetivo de cada canal sumando los objetivos
             // de sus vendedores. Así esos meses no muestran 0 en la vista por canal.
