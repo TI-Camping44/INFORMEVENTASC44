@@ -389,6 +389,13 @@
                 </div>
             </div>
             <div class="filter-group">
+                <label>📋 Anticipos</label>
+                <div id="cot-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button type="button" class="rot-btn on" data-cot="completa" onclick="setCotizacion('completa', this)" title="Cuenta la cotización completa, incluido el saldo de anticipos todavía no facturado">Venta completa</button>
+                    <button type="button" class="rot-btn" data-cot="facturado" onclick="setCotizacion('facturado', this)" title="Cuenta solo lo facturado en Odoo (sin el saldo pendiente de los anticipos)">Solo facturado</button>
+                </div>
+            </div>
+            <div class="filter-group">
                 <label>📅 Día Exacto</label>
                 <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
@@ -1516,6 +1523,17 @@
             try { filtrarYRenderizarTodo(); } catch (e) { console.error('aplicarModoIva', e); }
         }
 
+        // 📋 MODO ANTICIPOS (cotizaciones). "Venta completa" (default) cuenta la cotización entera,
+        //   incluido el saldo de anticipo todavía no facturado (Opción B). "Solo facturado" cuenta
+        //   únicamente lo facturado en Odoo: saca las filas de saldo pendiente (cuadra con Odoo).
+        //   Se combina con el toggle de IVA. No necesita tocar montos: el filtro ocurre en los loops.
+        window.__soloFacturado = false;
+        function setCotizacion(modo, btn) {
+            window.__soloFacturado = (modo === 'facturado');
+            document.querySelectorAll('#cot-btns .rot-btn').forEach(b => b.classList.toggle('on', b.getAttribute('data-cot') === modo));
+            try { filtrarYRenderizarTodo(); } catch (e) { console.error('setCotizacion', e); }
+        }
+
         // 🔗 CROSS-FILTER tipo Data Studio: un clic (en gráfico, tabla o marca) agrega/quita ese valor del
         //   filtro correspondiente y re-renderiza TODO en cascada. Togglea: clic de nuevo lo saca.
         //   Permite "varias opciones o una sola" (se van sumando). Reusa el multi-select si está poblado;
@@ -2032,6 +2050,7 @@
                 let minT = Infinity, maxT = 0, nLineas = 0;
                 lineasDeDatosGlobales.forEach(d => {
                     if (!d || d.canal !== "Mayoristas") return;
+                    if (window.__soloFacturado && d.saldoAnticipo) return; // 📋 Solo facturado: sin saldo pendiente
                     let cliKey = limpiarNombre(d.cliente);
                     if (!cliKey || cliKey.includes("CONSUMIDOR") || cliKey.includes("CONSUM. FINAL") || cliKey === "SIN CLIENTE") return;
                     let t = parseDateToTime(d.fecha);
@@ -2741,6 +2760,10 @@
                     if (t < tDesde || t > tHasta) return;
                 } else if (filtrosActivos.mes && r.mesIdx !== parseInt(filtrosActivos.mes, 10)) return;
 
+                // 📋 Modo "Solo facturado": excluye el saldo pendiente de cotizaciones con anticipo
+                //   (la parte de la venta que todavía no se facturó en Odoo). "Venta completa" lo incluye.
+                if (window.__soloFacturado && r.saldoAnticipo) return;
+
                 // Bucket fantasma "SALON": facturas sin vendedor real (internas de Camping 44 SA, etc.) NO suman.
                 if (limpiarNombre(r.vendedor) === "SALON") return;
                 // Guillermo Augusto Morel Candia: administrativo (sin cargo/sin comisión), no debe sumar.
@@ -3068,7 +3091,7 @@
                     ritmoHtml = ` &nbsp;·&nbsp; A FACTURAR POR DÍA: <span style="color:#dd6b20; font-weight:bold;">₲ ${Math.round(porDia).toLocaleString('es-PY')}</span> <span style="font-size:11px; color:var(--text-muted);">(faltan ${drTxt} días hábiles para el objetivo)</span>`;
                 }
             }
-            document.getElementById('txt-meta-global').innerText = `${hdrTitulo}${window.__sinIva ? ' (SIN IVA)' : ''}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
+            document.getElementById('txt-meta-global').innerText = `${hdrTitulo}${window.__sinIva ? ' (SIN IVA)' : ''}${window.__soloFacturado ? ' (SOLO FACTURADO)' : ''}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA AL OBJETIVO: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>${ritmoHtml}`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
@@ -3986,6 +4009,7 @@
             let ventasTot = {}, ventasMar = {}, canalVend = {}, nombreOrig = {};
             lineasDeDatosGlobales.forEach(r => {
                 if (!r || !r.vendedor) return;
+                if (window.__soloFacturado && r.saldoAnticipo) return; // 📋 Solo facturado: sin saldo pendiente
                 let vk = limpiarNombre(r.vendedor);
                 if (!nombreOrig[vk]) nombreOrig[vk] = r.vendedor;
                 ventasTot[vk] = (ventasTot[vk] || 0) + r.totalGs;
@@ -4067,6 +4091,7 @@
             let ventaYTD = {};
             lineasDeDatosGlobales.forEach(r => {
                 if (!r.marcaFinal) return;
+                if (window.__soloFacturado && r.saldoAnticipo) return; // 📋 Solo facturado: sin saldo pendiente
                 let ck = claveMarca(r.marcaFinal);
                 ventaYTD[ck] = (ventaYTD[ck] || 0) + r.totalGs;
             });
