@@ -230,15 +230,18 @@
         }
 
         /* =========================================================
-           CELULAR: TABLAS EN MODO TARJETA (cada fila apilada, sin scroll horizontal)
+           PANTALLAS MEDIANAS Y CHICAS (tablet / laptop chica / celular):
+           TABLAS EN MODO TARJETA (cada fila apilada, sin scroll horizontal ni columnas aplastadas).
+           Antes esto arrancaba recién en 600px y en 600–992px las tablas se aplastaban (feo).
+           La matriz (table.mtz) NO se toca: mantiene su scroll horizontal propio.
            Las etiquetas (data-label) las agrega el JS aplicarTablasResponsive().
            ========================================================= */
-        @media (max-width: 600px) {
+        @media (max-width: 992px) {
             .excel-container { overflow-x: visible; }
             table.excel-table, table.excel-table tbody { display: block; width: 100%; min-width: 0; }
             table.excel-table thead { display: none; }
             table.excel-table tr { display: block; margin: 0 0 12px; border: 1px solid var(--gray-border); border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-            table.excel-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: right; padding: 9px 12px; border: none; border-bottom: 1px solid #eef2f7; white-space: normal; word-break: break-word; }
+            table.excel-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: right; padding: 10px 14px; font-size: 12.5px; border: none; border-bottom: 1px solid #eef2f7; white-space: normal; word-break: break-word; }
             table.excel-table td:last-child { border-bottom: none; }
             table.excel-table td[data-label]::before { content: attr(data-label); font-weight: 600; color: #64748b; text-align: left; flex: 0 0 42%; }
             /* Primera celda = título de la tarjeta (nombre del vendedor / concepto) */
