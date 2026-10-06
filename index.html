@@ -371,6 +371,13 @@
                 </div>
             </div>
             <div class="filter-group">
+                <label>🧾 Valores (IVA)</label>
+                <div id="iva-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button type="button" class="rot-btn on" data-iva="con" onclick="setIva('con', this)">Con IVA</button>
+                    <button type="button" class="rot-btn" data-iva="sin" onclick="setIva('sin', this)">Sin IVA</button>
+                </div>
+            </div>
+            <div class="filter-group">
                 <label>📅 Día Exacto</label>
                 <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
@@ -920,9 +927,12 @@
             filtrosActivos.canales = [];
 
             if (scope && scope.length === 0) {
-                // Resumen General: ocultar ambos.
+                // Resumen General: Vendedor oculto, pero Canal VISIBLE (para incluir/excluir canales del
+                // global). Al deseleccionar un canal (ej. Directorio), tanto las ventas como la meta global
+                // se recalculan solo con los canales elegidos (meta = suma de sus objetivos).
                 if (fgV) fgV.style.display = 'none';
-                if (fgC) fgC.style.display = 'none';
+                if (fgC) fgC.style.display = '';
+                poblarMulti('ms-canal', canalesLimpiosGlobal, '(Todos los Canales)');
             } else if (scope && scope.length === 1) {
                 // Canal único: ocultar Canal, poblar Vendedor solo con los de ese canal.
                 if (fgC) fgC.style.display = 'none';
@@ -1471,6 +1481,26 @@
                 else b.classList.toggle('on', filtrosActivos.rotaciones.includes(r));
             });
             try { filtrarYRenderizarTodo(); } catch (e) { console.error('setRotacion', e); }
+        }
+
+        // 🧾 MODO CON/SIN IVA. "Con IVA" (default) = comportamiento de siempre (nada cambia).
+        //   "Sin IVA": ventas usan el Subtotal real de Odoo (exacto, sin estimar) y los objetivos/meta
+        //   se dividen por IVA_FACTOR (10% estándar). Las comisiones se calculan sin IVA → esta vista sirve
+        //   para hablar el mismo idioma que Sergio.
+        const IVA_FACTOR = 1.10;
+        window.__sinIva = false;
+        function setIva(modo, btn) {
+            window.__sinIva = (modo === 'sin');
+            document.querySelectorAll('#iva-btns .rot-btn').forEach(b => b.classList.toggle('on', b.getAttribute('data-iva') === modo));
+            aplicarModoIva();
+        }
+        // Reasigna el monto activo (con/sin IVA) a cada línea y re-renderiza. Mantiene _conIva y _sinIva
+        // guardados en el parseo, así el cambio es instantáneo y reversible sin volver a bajar datos.
+        function aplicarModoIva() {
+            (lineasDeDatosGlobales || []).forEach(d => {
+                d.totalGs = window.__sinIva ? (d._sinIva != null ? d._sinIva : d.totalGs) : (d._conIva != null ? d._conIva : d.totalGs);
+            });
+            try { filtrarYRenderizarTodo(); } catch (e) { console.error('aplicarModoIva', e); }
         }
         let simulacionDiasTrans = null;
 
@@ -2229,6 +2259,8 @@
             let idxEsAnt = -1, idxNroOrden = -1, idxVtaComp = -1, idxMontoAnt = -1, idxPendCli = -1;
             // 🔎 Columnas de conciliación (nuevas): Monto Excluido, Motivo Exclusion, Vendedor Odoo, Nro. Movimiento.
             let idxMontoExcl = -1, idxMotivoExcl = -1, idxVendOdoo = -1, idxNroMov = -1;
+            // 🧾 Columna Subtotal (SIN IVA) para el toggle Con/Sin IVA.
+            let idxSubtotal = -1;
             if (filas[0]) {
                 filas[0].forEach((h, idx) => {
                     let hn = limpiarNombre(h);
@@ -2244,6 +2276,7 @@
                     if (idxMotivoExcl === -1 && hn.startsWith("MOTIVO EXCLUSION")) idxMotivoExcl = idx;
                     if (idxVendOdoo === -1 && hn === "VENDEDOR ODOO") idxVendOdoo = idx;
                     if (idxNroMov === -1 && (hn.startsWith("NRO. MOVIMIENTO") || hn.startsWith("NRO MOVIMIENTO"))) idxNroMov = idx;
+                    if (idxSubtotal === -1 && hn === "SUBTOTAL") idxSubtotal = idx; // 🧾 Subtotal = monto SIN IVA (Odoo price_subtotal)
                 });
             }
             window.__reconExcl = []; // 🔎 filas de conciliación (exclusiones) por mes/vendedorOdoo/motivo
@@ -2288,6 +2321,11 @@
                     vendedorOdoo: (idxVendOdoo >= 0 && r[idxVendOdoo] ? String(r[idxVendOdoo]).trim() : String(r[17] || "").trim()),
                     saldoAnticipo: (idxNroMov >= 0 ? String(r[idxNroMov] || "").toUpperCase().startsWith("SALDO") : String(r[6] || "").toUpperCase().startsWith("SALDO"))
                 };
+                // 🧾 Monto con IVA (TOTAL GS) y sin IVA (Subtotal real de Odoo). Para filas de SALDO de
+                //   anticipo no hay subtotal real → se estima dividiendo por el IVA estándar.
+                d._conIva = handleNum(r[30]);
+                d._sinIva = (idxSubtotal >= 0 && !d.saldoAnticipo) ? handleNum(r[idxSubtotal]) : (d._conIva / IVA_FACTOR);
+                d.totalGs = window.__sinIva ? d._sinIva : d._conIva;
                 
                 let dp = String(d.fecha).split(' ')[0];
                 if(dp.includes('/')) d.mesIdx = parseInt(dp.split('/')[1], 10);
@@ -2561,7 +2599,18 @@
           try {
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             // Clonamos (canales aparte) para no mutar el histórico cacheado.
-            METAS_ACTIVAS = Object.assign({}, METAS_ACTIVAS, { canales: Object.assign({}, METAS_ACTIVAS.canales || {}) });
+            // 🧾 Si el modo es SIN IVA, dividimos TODOS los objetivos por el IVA estándar (global, por canal,
+            //   por vendedor y por marca), así la meta/avance queda en la misma base que las ventas sin IVA.
+            //   Con IVA (default) el divisor es 1 → no cambia nada.
+            let _ivaDiv = window.__sinIva ? IVA_FACTOR : 1;
+            let _origMA = METAS_ACTIVAS;
+            METAS_ACTIVAS = Object.assign({}, _origMA, {
+                global: (_origMA.global || 0) / _ivaDiv,
+                canales: {}, vendedoresTotales: {}, vendedorMarca: {}
+            });
+            Object.keys(_origMA.canales || {}).forEach(k => METAS_ACTIVAS.canales[k] = (_origMA.canales[k] || 0) / _ivaDiv);
+            Object.keys(_origMA.vendedoresTotales || {}).forEach(k => METAS_ACTIVAS.vendedoresTotales[k] = (_origMA.vendedoresTotales[k] || 0) / _ivaDiv);
+            Object.keys(_origMA.vendedorMarca || {}).forEach(k => METAS_ACTIVAS.vendedorMarca[k] = (_origMA.vendedorMarca[k] || 0) / _ivaDiv);
             // Si el período NO trae objetivo por canal pero sí por vendedor (ej. meses viejos que se
             // cargaron solo por vendedor), derivamos el objetivo de cada canal sumando los objetivos
             // de sus vendedores. Así esos meses no muestran 0 en la vista por canal.
@@ -2963,7 +3012,7 @@
                     ritmoHtml = ` &nbsp;·&nbsp; A FACTURAR POR DÍA: <span style="color:#dd6b20; font-weight:bold;">₲ ${Math.round(porDia).toLocaleString('es-PY')}</span> <span style="font-size:11px; color:var(--text-muted);">(faltan ${drTxt} días hábiles para el objetivo)</span>`;
                 }
             }
-            document.getElementById('txt-meta-global').innerText = `${hdrTitulo}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
+            document.getElementById('txt-meta-global').innerText = `${hdrTitulo}${window.__sinIva ? ' (SIN IVA)' : ''}: ₲ ${hdrNeta.toLocaleString('es-PY')} / ₲ ${hdrObj.toLocaleString('es-PY')}`;
             document.getElementById('txt-avance-general').innerHTML = `AVANCE GENERAL: ${hdrAvance}% &nbsp;·&nbsp; DIFERENCIA AL OBJETIVO: <span style="color:${hdrDif >= 0 ? '#2b7a78' : '#e53e3e'};">₲ ${hdrDif.toLocaleString('es-PY')}</span>${ritmoHtml}`;
             
             document.getElementById('lbl-dias-totales').innerText = dMes.toFixed(1).replace('.', ',');
@@ -3975,7 +4024,9 @@
                 Object.keys(config).forEach(marca => {
                     let cfg = config[marca];
                     let venta = ventaYTD[claveMarca(marca)] || 0;
-                    let objAno = cfg.objAno, objAcum = cfg.objAcum;
+                    // 🧾 Objetivos anuales también sin IVA (divididos por el IVA estándar) cuando el modo está activo.
+                    let _divA = window.__sinIva ? IVA_FACTOR : 1;
+                    let objAno = (cfg.objAno || 0) / _divA, objAcum = (cfg.objAcum || 0) / _divA;
                     let pctLog = objAno > 0 ? venta / objAno : 0;
                     let dif = venta - objAcum;
                     let faltante = objAno - venta;
