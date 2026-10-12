@@ -309,6 +309,8 @@
         table.mtz tbody tr:nth-child(even) td.mtz-marca { background:#fbfcfd; }
         table.mtz .mtz-total td { background:#eef2f7; font-weight:bold; border-top:2px solid #1a2c42; }
         table.mtz td.hl { background:#fff9c4 !important; }
+        /* Verde COMPLETO: la venta alcanzó (o superó) el objetivo de esa marca. */
+        table.mtz td.ok { background:#2f9e5e !important; color:#fff !important; font-weight:bold; }
         .mtz-seccion { margin-bottom:22px; }
         .mtz-titulo { font-weight:bold; color:#1a2c42; font-size:12px; margin:6px 0; background:#eef2f7; padding:6px 10px; border-left:4px solid #2b7a78; }
         .matriz-scroll { overflow-x:auto; }
@@ -317,6 +319,7 @@
         .mtz-leyenda { font-size:11.5px; color:#4a5568; background:#f7fafc; border:1px solid var(--gray-border); border-radius:6px; padding:8px 12px; margin-bottom:14px; }
         .mtz-leyenda b { color:#1a2c42; }
         .mtz-lg-box { display:inline-block; width:13px; height:13px; background:#fff9c4; border:1px solid #d4c94a; border-radius:2px; vertical-align:middle; }
+        .mtz-lg-ok { display:inline-block; width:13px; height:13px; background:#2f9e5e; border:1px solid #27824d; border-radius:2px; vertical-align:middle; }
     </style>
 </head>
 <body>
@@ -4227,13 +4230,13 @@
                     let clsPct = cObj > 0 ? (cVta >= cObj ? 'num-positivo' : 'num-negativo') : 'num-cero';
                     let tds = `<td class="mtz-marca">${escapeHtml(pretty(mc))}</td>`;
                     tds += `<td class="text-right" style="color:${cObj > 0 ? '#4a5568' : '#cbd5e0'};">${cObj > 0 ? gs(cObj) : '-'}</td>`;
-                    tds += `<td class="text-right ${cVta > 0 ? 'hl' : ''}" style="font-weight:bold; color:${cVta > 0 ? '#2b7a78' : '#cbd5e0'};">${cVta > 0 ? gs(cVta) : '-'}</td>`;
+                    tds += `<td class="text-right ${(cObj > 0 && cVta >= cObj) ? 'ok' : (cVta > 0 ? 'hl' : '')}" style="font-weight:bold; color:${(cObj > 0 && cVta >= cObj) ? '#fff' : (cVta > 0 ? '#1a2c42' : '#cbd5e0')};">${cVta > 0 ? gs(cVta) : '-'}</td>`;
                     tds += `<td class="text-center">${cObj > 0 ? alc : '-'}</td>`;
                     tds += `<td class="text-center ${clsPct}">${pct}</td>`;
                     vends.forEach(v => {
                         let o = objDe(v, mc), val = vendidoDe(v, mc); vObj[v] += o; vVta[v] += val;
                         tds += `<td class="text-right" style="color:${o > 0 ? '#4a5568' : '#cbd5e0'};">${o > 0 ? gs(o) : '-'}</td>`;
-                        tds += `<td class="text-right ${val > 0 ? 'hl' : ''}" style="color:${val > 0 ? '#2b7a78' : '#cbd5e0'};">${val > 0 ? gs(val) : '-'}</td>`;
+                        tds += `<td class="text-right ${(o > 0 && val >= o) ? 'ok' : (val > 0 ? 'hl' : '')}" style="color:${(o > 0 && val >= o) ? '#fff' : (val > 0 ? '#1a2c42' : '#cbd5e0')};">${val > 0 ? gs(val) : '-'}</td>`;
                     });
                     body += `<tr>${tds}</tr>`;
                 });
@@ -4263,7 +4266,7 @@
 
             let out = tablaSeccion('MARCAS GENERALES', grales) + tablaSeccion('ARMAS Y MUNICIONES', armas) + tablaSeccion('OTRAS MARCAS', resto);
             if (!out) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin datos.</div>';
-            let leyenda = `<div class="mtz-leyenda"><span class="mtz-lg-box"></span> <b>Amarillo</b> = hay venta registrada en esa marca &nbsp;·&nbsp; <b>Alc.</b> = 1 si alcanzó el objetivo de la marca, 0 si no &nbsp;·&nbsp; <b>%</b> = venta ÷ objetivo</div>`;
+            let leyenda = `<div class="mtz-leyenda"><span class="mtz-lg-ok"></span> <b>Verde</b> = alcanzó el objetivo de esa marca &nbsp;·&nbsp; <span class="mtz-lg-box"></span> <b>Amarillo</b> = hay venta pero todavía no llegó al objetivo &nbsp;·&nbsp; <b>Alc.</b> = 1 si alcanzó, 0 si no &nbsp;·&nbsp; <b>%</b> = venta ÷ objetivo</div>`;
             return leyenda + out;
         }
 
