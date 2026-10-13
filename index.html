@@ -1973,6 +1973,13 @@
                 let _corteT = parseDateToTime(_corteStr);
                 if (_corteT > 0) {
                     let _cD = new Date(_corteT); _cD.setHours(0, 0, 0, 0);
+                    // 🛡️ BLINDAJE: si a la celda B5 del Sheet se le borró el =HOY() y quedó una fecha vieja,
+                    //   el tablero se congelaba en ese día. Acá, si HOY (según el navegador) es del MISMO mes
+                    //   que el corte y es una fecha POSTERIOR, usamos hoy real. Así nunca más se queda atrasado.
+                    let _hoyNav = new Date(); _hoyNav.setHours(0, 0, 0, 0);
+                    if (_hoyNav.getFullYear() === _cD.getFullYear() && _hoyNav.getMonth() === _cD.getMonth() && _hoyNav > _cD) {
+                        _cD = _hoyNav;
+                    }
                     let _ini = new Date(_cD.getFullYear(), _cD.getMonth(), 1);
                     let _finMes = new Date(_cD.getFullYear(), _cD.getMonth() + 1, 0);
                     let _hab = (a, b) => { let t = 0, d = new Date(a.getTime()); while (d <= b) { let dw = d.getDay(); let k = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); if (!_feriadosSet.has(k)) { if (dw >= 1 && dw <= 5) t += 1; else if (dw === 6) t += 0.5; } d.setDate(d.getDate() + 1); } return t; };
