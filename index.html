@@ -4173,39 +4173,50 @@
             let vends = Object.keys(dataFichas).filter(v => dataFichas[v] && dataFichas[v].canal === canal && !esBasura(v) && vendedorPasaFiltro(v)).sort();
             if (!vends.length) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin comerciales para mostrar en este equipo.</div>';
 
-            // Objetivo por vendedor -> marca (nombre limpio)
+            // Objetivo y venta por vendedor agrupados por CLAVE DE MARCA (claveMarca), que unifica variantes
+            // del mismo nombre ("B.E Armor" == "B.E ARMOR" == "B.E. ARMOR"). Antes se usaba limpiarNombre y,
+            // cuando el objetivo y la venta tenían el nombre apenas distinto, salían filas DUPLICADAS.
             let objMap = {}; vends.forEach(v => objMap[v] = {});
             if (metas && metas.vendedorMarca) {
                 for (let k in metas.vendedorMarca) {
                     let parts = String(k).split('|||'); if (parts.length !== 2) continue;
                     let ov = metas.vendedorMarca[k]; if (!(ov > 0)) continue;
-                    let mc = limpiarNombre(parts[1]);
-                    vends.forEach(v => { if (sonElMismoVendedor(parts[0], v)) objMap[v][mc] = (objMap[v][mc] || 0) + ov; });
+                    let ck = claveMarca(parts[1]);
+                    vends.forEach(v => { if (sonElMismoVendedor(parts[0], v)) objMap[v][ck] = (objMap[v][ck] || 0) + ov; });
                 }
             }
-            let vendidoDe = (v, mc) => (dataFichas[v].marcas && dataFichas[v].marcas[mc]) ? dataFichas[v].marcas[mc] : 0;
-            let objDe = (v, mc) => objMap[v][mc] || 0;
+            // Venta por vendedor reagrupada por claveMarca (dataFichas.marcas viene con limpiarNombre).
+            let vtaMap = {};
+            vends.forEach(v => {
+                vtaMap[v] = {};
+                let mm = dataFichas[v].marcas || {};
+                Object.keys(mm).forEach(mk => { if (mm[mk] > 0) { let ck = claveMarca(mk); vtaMap[v][ck] = (vtaMap[v][ck] || 0) + mm[mk]; } });
+            });
+            let vendidoDe = (v, ck) => vtaMap[v][ck] || 0;
+            let objDe = (v, ck) => objMap[v][ck] || 0;
 
-            // Marcas presentes (con venta u objetivo) en el equipo
+            // Marcas presentes (con venta u objetivo) en el equipo, por claveMarca (ya unificadas).
             let set = new Set();
             vends.forEach(v => {
-                let d = dataFichas[v];
-                if (d.marcas) Object.keys(d.marcas).forEach(mk => { if (d.marcas[mk] > 0) set.add(limpiarNombre(mk)); });
-                Object.keys(objMap[v]).forEach(mc => set.add(mc));
+                Object.keys(vtaMap[v]).forEach(ck => { if (vtaMap[v][ck] > 0) set.add(ck); });
+                Object.keys(objMap[v]).forEach(ck => set.add(ck));
             });
             if (!set.size) return '<div style="padding:12px; color:var(--text-muted); font-size:12px;">Sin marcas con ventas u objetivo en este equipo.</div>';
 
             let clavesM = LISTA_MARCAS.map(m => claveMarca(m));
             let clavesA = LISTA_ARMAS.map(a => claveMarca(a));
             let grales = [], armas = [], resto = [];
-            Array.from(set).forEach(mc => { let ck = claveMarca(mc); if (clavesM.includes(ck)) grales.push(mc); else if (clavesA.includes(ck)) armas.push(mc); else resto.push(mc); });
-            grales.sort(); armas.sort(); resto.sort();
+            Array.from(set).forEach(ck => { if (clavesM.includes(ck)) grales.push(ck); else if (clavesA.includes(ck)) armas.push(ck); else resto.push(ck); });
+            // Ordenamos en el mismo orden que las listas de marcas/armas; el resto, alfabético.
+            grales.sort((a, b) => clavesM.indexOf(a) - clavesM.indexOf(b));
+            armas.sort((a, b) => clavesA.indexOf(a) - clavesA.indexOf(b));
+            resto.sort();
 
-            let pretty = (mc) => {
-                let fromList = LISTA_MARCAS.concat(LISTA_ARMAS).find(x => claveMarca(x) === claveMarca(mc));
+            let pretty = (ck) => {
+                let fromList = LISTA_MARCAS.concat(LISTA_ARMAS).find(x => claveMarca(x) === ck);
                 if (fromList) return fromList;
-                for (let v of vends) { let d = dataFichas[v]; if (d.marcas) { let o = Object.keys(d.marcas).find(x => limpiarNombre(x) === mc); if (o) return o; } }
-                return mc.charAt(0) + mc.slice(1).toLowerCase();
+                for (let v of vends) { let d = dataFichas[v]; if (d.marcas) { let o = Object.keys(d.marcas).find(x => claveMarca(x) === ck); if (o) return o; } }
+                return ck.charAt(0) + ck.slice(1).toLowerCase();
             };
 
             let gs = (n) => '₲ ' + Math.round(n).toLocaleString('es-PY');
