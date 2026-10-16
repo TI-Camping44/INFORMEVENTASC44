@@ -1445,6 +1445,74 @@
             'tab-consumidor': ['Salon', 'Online', 'Venta Externa', 'E-commerce'],
             'tab-mayoristas': ['Mayoristas']
         };
+
+        // ===== 📋 PLAN ESTRATÉGICO 2026 (contenido cualitativo cargado desde las planillas de Gerencia) =====
+        // Fuente: "Plan estratégico 2026 — CONSUMIDOR FINAL" (Sergio). Cada equipo es una clave.
+        // Cuando lleguen los planes de los otros equipos (Mayorista, etc.) se agregan acá con la misma estructura.
+        const PLAN_ESTRATEGICO = {
+            "Consumidor Final": {
+                canales: ['Salon', 'Online', 'Venta Externa', 'E-commerce'],
+                finalidad: "Ser la tienda armería más relevante de Asunción.",
+                metaAnual: 13553490621,
+                metaAnualTexto: "Facturar Gs 13.553.490.621 en 2026 (parte Consumidor Final de los Gs 28.000 MM totales de la empresa; Gs 12.000 MM en marcas, sin armas ni municiones).",
+                objetivos: [
+                    {
+                        nombre: "Crecimiento en facturación",
+                        meta: "Gs 13.553.490.621 en Consumidor Final. 25% del facturado debe ser de Marcas (≈ Gs 345 MM/mes en Q4).",
+                        estrategias: [
+                            { e: "Vendedores de alto rendimiento", periodo: "Q3", avance: 25, realizado: "", accion: "Entrenar a los vendedores para dar el mejor servicio de venta y postventa (asesoramiento por WhatsApp, talleres técnicos internos sobre productos).", como: "Desarrollar, implementar y evaluar un plan de talleres técnicos internos y de nuevos productos. Anticiparse a la llegada de nuevas importaciones.", resp: "Salón / Online / Mayorista / MKT" },
+                            { e: "Cross-selling (venta cruzada)", periodo: "Q4", avance: null, realizado: "", accion: "Vender por encima de la venta 'normal' al cliente (2º artículo, novedades).", como: "Automatizar el cross-selling: speach estándar para ventas cruzadas, 2º artículo con % de dto. (automático, no espontáneo). Trabajar la exhibición del salón (que no dependa solo del vendedor). Disminuir la cantidad de facturas.", resp: "Salón / Online / MKT" },
+                            { e: "CRM", periodo: "Q2", avance: 100, realizado: "Se implementó el CRM en ambos canales para que los vendedores ingresen a la nueva dinámica de ventas, posventa y procedimientos internos.", accion: "Implementar el CRM en ambos canales.", como: "Extensión a Q3.", resp: "Comercial" },
+                            { e: "Segmentación de clientes (IA)", periodo: "Q2", avance: 80, realizado: "En proceso el prototipo de Neural para segmentar clientes automáticamente por IA, diferenciando por etiquetas (armas, municiones, tácticos, camping, etc.).", accion: "Segmentar clientes para armar campañas específicas.", como: "Si compró pistola, ofrecerle balas, funda, etc.", resp: "Comercial" }
+                        ]
+                    },
+                    {
+                        nombre: "Expansión y nuevos canales",
+                        meta: "Comprar al menos 200 armas usadas en el año y desarrollar nuevos canales de venta.",
+                        estrategias: [
+                            { e: "Compra de armas usadas (CARU)", periodo: "Q4", avance: null, realizado: "", accion: "Ser la armería más referente a la hora de comprar un arma usada. Comprar y vender la mayor cantidad de armas CARU.", como: "Publicitar en redes, posteos semanales para estados de WhatsApp, mejor precio de compra, etc.", resp: "Comercial / MKT" },
+                            { e: "Canal de venta externa", periodo: "Q2", avance: 100, realizado: "Se contrataron 2 vendedores para el canal e iniciaron sus gestiones de venta.", accion: "Contratar al menos 2 vendedores de calle, manual de funciones, asignación de productos, definir rutas.", como: "Definir objetivos, rutas, mecanismo de trabajo y entrenamiento.", resp: "Comercial / RRHH" },
+                            { e: "Sucursales", periodo: "Q4", avance: null, realizado: "", accion: "Habilitar una sucursal de Camping 44 para venta de marcas y materiales no controlados.", como: "Definir lugar, cantidad de empleados, capex, etc. para Q3.", resp: "Comercial" },
+                            { e: "Ecommerce", periodo: "Q2", avance: 60, realizado: "Se creó el canal exclusivo de ecommerce; activos en 3 plataformas (Tupi, Porter, Contimarket) y en tratativa con Unicentro y Tienda Naranja.", accion: "Estar presentes en al menos 5 plataformas de venta digital.", como: "Definir mecanismo de carga, gestión, control, promos, etc.", resp: "Comercial / MKT" }
+                        ]
+                    },
+                    {
+                        nombre: "Posicionamiento",
+                        meta: "Ser la armería más atractiva de Paraguay.",
+                        estrategias: [
+                            { e: "Mejorar la exhibición (luces, TV, testeo, corpóreos)", periodo: "Q3", avance: null, realizado: "", accion: "Trabajar con Marketing. Ej.: Walther — pistolas + cuchillos + fundas en un solo lugar; TV con videos.", como: "Lo que más vendemos todavía no está explotado en el salón.", resp: "MKT" },
+                            { e: "Novedades y experiencia en tienda", periodo: "Q4", avance: null, realizado: "", accion: "Tener novedades atractivas para los clientes en la tienda.", como: "Trabajar la experiencia en el salón con MKT.", resp: "MKT / Salón / Online" }
+                        ]
+                    },
+                    {
+                        nombre: "Equipo comercial / asesores de venta",
+                        meta: "Asesores de venta de alto nivel, con evaluación y seguimiento.",
+                        estrategias: [
+                            { e: "Sistema de evaluación y estándares de atención", periodo: "Q2", avance: 100, realizado: "Los lunes hay reuniones individuales con feedback y estrategias de la semana; cada 2 días se verifican avances y se hacen supervisiones aleatorias de la gestión.", accion: "Crear un procedimiento de evaluación interno y hacia los clientes. Estándares de atención.", como: "Entrenamiento, control y seguimiento.", resp: "RRHH / Comercial / Calidad" },
+                            { e: "Mejorar la inducción de nuevos colaboradores", periodo: "Q3", avance: null, realizado: "", accion: "Mejorar el sistema de inducción: materiales, videos, pruebas, manejo seguro de material controlado, etc.", como: "", resp: "RRHH" }
+                        ]
+                    },
+                    {
+                        nombre: "Customer Experience",
+                        meta: "80% de satisfacción de clientes.",
+                        estrategias: [
+                            { e: "SGC - Consumidor Final", periodo: "Q2", avance: 100, realizado: "Se realizaron todos los procedimientos de los distintos canales para cumplir con el SGC.", accion: "Todos los funcionarios de Consumidor deben contar con manual de procedimientos y de funciones. Mejorar los procesos internos.", como: "", resp: "Calidad / Comercial" },
+                            { e: "Business Intelligence (B.I)", periodo: "Q2", avance: 20, realizado: "Se prepararon plataformas e informes para usar datos en la toma de decisiones: qué rota, qué falta, a qué arquetipo apuntar, pasar de vendedores de armas/municiones a tácticos y camping.", accion: "Conocer gustos y preferencias de clientes, mercadería de mayor y menor rotación, qué compran, etc.", como: "", resp: "Comercial / TI" },
+                            { e: "Instructor de tiro", periodo: "Q2", avance: 10, realizado: "Se establecieron procesos SGC, pero aún no se cuenta con el perfil adecuado (falta el instructor).", accion: "Contratar un instructor de tiro permanente que acompañe a los clientes, mantenga el lugar y dé cursos.", como: "", resp: "RRHH / Comercial" },
+                            { e: "Posventa y frecuencia de compra", periodo: "Q3", avance: null, realizado: "", accion: "Aumentar la frecuencia de compra de los clientes ('caso Volvo').", como: "Plan de contacto a 1 año POST VENTA: campañas con % de dto. en recompras, promos para clientes que ya compraron, mantenimiento gratis del arma, renovación de carnet, cupones de descuento, Club C44.", resp: "Online / MKT" }
+                        ]
+                    },
+                    {
+                        nombre: "Optimizar / eficiente stock de mercadería",
+                        meta: "Liquidar Gs 480.000.000 de mercadería de baja rotación (50% en Q2 = Gs 240 MM).",
+                        estrategias: [
+                            { e: "Selección y ajuste de precios de liquidación", periodo: "Q2", avance: null, realizado: "", accion: "Definir políticas de precios, subas, productos de liquidación y acciones promocionales, teniendo en cuenta el precio de la competencia.", como: "Seleccionar productos, preparar acciones, ajustar precios ABCD.", resp: "Comercial" }
+                        ]
+                    }
+                ],
+                marco: { vision: "", mision: "", valores: "", foda: "" } // pendientes de carga (Visión / Misión / Valores / FODA)
+            }
+        };
         // Asigna innerHTML solo si el elemento existe (pestañas quitadas ya no rompen el render).
         function setHtmlSafe(id, html) { let e = document.getElementById(id); if (e) e.innerHTML = html; }
 
@@ -4196,6 +4264,16 @@
                 canalesB.add(c);
             });
             let totAnual = trimTot[1] + trimTot[2] + trimTot[3] + trimTot[4];
+            // YTD por canal (año completo) + helper para sumar los canales de un equipo del plan.
+            let ytdPorCanal = {};
+            Array.from(canalesB).forEach(c => { ytdPorCanal[c] = (trim[1][c]||0)+(trim[2][c]||0)+(trim[3][c]||0)+(trim[4][c]||0); });
+            let _normCanal = s => (s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+            let _ytdEquipo = (canales) => {
+                let objetivo = new Set((canales||[]).map(_normCanal));
+                let tot = 0;
+                Object.keys(ytdPorCanal).forEach(c => { if (objetivo.has(_normCanal(c))) tot += ytdPorCanal[c]; });
+                return tot;
+            };
             let mesLive = (filtrosActivos.mesActualLive || (new Date().getMonth() + 1));
             let qActual = Math.ceil(mesLive / 3);
             let nombreTrim = { 1:'1er Trimestre (Ene–Mar)', 2:'2º Trimestre (Abr–Jun)', 3:'3er Trimestre (Jul–Sep)', 4:'4º Trimestre (Oct–Dic)' };
@@ -4215,8 +4293,71 @@
             }).join("")}<td class="text-right" data-label="Total" style="font-weight:bold;">${G(totAnual)}</td></tr>`;
 
             // ============================================================
-            // SECCIÓN C — Marco estratégico cualitativo (estructura, pendiente de Gerencia Comercial)
+            // SECCIÓN C — Plan estratégico cualitativo (contenido REAL de PLAN_ESTRATEGICO),
+            //   con el avance anual enlazado a las ventas reales del equipo.
             // ============================================================
+            const PBadge = (av) => {
+                if (av === null || av === undefined || av === '') return '<span style="color:#a0aec0; font-size:11px;">—</span>';
+                let col = av >= 100 ? '#2f9e5e' : (av >= 50 ? '#e8a32c' : '#d9534f');
+                return `<span style="display:inline-block; min-width:40px; text-align:center; background:${col}; color:#fff; font-weight:bold; font-size:11px; padding:2px 8px; border-radius:10px;">${av}%</span>`;
+            };
+            let planHtml = Object.keys(PLAN_ESTRATEGICO).map(eq => {
+                let p = PLAN_ESTRATEGICO[eq];
+                let ytd = _ytdEquipo(p.canales);
+                let _ivaDivP = window.__sinIva ? IVA_FACTOR : 1;
+                let metaA = (p.metaAnual || 0) / _ivaDivP;
+                let pctMeta = metaA > 0 ? ytd / metaA : 0;
+                let barW = Math.max(0, Math.min(100, pctMeta * 100));
+                let barColor = pctMeta >= 1 ? '#2f9e5e' : (pctMeta >= 0.7 ? '#e8a32c' : '#2d5a87');
+                let objsHtml = (p.objetivos || []).map((o, oi) => {
+                    let filas = (o.estrategias || []).map(s => `
+                        <tr>
+                            <td class="card-title" data-label="Estrategia"><strong>${escapeHtml(s.e)}</strong></td>
+                            <td class="text-center" data-label="Período">${escapeHtml(s.periodo || '-')}</td>
+                            <td class="text-center" data-label="Avance">${PBadge(s.avance)}</td>
+                            <td data-label="Qué se hizo / qué falta" style="font-size:11.5px; line-height:1.45; text-align:left; white-space:normal;">
+                                ${s.realizado ? `<div style="color:#2f6f4f;"><b>✔ Realizado:</b> ${escapeHtml(s.realizado)}</div>` : ''}
+                                ${s.accion ? `<div style="color:#2d3748; margin-top:${s.realizado ? '4px' : '0'};"><b>Acción:</b> ${escapeHtml(s.accion)}</div>` : ''}
+                                ${s.como ? `<div style="color:#718096; margin-top:4px;"><b>Cómo:</b> ${escapeHtml(s.como)}</div>` : ''}
+                            </td>
+                            <td data-label="Responsable" style="font-size:11.5px; white-space:normal;">${escapeHtml(s.resp || '-')}</td>
+                        </tr>`).join("");
+                    return `
+                        <div style="margin:0 4px 16px;">
+                            <div style="background:#1c3d5a; color:#fff; padding:8px 12px; border-radius:6px 6px 0 0; font-weight:bold; font-size:13px;">${oi + 1}. ${escapeHtml(o.nombre)}</div>
+                            ${o.meta ? `<div style="background:#eef4fb; border:1px solid #d6e4f5; border-top:none; padding:6px 12px; font-size:12px; color:#2d5a87;"><b>Meta:</b> ${escapeHtml(o.meta)}</div>` : ''}
+                            <div class="table-responsive-wrapper">
+                                <table class="excel-table" style="border-top:none;">
+                                    <thead><tr><th>Estrategia</th><th class="text-center">Período</th><th class="text-center">Avance</th><th>Qué se hizo / qué falta</th><th>Responsable</th></tr></thead>
+                                    <tbody>${filas}</tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                }).join("");
+                let marco = p.marco || {};
+                let marcoVacio = !marco.vision && !marco.mision && !marco.valores && !marco.foda;
+                return `
+                    <div class="excel-container">
+                        <div class="excel-title">3) Plan estratégico — Equipo ${escapeHtml(eq)}</div>
+                        <div style="background:#f0f6ff; border:1px solid #cfe0f5; border-radius:8px; padding:12px 14px; margin:0 4px 16px;">
+                            <div style="font-size:13px; color:#1c3d5a;"><b>🎯 Finalidad:</b> ${escapeHtml(p.finalidad || '')}</div>
+                            <div style="font-size:12px; color:#4a5568; margin-top:6px;">${escapeHtml(p.metaAnualTexto || '')}</div>
+                            ${metaA > 0 ? `
+                            <div style="margin-top:10px;">
+                                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; font-size:12px; margin-bottom:4px;">
+                                    <span>Facturación real del año (YTD): <b>${G(ytd)}</b></span>
+                                    <span>Meta anual: <b>${G(metaA)}</b> · <b class="${pctMeta >= 1 ? 'num-positivo' : 'num-negativo'}" style="padding:1px 6px; border-radius:4px;">${P(pctMeta)}</b></span>
+                                </div>
+                                <div style="height:16px; background:#dde7f2; border-radius:8px; overflow:hidden;">
+                                    <div style="height:100%; width:${barW}%; background:${barColor};"></div>
+                                </div>
+                            </div>` : ''}
+                        </div>
+                        ${objsHtml}
+                        ${marcoVacio ? `<div style="margin:4px 4px 0; padding:10px 14px; border:1px dashed #cbd5e0; border-radius:8px; background:#fcfdfe; font-size:12px; color:#94a3b8;">⏳ <b>Visión / Misión / Valores / FODA:</b> pendientes de carga (los completamos cuando Gerencia los defina).</div>` : ''}
+                    </div>`;
+            }).join("");
+
             cont.innerHTML = `
                 <div class="excel-container">
                     <div class="excel-title">📋 PLAN ESTRATÉGICO COMERCIAL 2026</div>
@@ -4257,32 +4398,7 @@
                     </div>
                 </div>
 
-                <div class="excel-container" style="border-left:4px solid #e8a32c;">
-                    <div class="excel-title">3) Marco estratégico, acciones y cronograma</div>
-                    <div style="background:#fff8e6; border:1px solid #f0d68a; border-radius:6px; padding:10px 14px; font-size:12px; color:#8a6d1a; margin:0 4px 14px;">
-                        ⏳ <b>Pendiente de definición con Gerencia Comercial.</b> Esta sección se completa con los lineamientos
-                        de la reunión (objetivos estratégicos 2026, acciones por canal y cronograma trimestral). La estructura ya está lista;
-                        apenas tengas los contenidos, se cargan acá y quedan enlazados al cumplimiento real de arriba.
-                    </div>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; padding:0 4px;">
-                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
-                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🎯 Objetivos estratégicos</div>
-                            <div style="font-size:12px; color:#94a3b8;">Metas anuales de crecimiento, rentabilidad y participación por canal. <i>(a cargar)</i></div>
-                        </div>
-                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
-                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🧭 Plan por canal</div>
-                            <div style="font-size:12px; color:#94a3b8;">Estrategia y acciones específicas para Salón, Mayoristas, E-commerce, Venta Externa. <i>(a cargar)</i></div>
-                        </div>
-                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
-                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🗓️ Cronograma trimestral</div>
-                            <div style="font-size:12px; color:#94a3b8;">Hitos y responsables por Q1–Q4, enlazados a las ventas reales de la sección 2. <i>(a cargar)</i></div>
-                        </div>
-                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
-                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">📈 Seguimiento avance vs plan</div>
-                            <div style="font-size:12px; color:#94a3b8;">Semáforo de cumplimiento por objetivo, alimentado automáticamente con los datos reales. <i>(a cargar)</i></div>
-                        </div>
-                    </div>
-                </div>
+                ${planHtml}
             `;
         }
 
