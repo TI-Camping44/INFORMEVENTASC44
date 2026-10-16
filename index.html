@@ -1513,6 +1513,68 @@
                 marco: { vision: "", mision: "", valores: "", foda: "" } // pendientes de carga (Visión / Misión / Valores / FODA)
             }
         };
+
+        // Canales que suma cada equipo del plan (para enlazar la meta anual con la facturación real YTD).
+        const PLAN_CANALES_EQUIPO = {
+            'consumidor final': ['Salon', 'Online', 'Venta Externa', 'E-commerce'],
+            'mayorista': ['Mayoristas'],
+            'mayoristas': ['Mayoristas']
+        };
+
+        // Carga el plan desde la hoja "PLAN" del Sheet (edición autoservicio de Gerencia).
+        // Estructura plana: una fila por estrategia, con forward-fill de Equipo/Finalidad/Meta/Objetivo.
+        // Si la hoja no se reconoce, se conserva la copia interna del plan (PLAN_ESTRATEGICO).
+        function cargarPlanDesdeSheet(filas) {
+            if (!filas || filas.length < 2) return;
+            let head = filas[0].map(h => String(h || '').trim().toLowerCase());
+            let col = (name) => head.findIndex(h => h === name);
+            let iEq = col('equipo'), iFin = col('finalidad'), iMetaT = col('metaanualtexto'), iMetaN = col('metaanual'),
+                iObj = col('objetivo'), iMetaO = col('metaobjetivo'), iEst = col('estrategia'), iPer = col('periodo'),
+                iAv = col('avance'), iReal = col('realizado'), iAcc = col('accion'), iComo = col('como'), iResp = col('responsable');
+            if (iEq < 0 || iEst < 0) return; // estructura no reconocida → me quedo con la copia interna
+            let g = (row, s) => (s >= 0 && row && row[s] != null) ? String(row[s]).trim() : '';
+            let nuevo = {};
+            let curEq = '', curFin = '', curMetaT = '', curMetaN = 0, curObj = '', curMetaO = '';
+            for (let r = 1; r < filas.length; r++) {
+                let row = filas[r]; if (!row) continue;
+                if (g(row, iEq)) { curEq = g(row, iEq); curFin = ''; curMetaT = ''; curMetaN = 0; }
+                if (g(row, iFin)) curFin = g(row, iFin);
+                if (g(row, iMetaT)) curMetaT = g(row, iMetaT);
+                if (g(row, iMetaN)) { let n = parseFloat(String(row[iMetaN]).replace(/[^\d.-]/g, '')); if (!isNaN(n)) curMetaN = n; }
+                if (g(row, iObj)) { curObj = g(row, iObj); curMetaO = ''; }
+                if (g(row, iMetaO)) curMetaO = g(row, iMetaO);
+                let est = g(row, iEst);
+                if (!curEq || !est) continue;
+                if (!nuevo[curEq]) {
+                    let canales = (PLAN_ESTRATEGICO[curEq] && PLAN_ESTRATEGICO[curEq].canales) || PLAN_CANALES_EQUIPO[curEq.toLowerCase()] || [];
+                    nuevo[curEq] = { canales: canales, finalidad: '', metaAnual: 0, metaAnualTexto: '', objetivos: [], marco: {} };
+                }
+                let p = nuevo[curEq];
+                if (curFin) p.finalidad = curFin;
+                if (curMetaT) p.metaAnualTexto = curMetaT;
+                if (curMetaN) p.metaAnual = curMetaN;
+                let oName = curObj || 'Objetivos';
+                let o = p.objetivos.find(x => x.nombre === oName);
+                if (!o) { o = { nombre: oName, meta: curMetaO || '', estrategias: [] }; p.objetivos.push(o); }
+                else if (curMetaO && !o.meta) o.meta = curMetaO;
+                let av = null;
+                if (iAv >= 0) { let raw = String((row[iAv] != null ? row[iAv] : '')).trim().replace('%', '').replace(',', '.'); if (raw !== '') { let n = parseFloat(raw); av = isNaN(n) ? null : n; } }
+                o.estrategias.push({
+                    e: est,
+                    periodo: g(row, iPer),
+                    avance: av,
+                    realizado: g(row, iReal),
+                    accion: g(row, iAcc),
+                    como: g(row, iComo),
+                    resp: g(row, iResp)
+                });
+            }
+            if (Object.keys(nuevo).length) {
+                // Reemplazo el contenido del plan con lo del Sheet (mutando la const, no reasignándola).
+                Object.keys(PLAN_ESTRATEGICO).forEach(k => delete PLAN_ESTRATEGICO[k]);
+                Object.keys(nuevo).forEach(k => PLAN_ESTRATEGICO[k] = nuevo[k]);
+            }
+        }
         // Asigna innerHTML solo si el elemento existe (pestañas quitadas ya no rompen el render).
         function setHtmlSafe(id, html) { let e = document.getElementById(id); if (e) e.innerHTML = html; }
 
@@ -1946,6 +2008,17 @@
 
                 // Procesamos las ventas EN VIVO
                 procesarVentasData(filasDataFormateadas);
+
+                // 📋 Plan Estratégico EN VIVO (hoja "PLAN", gid 424299). Si falla o no está publicada,
+                //   el tablero sigue con la copia interna del plan (no rompe nada).
+                try {
+                    const urlPlan = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=424299&single=true&output=csv&cb=' + new Date().getTime();
+                    const resPlan = await fetch(urlPlan, { signal: controller.signal });
+                    if (resPlan.ok) {
+                        let txtPlan = await resPlan.text();
+                        if (txtPlan && !/^\s*</.test(txtPlan)) cargarPlanDesdeSheet(parseCSV(txtPlan));
+                    }
+                } catch (ePlan) { console.warn("Plan Estratégico: uso la copia interna", ePlan); }
 
                 clearTimeout(slowNotice); clearTimeout(networkTimeout);
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
