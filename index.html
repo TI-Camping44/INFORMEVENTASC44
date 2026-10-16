@@ -1449,6 +1449,8 @@
         // ===== 📋 PLAN ESTRATÉGICO 2026 (contenido cualitativo cargado desde las planillas de Gerencia) =====
         // Fuente: "Plan estratégico 2026 — CONSUMIDOR FINAL" (Sergio). Cada equipo es una clave.
         // Cuando lleguen los planes de los otros equipos (Mayorista, etc.) se agregan acá con la misma estructura.
+        // Modelo POR OBJETIVO: cada objetivo tiene una línea con su meta, su avance por trimestre
+        // (Q1–Q4, texto libre cualitativo o cuantitativo) y la columna ¿Logró? (✔ / ✘ / % / nota).
         const PLAN_ESTRATEGICO = {
             "Consumidor Final": {
                 canales: ['Salon', 'Online', 'Venta Externa', 'E-commerce'],
@@ -1459,55 +1461,62 @@
                     {
                         nombre: "Crecimiento en facturación",
                         meta: "Gs 13.553.490.621 en Consumidor Final. 25% del facturado debe ser de Marcas (≈ Gs 345 MM/mes en Q4).",
-                        estrategias: [
-                            { e: "Vendedores de alto rendimiento", periodo: "Q3", avance: 25, realizado: "", accion: "Entrenar a los vendedores para dar el mejor servicio de venta y postventa (asesoramiento por WhatsApp, talleres técnicos internos sobre productos).", como: "Desarrollar, implementar y evaluar un plan de talleres técnicos internos y de nuevos productos. Anticiparse a la llegada de nuevas importaciones.", resp: "Salón / Online / Mayorista / MKT" },
-                            { e: "Cross-selling (venta cruzada)", periodo: "Q4", avance: null, realizado: "", accion: "Vender por encima de la venta 'normal' al cliente (2º artículo, novedades).", como: "Automatizar el cross-selling: speach estándar para ventas cruzadas, 2º artículo con % de dto. (automático, no espontáneo). Trabajar la exhibición del salón (que no dependa solo del vendedor). Disminuir la cantidad de facturas.", resp: "Salón / Online / MKT" },
-                            { e: "CRM", periodo: "Q2", avance: 100, realizado: "Se implementó el CRM en ambos canales para que los vendedores ingresen a la nueva dinámica de ventas, posventa y procedimientos internos.", accion: "Implementar el CRM en ambos canales.", como: "Extensión a Q3.", resp: "Comercial" },
-                            { e: "Segmentación de clientes (IA)", periodo: "Q2", avance: 80, realizado: "En proceso el prototipo de Neural para segmentar clientes automáticamente por IA, diferenciando por etiquetas (armas, municiones, tácticos, camping, etc.).", accion: "Segmentar clientes para armar campañas específicas.", como: "Si compró pistola, ofrecerle balas, funda, etc.", resp: "Comercial" }
-                        ]
+                        q1: "",
+                        q2: "✔ CRM implementado en ambos canales. Segmentación de clientes por IA (prototipo Neural, 80%).",
+                        q3: "Vendedores de alto rendimiento: talleres técnicos y mejor servicio de venta/postventa (25%).",
+                        q4: "Automatizar el cross-selling (2º artículo con dto., mejor exhibición, menos facturas).",
+                        logro: "En proceso",
+                        resp: "Comercial / Salón / Online / MKT"
                     },
                     {
                         nombre: "Expansión y nuevos canales",
                         meta: "Comprar al menos 200 armas usadas en el año y desarrollar nuevos canales de venta.",
-                        estrategias: [
-                            { e: "Compra de armas usadas (CARU)", periodo: "Q4", avance: null, realizado: "", accion: "Ser la armería más referente a la hora de comprar un arma usada. Comprar y vender la mayor cantidad de armas CARU.", como: "Publicitar en redes, posteos semanales para estados de WhatsApp, mejor precio de compra, etc.", resp: "Comercial / MKT" },
-                            { e: "Canal de venta externa", periodo: "Q2", avance: 100, realizado: "Se contrataron 2 vendedores para el canal e iniciaron sus gestiones de venta.", accion: "Contratar al menos 2 vendedores de calle, manual de funciones, asignación de productos, definir rutas.", como: "Definir objetivos, rutas, mecanismo de trabajo y entrenamiento.", resp: "Comercial / RRHH" },
-                            { e: "Sucursales", periodo: "Q4", avance: null, realizado: "", accion: "Habilitar una sucursal de Camping 44 para venta de marcas y materiales no controlados.", como: "Definir lugar, cantidad de empleados, capex, etc. para Q3.", resp: "Comercial" },
-                            { e: "Ecommerce", periodo: "Q2", avance: 60, realizado: "Se creó el canal exclusivo de ecommerce; activos en 3 plataformas (Tupi, Porter, Contimarket) y en tratativa con Unicentro y Tienda Naranja.", accion: "Estar presentes en al menos 5 plataformas de venta digital.", como: "Definir mecanismo de carga, gestión, control, promos, etc.", resp: "Comercial / MKT" }
-                        ]
+                        q1: "",
+                        q2: "✔ Venta externa en marcha (2 vendedores). Ecommerce activo en 3 plataformas (60%).",
+                        q3: "Sumar Unicentro y Tienda Naranja (meta: 5 plataformas). Definir sucursal (lugar, empleados, capex).",
+                        q4: "Habilitar sucursal. Compra/venta de armas usadas CARU con publicidad.",
+                        logro: "En proceso",
+                        resp: "Comercial / RRHH / MKT"
                     },
                     {
                         nombre: "Posicionamiento",
                         meta: "Ser la armería más atractiva de Paraguay.",
-                        estrategias: [
-                            { e: "Mejorar la exhibición (luces, TV, testeo, corpóreos)", periodo: "Q3", avance: null, realizado: "", accion: "Trabajar con Marketing. Ej.: Walther — pistolas + cuchillos + fundas en un solo lugar; TV con videos.", como: "Lo que más vendemos todavía no está explotado en el salón.", resp: "MKT" },
-                            { e: "Novedades y experiencia en tienda", periodo: "Q4", avance: null, realizado: "", accion: "Tener novedades atractivas para los clientes en la tienda.", como: "Trabajar la experiencia en el salón con MKT.", resp: "MKT / Salón / Online" }
-                        ]
+                        q1: "",
+                        q2: "",
+                        q3: "Mejorar la exhibición con MKT: luces, TV con videos, corpóreos (ej. Walther).",
+                        q4: "Novedades atractivas y experiencia en el salón.",
+                        logro: "Pendiente",
+                        resp: "MKT / Salón / Online"
                     },
                     {
                         nombre: "Equipo comercial / asesores de venta",
                         meta: "Asesores de venta de alto nivel, con evaluación y seguimiento.",
-                        estrategias: [
-                            { e: "Sistema de evaluación y estándares de atención", periodo: "Q2", avance: 100, realizado: "Los lunes hay reuniones individuales con feedback y estrategias de la semana; cada 2 días se verifican avances y se hacen supervisiones aleatorias de la gestión.", accion: "Crear un procedimiento de evaluación interno y hacia los clientes. Estándares de atención.", como: "Entrenamiento, control y seguimiento.", resp: "RRHH / Comercial / Calidad" },
-                            { e: "Mejorar la inducción de nuevos colaboradores", periodo: "Q3", avance: null, realizado: "", accion: "Mejorar el sistema de inducción: materiales, videos, pruebas, manejo seguro de material controlado, etc.", como: "", resp: "RRHH" }
-                        ]
+                        q1: "",
+                        q2: "✔ Reuniones individuales semanales con feedback; supervisiones aleatorias de la gestión.",
+                        q3: "Mejorar la inducción de nuevos colaboradores (materiales, videos, manejo seguro).",
+                        q4: "",
+                        logro: "✔ (parcial)",
+                        resp: "RRHH / Comercial / Calidad"
                     },
                     {
                         nombre: "Customer Experience",
                         meta: "80% de satisfacción de clientes.",
-                        estrategias: [
-                            { e: "SGC - Consumidor Final", periodo: "Q2", avance: 100, realizado: "Se realizaron todos los procedimientos de los distintos canales para cumplir con el SGC.", accion: "Todos los funcionarios de Consumidor deben contar con manual de procedimientos y de funciones. Mejorar los procesos internos.", como: "", resp: "Calidad / Comercial" },
-                            { e: "Business Intelligence (B.I)", periodo: "Q2", avance: 20, realizado: "Se prepararon plataformas e informes para usar datos en la toma de decisiones: qué rota, qué falta, a qué arquetipo apuntar, pasar de vendedores de armas/municiones a tácticos y camping.", accion: "Conocer gustos y preferencias de clientes, mercadería de mayor y menor rotación, qué compran, etc.", como: "", resp: "Comercial / TI" },
-                            { e: "Instructor de tiro", periodo: "Q2", avance: 10, realizado: "Se establecieron procesos SGC, pero aún no se cuenta con el perfil adecuado (falta el instructor).", accion: "Contratar un instructor de tiro permanente que acompañe a los clientes, mantenga el lugar y dé cursos.", como: "", resp: "RRHH / Comercial" },
-                            { e: "Posventa y frecuencia de compra", periodo: "Q3", avance: null, realizado: "", accion: "Aumentar la frecuencia de compra de los clientes ('caso Volvo').", como: "Plan de contacto a 1 año POST VENTA: campañas con % de dto. en recompras, promos para clientes que ya compraron, mantenimiento gratis del arma, renovación de carnet, cupones de descuento, Club C44.", resp: "Online / MKT" }
-                        ]
+                        q1: "",
+                        q2: "✔ SGC con procedimientos de todos los canales. B.I en marcha (20%). Instructor de tiro pendiente (10%).",
+                        q3: "Posventa: plan de contacto a 1 año (dto. en recompras, mantenimiento, Club C44).",
+                        q4: "",
+                        logro: "En proceso",
+                        resp: "Calidad / Comercial / TI / RRHH"
                     },
                     {
                         nombre: "Optimizar / eficiente stock de mercadería",
                         meta: "Liquidar Gs 480.000.000 de mercadería de baja rotación (50% en Q2 = Gs 240 MM).",
-                        estrategias: [
-                            { e: "Selección y ajuste de precios de liquidación", periodo: "Q2", avance: null, realizado: "", accion: "Definir políticas de precios, subas, productos de liquidación y acciones promocionales, teniendo en cuenta el precio de la competencia.", como: "Seleccionar productos, preparar acciones, ajustar precios ABCD.", resp: "Comercial" }
-                        ]
+                        q1: "",
+                        q2: "Seleccionar productos, ajustar precios ABCD y acciones promocionales (vs. competencia). Meta: 50%.",
+                        q3: "",
+                        q4: "",
+                        logro: "En proceso",
+                        resp: "Comercial"
                     }
                 ],
                 marco: { vision: "", mision: "", valores: "", foda: "" } // pendientes de carga (Visión / Misión / Valores / FODA)
@@ -1522,29 +1531,30 @@
         };
 
         // Carga el plan desde la hoja "PLAN" del Sheet (edición autoservicio de Gerencia).
-        // Estructura plana: una fila por estrategia, con forward-fill de Equipo/Finalidad/Meta/Objetivo.
-        // Si la hoja no se reconoce, se conserva la copia interna del plan (PLAN_ESTRATEGICO).
+        // Estructura: una fila por OBJETIVO, con columnas Equipo | Finalidad | MetaAnual | MetaAnualTexto |
+        //   Objetivo | Meta | Q1 | Q2 | Q3 | Q4 | Logro | Responsable (los datos del equipo se escriben
+        //   una vez y se arrastran hacia abajo). Si la hoja no se reconoce, se conserva la copia interna.
         function cargarPlanDesdeSheet(filas) {
             if (!filas || filas.length < 2) return;
             let head = filas[0].map(h => String(h || '').trim().toLowerCase());
-            let col = (name) => head.findIndex(h => h === name);
-            let iEq = col('equipo'), iFin = col('finalidad'), iMetaT = col('metaanualtexto'), iMetaN = col('metaanual'),
-                iObj = col('objetivo'), iMetaO = col('metaobjetivo'), iEst = col('estrategia'), iPer = col('periodo'),
-                iAv = col('avance'), iReal = col('realizado'), iAcc = col('accion'), iComo = col('como'), iResp = col('responsable');
-            if (iEq < 0 || iEst < 0) return; // estructura no reconocida → me quedo con la copia interna
+            let col = (...names) => head.findIndex(h => names.includes(h));
+            let iEq = col('equipo'), iFin = col('finalidad'), iMetaT = col('metaanualtexto', 'meta anual texto'),
+                iMetaN = col('metaanual', 'meta anual', 'meta anual (gs)', 'metaanual(gs)'),
+                iObj = col('objetivo'), iMeta = col('meta', 'metaobjetivo', 'meta objetivo'),
+                iQ1 = col('q1'), iQ2 = col('q2'), iQ3 = col('q3'), iQ4 = col('q4'),
+                iLogro = col('logro', '¿logró?', 'logró', '¿logro?', 'logro?'), iResp = col('responsable');
+            if (iEq < 0 || iObj < 0) return; // estructura no reconocida → me quedo con la copia interna
             let g = (row, s) => (s >= 0 && row && row[s] != null) ? String(row[s]).trim() : '';
             let nuevo = {};
-            let curEq = '', curFin = '', curMetaT = '', curMetaN = 0, curObj = '', curMetaO = '';
+            let curEq = '', curFin = '', curMetaT = '', curMetaN = 0;
             for (let r = 1; r < filas.length; r++) {
                 let row = filas[r]; if (!row) continue;
                 if (g(row, iEq)) { curEq = g(row, iEq); curFin = ''; curMetaT = ''; curMetaN = 0; }
                 if (g(row, iFin)) curFin = g(row, iFin);
                 if (g(row, iMetaT)) curMetaT = g(row, iMetaT);
                 if (g(row, iMetaN)) { let n = parseFloat(String(row[iMetaN]).replace(/[^\d.-]/g, '')); if (!isNaN(n)) curMetaN = n; }
-                if (g(row, iObj)) { curObj = g(row, iObj); curMetaO = ''; }
-                if (g(row, iMetaO)) curMetaO = g(row, iMetaO);
-                let est = g(row, iEst);
-                if (!curEq || !est) continue;
+                let obj = g(row, iObj);
+                if (!curEq || !obj) continue; // fila sin objetivo útil
                 if (!nuevo[curEq]) {
                     let canales = (PLAN_ESTRATEGICO[curEq] && PLAN_ESTRATEGICO[curEq].canales) || PLAN_CANALES_EQUIPO[curEq.toLowerCase()] || [];
                     nuevo[curEq] = { canales: canales, finalidad: '', metaAnual: 0, metaAnualTexto: '', objetivos: [], marco: {} };
@@ -1553,19 +1563,11 @@
                 if (curFin) p.finalidad = curFin;
                 if (curMetaT) p.metaAnualTexto = curMetaT;
                 if (curMetaN) p.metaAnual = curMetaN;
-                let oName = curObj || 'Objetivos';
-                let o = p.objetivos.find(x => x.nombre === oName);
-                if (!o) { o = { nombre: oName, meta: curMetaO || '', estrategias: [] }; p.objetivos.push(o); }
-                else if (curMetaO && !o.meta) o.meta = curMetaO;
-                let av = null;
-                if (iAv >= 0) { let raw = String((row[iAv] != null ? row[iAv] : '')).trim().replace('%', '').replace(',', '.'); if (raw !== '') { let n = parseFloat(raw); av = isNaN(n) ? null : n; } }
-                o.estrategias.push({
-                    e: est,
-                    periodo: g(row, iPer),
-                    avance: av,
-                    realizado: g(row, iReal),
-                    accion: g(row, iAcc),
-                    como: g(row, iComo),
+                p.objetivos.push({
+                    nombre: obj,
+                    meta: g(row, iMeta),
+                    q1: g(row, iQ1), q2: g(row, iQ2), q3: g(row, iQ3), q4: g(row, iQ4),
+                    logro: g(row, iLogro),
                     resp: g(row, iResp)
                 });
             }
@@ -4369,10 +4371,23 @@
             // SECCIÓN C — Plan estratégico cualitativo (contenido REAL de PLAN_ESTRATEGICO),
             //   con el avance anual enlazado a las ventas reales del equipo.
             // ============================================================
-            const PBadge = (av) => {
-                if (av === null || av === undefined || av === '') return '<span style="color:#a0aec0; font-size:11px;">—</span>';
-                let col = av >= 100 ? '#2f9e5e' : (av >= 50 ? '#e8a32c' : '#d9534f');
-                return `<span style="display:inline-block; min-width:40px; text-align:center; background:${col}; color:#fff; font-weight:bold; font-size:11px; padding:2px 8px; border-radius:10px;">${av}%</span>`;
+            // Interpreta la columna ¿Logró?: ✔ Sí (verde), ✘ No (rojo), un % (semáforo) o una nota cualitativa.
+            const logroBadge = (txt) => {
+                let t = String(txt || '').trim();
+                if (!t) return '<span style="color:#a0aec0;">—</span>';
+                let low = t.toLowerCase();
+                if (/^(✔|✓|si|sí|ok|logrado|logró|cumplido|hecho|done)$/.test(low))
+                    return '<span style="display:inline-block; background:#2f9e5e; color:#fff; font-weight:bold; font-size:11px; padding:2px 9px; border-radius:10px;">✔ Sí</span>';
+                if (/^(✘|✗|x|no|no logrado|no cumplido)$/.test(low))
+                    return '<span style="display:inline-block; background:#d9534f; color:#fff; font-weight:bold; font-size:11px; padding:2px 9px; border-radius:10px;">✘ No</span>';
+                let num = parseFloat(low.replace('%', '').replace(',', '.'));
+                if (!isNaN(num) && /^[\d.,]+%?$/.test(low)) {
+                    let c = num >= 100 ? '#2f9e5e' : (num >= 50 ? '#e8a32c' : '#d9534f');
+                    return `<span style="display:inline-block; background:${c}; color:#fff; font-weight:bold; font-size:11px; padding:2px 9px; border-radius:10px;">${num}%</span>`;
+                }
+                if (/^✔/.test(t)) return `<span style="display:inline-block; background:#2f9e5e; color:#fff; font-weight:bold; font-size:11px; padding:2px 9px; border-radius:10px;">${escapeHtml(t)}</span>`;
+                let neutralC = /proceso|parcial|avanz|marcha/.test(low) ? '#e8a32c' : (/pendiente|sin|no\s/.test(low) ? '#b0792c' : '#718096');
+                return `<span style="display:inline-block; background:${neutralC}; color:#fff; font-size:11px; padding:2px 9px; border-radius:10px;">${escapeHtml(t)}</span>`;
             };
             let planHtml = Object.keys(PLAN_ESTRATEGICO).map(eq => {
                 let p = PLAN_ESTRATEGICO[eq];
@@ -4382,31 +4397,27 @@
                 let pctMeta = metaA > 0 ? ytd / metaA : 0;
                 let barW = Math.max(0, Math.min(100, pctMeta * 100));
                 let barColor = pctMeta >= 1 ? '#2f9e5e' : (pctMeta >= 0.7 ? '#e8a32c' : '#2d5a87');
-                let objsHtml = (p.objetivos || []).map((o, oi) => {
-                    let filas = (o.estrategias || []).map(s => `
-                        <tr>
-                            <td class="card-title" data-label="Estrategia"><strong>${escapeHtml(s.e)}</strong></td>
-                            <td class="text-center" data-label="Período">${escapeHtml(s.periodo || '-')}</td>
-                            <td class="text-center" data-label="Avance">${PBadge(s.avance)}</td>
-                            <td data-label="Qué se hizo / qué falta" style="font-size:11.5px; line-height:1.45; text-align:left; white-space:normal;">
-                                ${s.realizado ? `<div style="color:#2f6f4f;"><b>✔ Realizado:</b> ${escapeHtml(s.realizado)}</div>` : ''}
-                                ${s.accion ? `<div style="color:#2d3748; margin-top:${s.realizado ? '4px' : '0'};"><b>Acción:</b> ${escapeHtml(s.accion)}</div>` : ''}
-                                ${s.como ? `<div style="color:#718096; margin-top:4px;"><b>Cómo:</b> ${escapeHtml(s.como)}</div>` : ''}
-                            </td>
-                            <td data-label="Responsable" style="font-size:11.5px; white-space:normal;">${escapeHtml(s.resp || '-')}</td>
-                        </tr>`).join("");
-                    return `
-                        <div style="margin:0 4px 16px;">
-                            <div style="background:#1c3d5a; color:#fff; padding:8px 12px; border-radius:6px 6px 0 0; font-weight:bold; font-size:13px;">${oi + 1}. ${escapeHtml(o.nombre)}</div>
-                            ${o.meta ? `<div style="background:#eef4fb; border:1px solid #d6e4f5; border-top:none; padding:6px 12px; font-size:12px; color:#2d5a87;"><b>Meta:</b> ${escapeHtml(o.meta)}</div>` : ''}
-                            <div class="table-responsive-wrapper">
-                                <table class="excel-table" style="border-top:none;">
-                                    <thead><tr><th>Estrategia</th><th class="text-center">Período</th><th class="text-center">Avance</th><th>Qué se hizo / qué falta</th><th>Responsable</th></tr></thead>
-                                    <tbody>${filas}</tbody>
-                                </table>
-                            </div>
-                        </div>`;
-                }).join("");
+                // Tabla por OBJETIVO: Objetivo (+meta) · Q1 · Q2 · Q3 · Q4 · ¿Logró? · Responsable.
+                // El trimestre en curso se resalta.
+                let thQ = [1, 2, 3, 4].map(q => `<th class="text-center"${q === qActual ? ' style="background:#2d5a87;"' : ''}>Q${q}${q === qActual ? ' •' : ''}</th>`).join("");
+                let qCell = (val, q) => `<td data-label="Q${q}" style="font-size:11.5px; line-height:1.4; text-align:left; white-space:normal; vertical-align:top; ${q === qActual ? 'background:#f0f6ff;' : ''}">${val ? escapeHtml(val) : '<span style="color:#cbd5e0;">-</span>'}</td>`;
+                let filasObj = (p.objetivos || []).map((o, oi) => `
+                    <tr>
+                        <td class="card-title" data-label="Objetivo" style="text-align:left; vertical-align:top; min-width:170px;">
+                            <strong>${oi + 1}. ${escapeHtml(o.nombre)}</strong>
+                            ${o.meta ? `<div style="font-size:11px; color:#718096; font-weight:normal; margin-top:3px;">🎯 ${escapeHtml(o.meta)}</div>` : ''}
+                        </td>
+                        ${qCell(o.q1, 1)}${qCell(o.q2, 2)}${qCell(o.q3, 3)}${qCell(o.q4, 4)}
+                        <td class="text-center" data-label="¿Logró?" style="vertical-align:top;">${logroBadge(o.logro)}</td>
+                        <td data-label="Responsable" style="font-size:11px; white-space:normal; vertical-align:top;">${escapeHtml(o.resp || '-')}</td>
+                    </tr>`).join("");
+                let objsHtml = `
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th style="min-width:170px;">Objetivo</th>${thQ}<th class="text-center">¿Logró?</th><th>Resp.</th></tr></thead>
+                            <tbody>${filasObj}</tbody>
+                        </table>
+                    </div>`;
                 let marco = p.marco || {};
                 let marcoVacio = !marco.vision && !marco.mision && !marco.valores && !marco.foda;
                 return `
