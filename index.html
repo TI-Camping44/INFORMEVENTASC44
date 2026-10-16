@@ -338,6 +338,7 @@
         <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
         <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
         <div class="menu-item" onclick="switchTab('tab-concil', this)">🔎 Conciliación Odoo</div>
+        <div class="menu-item" onclick="switchTab('tab-plan', this)">📋 Plan Estratégico</div>
         <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
         <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
         <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
@@ -909,6 +910,10 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+        <div id="tab-plan" class="tab-content">
+            <div id="pe-body"></div>
         </div>
 
     </div>
@@ -2940,6 +2945,7 @@
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
             try { renderAnual(); } catch(e) { console.error("Error anual", e); }
             try { renderConciliacion(); } catch(e) { console.error("Error conciliacion", e); }
+            try { renderPlanEstrategico(acumCanales, METAS_ACTIVAS); } catch(e) { console.error("Error plan estrategico", e); }
             try { renderChipsFiltros(); } catch(e) { console.error("Error chips", e); }
           } catch(e) {
               console.error("FATAL ERROR IN RENDER:", e);
@@ -4093,6 +4099,188 @@
         // =========================================================================
         // 📈 SEGUIMIENTO ANUAL POR MARCA (Marcas y A&M) — venta YTD del DATA + objetivos config.
         // =========================================================================
+        // === 📋 PLAN ESTRATÉGICO 2026 (TI-0091) ===
+        //   Mezcla datos REALES que ya existen (cumplimiento de ventas por canal del período activo y
+        //   ventas reales acumuladas por trimestre) con la ESTRUCTURA del plan cualitativo
+        //   (objetivos estratégicos, acciones y cronograma) que se carga con Gerencia Comercial.
+        //   Los montos respetan el toggle Con/Sin IVA y Venta completa / Solo facturado, igual que el resto.
+        function _planExcluirVend(r) {
+            if (window.__soloFacturado && r.saldoAnticipo) return true;
+            let v = limpiarNombre(r.vendedor || "");
+            if (v === "SALON") return true;
+            if (v.includes("MOREL CANDIA")) return true;
+            if (v.includes("CESAR FABIAN")) return true;
+            if (v.includes("GONZALEZ VALLEJOS")) return true;
+            if (v.includes("PINEDA VALLEJOS")) return true;
+            return false;
+        }
+        function renderPlanEstrategico(acumCanales, metas) {
+            let cont = document.getElementById('pe-body');
+            if (!cont) return;
+            const G = x => '₲ ' + Math.round(x || 0).toLocaleString('es-PY');
+            const P = x => (x * 100).toFixed(0) + '%';
+            acumCanales = acumCanales || {};
+            metas = metas || {};
+            let objCanales = metas.canales || {};
+            let modoIva = window.__sinIva ? 'sin IVA' : 'con IVA';
+            let modoCot = window.__soloFacturado ? 'solo facturado' : 'venta completa';
+
+            // --- Etiqueta del período activo (para la sección de cumplimiento por canal) ---
+            let etiquetaPeriodo = "mes en curso";
+            try {
+                const _mesesNom = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+                if (filtrosActivos.desde && filtrosActivos.hasta) {
+                    etiquetaPeriodo = filtrosActivos.desde + " a " + filtrosActivos.hasta;
+                } else if (filtrosActivos.mes !== "" && filtrosActivos.mes != null) {
+                    etiquetaPeriodo = (_mesesNom[parseInt(filtrosActivos.mes, 10) - 1] || "mes") + " " + new Date().getFullYear();
+                }
+            } catch(e) {}
+
+            // ============================================================
+            // SECCIÓN A — Cumplimiento por canal (período activo, datos reales)
+            //   Usa exactamente los mismos acumulados (acumCanales) y objetivos (metas.canales)
+            //   que el Resumen General, para que los números CUADREN con el resto del panel.
+            // ============================================================
+            let canalesA = new Set();
+            Object.keys(objCanales).forEach(c => { if (objCanales[c] > 0) canalesA.add(c); });
+            Object.keys(acumCanales).forEach(c => { if (acumCanales[c] && (acumCanales[c].bruto + acumCanales[c].nc) !== 0) canalesA.add(c); });
+            // Directorio no entra en el plan de ventas (es dirección, no canal comercial).
+            let listaA = Array.from(canalesA).filter(c => !/DIRECTORIO/i.test(c)).sort();
+            let totNetaA = 0, totObjA = 0;
+            let filasA = listaA.map(c => {
+                let neta = acumCanales[c] ? (acumCanales[c].bruto + acumCanales[c].nc) : 0;
+                let obj = objCanales[c] || 0;
+                totNetaA += neta; totObjA += obj;
+                let pct = obj > 0 ? neta / obj : 0;
+                let barW = Math.max(0, Math.min(100, pct * 100));
+                let barColor = pct >= 1 ? '#2f9e5e' : (pct >= 0.7 ? '#e8a32c' : '#d9534f');
+                return `<tr>
+                    <td class="card-title" data-label="Canal"><strong>${escapeHtml(c)}</strong></td>
+                    <td class="text-right" data-label="Venta neta" style="font-weight:bold;">${G(neta)}</td>
+                    <td class="text-right" data-label="Objetivo período">${obj > 0 ? G(obj) : '-'}</td>
+                    <td data-label="Avance" style="min-width:160px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:12px; background:#edf2f7; border-radius:6px; overflow:hidden;">
+                                <div style="height:100%; width:${barW}%; background:${barColor};"></div>
+                            </div>
+                            <span class="${pct >= 1 ? 'num-positivo' : 'num-negativo'}" style="font-weight:bold; min-width:44px; text-align:right; padding:2px 4px; border-radius:4px;">${obj > 0 ? P(pct) : '-'}</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join("");
+            let pctTotA = totObjA > 0 ? totNetaA / totObjA : 0;
+
+            // ============================================================
+            // SECCIÓN B — Ventas reales acumuladas por TRIMESTRE (todo el año, datos reales)
+            //   Suma neta (totalGs ya trae NC en negativo) por trimestre, con desglose por canal.
+            //   Siempre es del AÑO COMPLETO (no depende del filtro de mes) — es la vista estratégica.
+            // ============================================================
+            let trim = { 1:{}, 2:{}, 3:{}, 4:{} };   // trimestre -> canal -> neta
+            let trimTot = { 1:0, 2:0, 3:0, 4:0 };
+            let canalesB = new Set();
+            (lineasDeDatosGlobales || []).forEach(r => {
+                if (_planExcluirVend(r)) return;
+                let mi = parseInt(r.mesIdx, 10);
+                if (isNaN(mi) || mi < 1 || mi > 12) return;
+                let q = Math.ceil(mi / 3);
+                let c = r.canal || "(Sin canal)";
+                if (/DIRECTORIO/i.test(c)) return;
+                let m = r.totalGs || 0;
+                trim[q][c] = (trim[q][c] || 0) + m;
+                trimTot[q] += m;
+                canalesB.add(c);
+            });
+            let totAnual = trimTot[1] + trimTot[2] + trimTot[3] + trimTot[4];
+            let mesLive = (filtrosActivos.mesActualLive || (new Date().getMonth() + 1));
+            let qActual = Math.ceil(mesLive / 3);
+            let nombreTrim = { 1:'1er Trimestre (Ene–Mar)', 2:'2º Trimestre (Abr–Jun)', 3:'3er Trimestre (Jul–Sep)', 4:'4º Trimestre (Oct–Dic)' };
+            let colsB = Array.from(canalesB).sort();
+            let headB = `<tr><th>Trimestre</th>${colsB.map(c => `<th class="text-right">${escapeHtml(c)}</th>`).join("")}<th class="text-right">Total trimestre</th></tr>`;
+            let filasB = [1,2,3,4].map(q => {
+                let marca = q === qActual ? ' <span style="font-size:10px; background:#2d5a87; color:#fff; padding:1px 6px; border-radius:8px; vertical-align:middle;">EN CURSO</span>' : '';
+                return `<tr${q === qActual ? ' style="background:#f0f6ff;"' : ''}>
+                    <td class="card-title" data-label="Trimestre"><strong>${nombreTrim[q]}</strong>${marca}</td>
+                    ${colsB.map(c => `<td class="text-right" data-label="${escapeHtml(c)}">${trim[q][c] ? G(trim[q][c]) : '<span style="color:#cbd5e0;">-</span>'}</td>`).join("")}
+                    <td class="text-right" data-label="Total" style="font-weight:bold;">${G(trimTot[q])}</td>
+                </tr>`;
+            }).join("");
+            let footB = `<tr class="total-segmento"><td class="card-title">TOTAL AÑO</td>${colsB.map(c => {
+                let s = (trim[1][c]||0)+(trim[2][c]||0)+(trim[3][c]||0)+(trim[4][c]||0);
+                return `<td class="text-right" data-label="${escapeHtml(c)}">${G(s)}</td>`;
+            }).join("")}<td class="text-right" data-label="Total" style="font-weight:bold;">${G(totAnual)}</td></tr>`;
+
+            // ============================================================
+            // SECCIÓN C — Marco estratégico cualitativo (estructura, pendiente de Gerencia Comercial)
+            // ============================================================
+            cont.innerHTML = `
+                <div class="excel-container">
+                    <div class="excel-title">📋 PLAN ESTRATÉGICO COMERCIAL 2026</div>
+                    <p style="font-size:12px; color:#4a5568; padding:0 4px 4px;">
+                        Tablero de seguimiento del plan (TI-0091). Combina el <b>cumplimiento real de ventas</b>
+                        —que ya existe en el panel— con la <b>estructura del plan cualitativo</b> (objetivos, acciones y cronograma)
+                        que se completa con Gerencia Comercial. Montos en modo <b>${modoIva}</b> · <b>${modoCot}</b>.
+                    </p>
+                </div>
+
+                <div class="excel-container">
+                    <div class="excel-title">1) Cumplimiento de ventas por canal — ${escapeHtml(String(etiquetaPeriodo))}</div>
+                    <p style="font-size:11.5px; color:#718096; padding:0 4px 8px;">Datos reales del período seleccionado (coinciden con el Resumen General).</p>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead><tr><th>Canal</th><th class="text-right">Venta neta</th><th class="text-right">Objetivo del período</th><th>Avance</th></tr></thead>
+                            <tbody>
+                                ${filasA || '<tr><td colspan="4" style="text-align:center; color:#718096; padding:16px;">Sin datos de canales en el período.</td></tr>'}
+                                ${listaA.length ? `<tr class="total-segmento">
+                                    <td class="card-title">TOTAL</td>
+                                    <td class="text-right" style="font-weight:bold;">${G(totNetaA)}</td>
+                                    <td class="text-right">${totObjA > 0 ? G(totObjA) : '-'}</td>
+                                    <td class="text-right ${pctTotA >= 1 ? 'num-positivo' : 'num-negativo'}" style="font-weight:bold;">${totObjA > 0 ? P(pctTotA) : '-'}</td>
+                                </tr>` : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="excel-container">
+                    <div class="excel-title">2) Ventas reales acumuladas por trimestre — año ${new Date().getFullYear()}</div>
+                    <p style="font-size:11.5px; color:#718096; padding:0 4px 8px;">Año completo (no depende del filtro de mes). Las notas de crédito ya están descontadas.</p>
+                    <div class="table-responsive-wrapper">
+                        <table class="excel-table">
+                            <thead>${headB}</thead>
+                            <tbody>${filasB}${footB}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="excel-container" style="border-left:4px solid #e8a32c;">
+                    <div class="excel-title">3) Marco estratégico, acciones y cronograma</div>
+                    <div style="background:#fff8e6; border:1px solid #f0d68a; border-radius:6px; padding:10px 14px; font-size:12px; color:#8a6d1a; margin:0 4px 14px;">
+                        ⏳ <b>Pendiente de definición con Gerencia Comercial.</b> Esta sección se completa con los lineamientos
+                        de la reunión (objetivos estratégicos 2026, acciones por canal y cronograma trimestral). La estructura ya está lista;
+                        apenas tengas los contenidos, se cargan acá y quedan enlazados al cumplimiento real de arriba.
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; padding:0 4px;">
+                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
+                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🎯 Objetivos estratégicos</div>
+                            <div style="font-size:12px; color:#94a3b8;">Metas anuales de crecimiento, rentabilidad y participación por canal. <i>(a cargar)</i></div>
+                        </div>
+                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
+                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🧭 Plan por canal</div>
+                            <div style="font-size:12px; color:#94a3b8;">Estrategia y acciones específicas para Salón, Mayoristas, E-commerce, Venta Externa. <i>(a cargar)</i></div>
+                        </div>
+                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
+                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">🗓️ Cronograma trimestral</div>
+                            <div style="font-size:12px; color:#94a3b8;">Hitos y responsables por Q1–Q4, enlazados a las ventas reales de la sección 2. <i>(a cargar)</i></div>
+                        </div>
+                        <div style="border:1px dashed #cbd5e0; border-radius:8px; padding:12px; background:#fcfdfe;">
+                            <div style="font-weight:bold; color:#1c3d5a; margin-bottom:6px;">📈 Seguimiento avance vs plan</div>
+                            <div style="font-size:12px; color:#94a3b8;">Semáforo de cumplimiento por objetivo, alimentado automáticamente con los datos reales. <i>(a cargar)</i></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderAnual() {
             let elM = document.getElementById('grid-anual-marcas');
             let elA = document.getElementById('grid-anual-aym');
