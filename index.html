@@ -965,7 +965,14 @@
                 // se recalculan solo con los canales elegidos (meta = suma de sus objetivos).
                 if (fgV) fgV.style.display = 'none';
                 if (fgC) fgC.style.display = '';
-                poblarMulti('ms-canal', canalesLimpiosGlobal, '(Todos los Canales)');
+                // DEFAULT pedido: mostrar todos los canales de venta MENOS Directorio/Licitaciones,
+                // así el avance global no se infla con ventas que no tienen objetivo. El usuario puede
+                // volver a incluir Directorio tildándolo (o "Todos los Canales").
+                let _excluirDef = c => /DIRECTORIO|LICITACION/i.test(c);
+                let _canalesDef = canalesLimpiosGlobal.filter(c => !_excluirDef(c));
+                let _hayExcluidos = _canalesDef.length < canalesLimpiosGlobal.length;
+                poblarMulti('ms-canal', canalesLimpiosGlobal, '(Todos los Canales)', _hayExcluidos ? _canalesDef : null);
+                filtrosActivos.canales = _hayExcluidos ? _canalesDef.slice() : [];
             } else if (scope && scope.length === 1) {
                 // Canal único: ocultar Canal, poblar Vendedor solo con los de ese canal.
                 if (fgC) fgC.style.display = 'none';
@@ -990,6 +997,11 @@
                 let btn = document.querySelector('#' + id + ' .ms-btn');
                 if (btn) btn.textContent = btn.getAttribute('data-todos') || '-- Todos --';
             });
+            // Si en Resumen General quedó el default (sin Directorio), reflejarlo en el botón de Canal.
+            if (scope && scope.length === 0 && filtrosActivos.canales.length > 0) {
+                let btnC = document.querySelector('#ms-canal .ms-btn');
+                if (btnC) btnC.textContent = 'Todos menos Directorio';
+            }
         }
 
         // Ordena una tabla plana al tocar el encabezado (alterna asc/desc). Detecta números (₲, %).
@@ -1592,12 +1604,15 @@
             if (!e.target.closest('.multi-select')) document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('open'));
         });
         // Rellena un multi-select con opciones y su casilla "Todos".
-        function poblarMulti(id, opciones, textoTodos) {
+        function poblarMulti(id, opciones, textoTodos, preCheck) {
             let panel = document.querySelector('#' + id + ' .ms-panel');
             if (!panel) return;
-            let html = `<label class="ms-all"><input type="checkbox" onchange="msToggleTodos('${id}', this)"> ${textoTodos}</label>`;
+            let pre = Array.isArray(preCheck) ? preCheck : null; // casillas a dejar tildadas por defecto
+            let allChk = pre ? (pre.length === opciones.length && opciones.length > 0) : false;
+            let html = `<label class="ms-all"><input type="checkbox" ${allChk ? 'checked' : ''} onchange="msToggleTodos('${id}', this)"> ${textoTodos}</label>`;
             opciones.forEach(o => {
-                html += `<label><input type="checkbox" value="${escapeHtml(o)}" onchange="msCambio('${id}')"> ${escapeHtml(o)}</label>`;
+                let chk = pre ? (pre.includes(o) ? 'checked' : '') : '';
+                html += `<label><input type="checkbox" ${chk} value="${escapeHtml(o)}" onchange="msCambio('${id}')"> ${escapeHtml(o)}</label>`;
             });
             panel.innerHTML = html;
         }
