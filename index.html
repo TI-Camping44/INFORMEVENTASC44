@@ -1978,8 +1978,14 @@
         // ========================================================================
         // 🔥 INICIO DEL SISTEMA
         // ========================================================================
-        async function iniciarSincronizacion() {
-            document.getElementById('loader').style.display = 'flex';
+        let __syncEnCurso = false;
+        const AUTO_REFRESH_MIN = 10; // auto-actualización silenciosa cada N minutos (sin tocar F5)
+        async function iniciarSincronizacion(silencioso) {
+            if (__syncEnCurso) return;              // evita que dos cargas se solapen
+            __syncEnCurso = true;
+            // Modo silencioso (auto-refresh): no mostramos el loader ni pisamos los filtros del usuario.
+            let snapFiltros = silencioso ? JSON.parse(JSON.stringify(filtrosActivos)) : null;
+            if (!silencioso) document.getElementById('loader').style.display = 'flex';
             verificarLibreriasCDN();
 
             // Aviso "suave": si tarda, solo actualizamos el texto del loader (NO renderizamos datos vacíos).
@@ -2039,22 +2045,50 @@
                 } catch (ePlan) { console.warn("Plan Estratégico: uso la copia interna", ePlan); }
 
                 clearTimeout(slowNotice); clearTimeout(networkTimeout);
+                // Modo silencioso: restauramos los filtros que tenía el usuario (mes, canal, vendedor, marca…).
+                if (silencioso && snapFiltros) {
+                    let liveMes = filtrosActivos.mesActualLive;   // mes actual recién leído del CONFIG
+                    Object.assign(filtrosActivos, snapFiltros);    // restaura TODO lo que el usuario tenía
+                    filtrosActivos.mesActualLive = liveMes;        // salvo el mes-actual (puede haber cambiado)
+                    reTildarMulti('ms-vendedor', filtrosActivos.vendedores);
+                    reTildarMulti('ms-canal', filtrosActivos.canales);
+                    reTildarMulti('ms-marca', filtrosActivos.marcas);
+                    let selMes = document.getElementById('select-mes'); if (selMes) selMes.value = filtrosActivos.mes;
+                }
                 let horaStr = new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                actualizarBannerEstado('success', `✅ Sincronizado YTD (Metas Blindadas + Ventas en Vivo) a las: ${horaStr}`);
-                
+                actualizarBannerEstado('success', silencioso
+                    ? `🔄 Auto-actualizado a las ${horaStr} · se refresca solo cada ${AUTO_REFRESH_MIN} min`
+                    : `✅ Sincronizado YTD (Metas Blindadas + Ventas en Vivo) a las: ${horaStr}`);
+
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
-                document.getElementById('loader').style.display = 'none';
+                if (!silencioso) document.getElementById('loader').style.display = 'none';
 
             } catch (err) {
                 clearTimeout(slowNotice); clearTimeout(networkTimeout);
                 console.error(err);
-                try { filtrarYRenderizarTodo(); } catch(e){}
-                let msg = (err && err.name === 'AbortError')
-                    ? `⚠️ Google Sheets no respondió a tiempo (timeout de 45s). Revisá tu conexión y tocá "Actualizar Base".`
-                    : `⚠️ Error al leer datos remotos de Google Sheets. Tocá "Actualizar Base" para reintentar.`;
-                actualizarBannerEstado('error', msg);
-                document.getElementById('loader').style.display = 'none';
+                if (!silencioso) {
+                    try { filtrarYRenderizarTodo(); } catch(e){}
+                    let msg = (err && err.name === 'AbortError')
+                        ? `⚠️ Google Sheets no respondió a tiempo (timeout de 45s). Revisá tu conexión y tocá "Actualizar Base".`
+                        : `⚠️ Error al leer datos remotos de Google Sheets. Tocá "Actualizar Base" para reintentar.`;
+                    actualizarBannerEstado('error', msg);
+                    document.getElementById('loader').style.display = 'none';
+                }
+            } finally {
+                __syncEnCurso = false;
             }
+        }
+        // Re-tilda las casillas de un multi-select según una lista de valores (para el auto-refresh silencioso).
+        function reTildarMulti(id, arr) {
+            let panel = document.querySelector('#' + id + ' .ms-panel'); if (!panel) return;
+            let set = new Set(arr || []);
+            let boxes = panel.querySelectorAll('input[type="checkbox"][value]');
+            boxes.forEach(c => { c.checked = set.has(c.value); });
+            let allChk = panel.querySelector('.ms-all input');
+            if (allChk) allChk.checked = (arr && arr.length === boxes.length && boxes.length > 0);
+            let btn = document.querySelector('#' + id + ' .ms-btn');
+            if (btn) { let td = btn.getAttribute('data-todos') || '-- Todos --';
+                btn.textContent = (!arr || arr.length === 0 || arr.length === boxes.length) ? td : (arr.length + ' seleccionado' + (arr.length > 1 ? 's' : '')); }
         }
 
         // Bug 6: avisar si alguna librería de CDN no cargó (sin internet las exportaciones/gráficos fallan).
@@ -4698,6 +4732,12 @@
         }
 
         iniciarSincronizacion();
+
+        // ⏱️ Auto-actualización: cada AUTO_REFRESH_MIN minutos re-lee el Sheet sin tocar F5 ni los filtros.
+        //    Solo corre si la pestaña está visible (no gasta datos en segundo plano).
+        setInterval(function () {
+            if (document.visibilityState === 'visible') iniciarSincronizacion(true);
+        }, AUTO_REFRESH_MIN * 60 * 1000);
     </script>
 
     <!-- Ventana emergente: situación detallada de un vendedor -->
