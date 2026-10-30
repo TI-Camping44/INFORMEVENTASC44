@@ -2585,6 +2585,12 @@
                 if (limpiarNombre(r[17]).includes("DERLIS")) continue;
 
                 let cNormalizado = obtenerCanalReal(r[17], r[18]);
+                // 🚫 NO COMERCIAL: honorarios profesionales y facturas de socios/directores marcadas
+                //   "No Pagar Comisión" (equipo "Personal Camping", p.ej. Ariel/Diego Kemper). No son ventas
+                //   de mercadería → NO entran al panel. Las ventas de Directorio de los directores sí cuentan.
+                let _prodUP = String((idxProductoGlobal >= 0 ? r[idxProductoGlobal] : "")).toUpperCase();
+                if (_prodUP.includes("HONORARIO") || _prodUP.includes("[HPS]")) continue;
+                if (limpiarNombre(r[17]).includes("KEMPER") && cNormalizado !== "Directorio") continue;
                 // Marcador de grupo Contimarket: viene en columna aparte (r[31]) desde el Apps Script.
                 // El VENDEDOR queda como la persona real (Julia); Contimarket solo agrupa en el desglose/marcas de e-commerce.
                 let esContimarket = String(r[31] || "").toUpperCase().includes("CONTIMARKET")
