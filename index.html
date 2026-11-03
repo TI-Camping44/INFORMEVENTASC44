@@ -2591,6 +2591,16 @@
                 let _prodUP = String((idxProductoGlobal >= 0 ? r[idxProductoGlobal] : "")).toUpperCase();
                 if (_prodUP.includes("HONORARIO") || _prodUP.includes("[HPS]")) continue;
                 if (limpiarNombre(r[17]).includes("KEMPER") && cNormalizado !== "Directorio") continue;
+                // 📌 TI-0105: Diego A. López Rojas y Héctor Quintana Cantero pasan de "Venta Externa" a
+                //   "Mayoristas" para las ventas DESDE el 01/11/2026. Lo anterior queda en Venta Externa
+                //   (Consumidor Final). El corte es por FECHA de la factura, así el histórico NO se mueve.
+                {
+                    let _vnDH = limpiarNombre(r[17]);
+                    if ((_vnDH.includes("DIEGO") && _vnDH.includes("LOPEZ ROJAS")) ||
+                        (_vnDH.includes("HECTOR") && _vnDH.includes("QUINTANA CANTERO"))) {
+                        cNormalizado = (parseDateToTime(r[1]) >= parseDateToTime("01/11/2026")) ? "Mayoristas" : "Venta Externa";
+                    }
+                }
                 // Marcador de grupo Contimarket: viene en columna aparte (r[31]) desde el Apps Script.
                 // El VENDEDOR queda como la persona real (Julia); Contimarket solo agrupa en el desglose/marcas de e-commerce.
                 let esContimarket = String(r[31] || "").toUpperCase().includes("CONTIMARKET")
@@ -2890,6 +2900,17 @@
 
         function filtrarYRenderizarTodo() {
           try {
+            // 📌 TI-0105: en la vista por VENDEDOR (ficha/objetivo), Diego y Héctor caen en Mayoristas si el
+            //   mes mostrado es noviembre 2026 en adelante; antes, Venta Externa. (Las VENTAS ya se cortan por
+            //   fecha de factura en procesarVentasData; esto alinea la ficha del vendedor con ese corte.)
+            try {
+                let _mesDH = parseInt(filtrosActivos.mes, 10);
+                let _canalDH = (isNaN(_mesDH) || _mesDH >= 11) ? "Mayoristas" : "Venta Externa";
+                Object.keys(VENDEDOR_CANAL_CFG).forEach(k => {
+                    if ((k.includes("DIEGO") && k.includes("LOPEZ ROJAS")) || (k.includes("HECTOR") && k.includes("QUINTANA CANTERO")))
+                        VENDEDOR_CANAL_CFG[k] = _canalDH;
+                });
+            } catch (e) {}
             let METAS_ACTIVAS = obtenerMetasEstructuraBI();
             // Clonamos (canales aparte) para no mutar el histórico cacheado.
             // 🧾 Si el modo es SIN IVA, dividimos TODOS los objetivos por el IVA estándar (global, por canal,
