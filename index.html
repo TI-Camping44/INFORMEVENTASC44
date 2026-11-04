@@ -3136,9 +3136,9 @@
             // EL SECRETO PARA QUE TODOS APAREZCAN AUNQUE VENDAN 0:
             if (METAS_ACTIVAS && METAS_ACTIVAS.vendedoresTotales) {
                 Object.keys(METAS_ACTIVAS.vendedoresTotales).forEach(vMeta => {
-                    // Tupi / Porter / Contimarket son CLIENTES de e-commerce (objetivo por cliente),
-                    // no vendedores: no los inyectamos como fichas de vendedor.
-                    if (/TUPI|PORTER|CONTIMARKET/.test(String(vMeta).toUpperCase())) return;
+                    // Tupi / Porter / Contimarket / Unicentro son CLIENTES de e-commerce (objetivo por cliente),
+                    // no vendedores: no los inyectamos como fichas de vendedor. (Unicentro lo vende Julia; TI-0106)
+                    if (/TUPI|PORTER|CONTIMARKET|UNICENTRO/.test(String(vMeta).toUpperCase())) return;
                     let found = false;
                     Object.keys(dataFichasVend).forEach(vReal => {
                         if (sonElMismoVendedor(vMeta, vReal)) found = true;
