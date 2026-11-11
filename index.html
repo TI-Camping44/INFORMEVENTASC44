@@ -337,6 +337,18 @@
     <div class="sidebar" id="main-sidebar">
         <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
+        <!-- Una sola puerta para los dos informes: desde acá se salta a la entrada o directo a Vitálica. -->
+        <style>
+          .cambia-empresa { display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap;
+                            font-size:10.5px; margin:2px 0 12px; }
+          .cambia-empresa a { color:#a0aab8; text-decoration:none; border-bottom:1px dotted #5a6472; }
+          .cambia-empresa a:hover { color:#fff; border-bottom-color:#fff; }
+          @media (max-width:820px){ .cambia-empresa { display:none; } }
+        </style>
+        <div class="cambia-empresa">
+          <a href="https://ti-camping44.github.io/INFORME-DE-VENTAS/" title="Elegir empresa">🏢 Empresa:</a>
+          <a href="https://ti-camping44.github.io/INFORMEVENTASVITALICA/" title="Ir al informe de Vitálica">Vitálica ⇄</a>
+        </div>
         <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-label="Abrir menú">☰ Menú</button>
         <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
         <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
