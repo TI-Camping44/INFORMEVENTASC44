@@ -103,11 +103,13 @@ function bmMesDelConfig_(filas) {
   var fin = "", ini = "";
   filas.forEach(function (row) {
     var c0 = String(row[0] || "").trim();
-    if (c0 === "Fecha Fin:" && row[1]) fin = String(row[1]).trim();
-    if (c0 === "Fecha Inicio:" && row[1]) ini = String(row[1]).trim();
+    if (c0 === "Fecha Fin:" && row[1] !== "" && row[1] != null) fin = row[1];
+    if (c0 === "Fecha Inicio:" && row[1] !== "" && row[1] != null) ini = row[1];
   });
-  var src = fin || ini;
-  var mm = src.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);  // dd/mm/yyyy
+  var src = (fin !== "" ? fin : ini);
+  if (src === "" || src == null) return 0;
+  if (Object.prototype.toString.call(src) === "[object Date]") return src.getMonth() + 1; // Apps Script devuelve Date
+  var mm = String(src).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);  // o texto dd/mm/aaaa
   return mm ? parseInt(mm[2], 10) : 0;
 }
 
