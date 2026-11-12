@@ -26,18 +26,18 @@
  *  contenido, ABORTA y manda mail (nunca pisa ni borra meses ya guardados).
  ************************************************************************************************/
 
-var HOJA_CONFIG = "CONFIG";
-var PREFIJO_B64 = "HISTORICO_B64_";
-var CHUNK = 45000;           // chars por celda (bajo el límite de 50.000 de Google Sheets)
-var HORA_BLINDAJE = 22;      // corre todos los días a esta hora (zona horaria del proyecto)
+var BM_HOJA_CONFIG = "CONFIG";
+var BM_PREFIJO_B64 = "HISTORICO_B64_";
+var BM_CHUNK = 45000;           // chars por celda (bajo el límite de 50.000 de Google Sheets)
+var BM_HORA_BLINDAJE = 22;      // corre todos los días a esta hora (zona horaria del proyecto)
 
 /** Crea (o recrea) el disparador diario. Ejecutá esta función UNA vez. */
 function instalarBlindajeMensual() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === "blindarMesActual_") ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger("blindarMesActual_").timeBased().atHour(HORA_BLINDAJE).everyDays(1).create();
-  try { SpreadsheetApp.getActive().toast("✅ Blindaje mensual instalado: corre diario ~" + HORA_BLINDAJE + ":00.", "Camping 44", 8); } catch (e) {}
+  ScriptApp.newTrigger("blindarMesActual_").timeBased().atHour(BM_HORA_BLINDAJE).everyDays(1).create();
+  try { SpreadsheetApp.getActive().toast("✅ Blindaje mensual instalado: corre diario ~" + BM_HORA_BLINDAJE + ":00.", "Camping 44", 8); } catch (e) {}
 }
 
 /** Apaga el blindaje (borra el disparador). */
@@ -51,12 +51,12 @@ function desinstalarBlindajeMensual() {
 
 /** DRY-RUN: muestra qué archivaría, sin escribir. Útil para verificar antes de confiar. */
 function probarBlindajeMensual() {
-  var sh = SpreadsheetApp.getActive().getSheetByName(HOJA_CONFIG);
+  var sh = SpreadsheetApp.getActive().getSheetByName(BM_HOJA_CONFIG);
   if (!sh) { SpreadsheetApp.getUi().alert("No existe la hoja CONFIG"); return; }
   var filas = sh.getDataRange().getValues();
-  var mes = mesDelConfig_(filas);
-  var m = construirMetasDelConfig_(filas);
-  var h = leerHistorico_(sh);
+  var mes = bmMesDelConfig_(filas);
+  var m = bmConstruirMetas_(filas);
+  var h = bmLeerHistorico_(sh);
   var sumV = 0; Object.keys(m.vendedoresTotales).forEach(function (k) { sumV += m.vendedoresTotales[k]; });
   var msg = "Mes detectado (Fecha Fin): " + mes +
     "\nGlobal: ₲ " + m.global.toLocaleString("es-PY") +
@@ -72,13 +72,13 @@ function probarBlindajeMensual() {
 
 /* ============================ HELPERS (réplica del tablero) ============================ */
 
-function limpiarNombre_(t) {
+function bmLimpiar_(t) {
   if (!t) return "";
   t = String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
   t = t.replace(/\s*-\s*(SALON|ONLINE|E-COMMERCE|MAYORISTAS|VENTA EXTERNA|REPARACIONES|DIRECTORIO)\s*$/g, "");
   return t.trim();
 }
-function handleNum_(v) {
+function bmHandleNum_(v) {
   if (!v) return 0;
   var s = String(v).replace(/\./g, "");
   if (s.indexOf(",") >= 0) s = s.split(",")[0];
@@ -86,7 +86,7 @@ function handleNum_(v) {
   var n = parseInt(s, 10);
   return isNaN(n) ? 0 : n;
 }
-function canalNorm_(c) {
+function bmCanalNorm_(c) {
   var u = String(c || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().trim();
   if (u === "SALON") return "Salon";
   if (u === "ONLINE") return "Online";
@@ -99,7 +99,7 @@ function canalNorm_(c) {
 }
 
 /** Mes (1-12) que representa el CONFIG, leído de "Fecha Fin:" (o "Fecha Inicio:"). */
-function mesDelConfig_(filas) {
+function bmMesDelConfig_(filas) {
   var fin = "", ini = "";
   filas.forEach(function (row) {
     var c0 = String(row[0] || "").trim();
@@ -112,18 +112,18 @@ function mesDelConfig_(filas) {
 }
 
 /** Construye la estructura de metas del mes a partir de las filas del CONFIG (igual que el tablero). */
-function construirMetasDelConfig_(filas) {
+function bmConstruirMetas_(filas) {
   var m = { diasMes: 25, diasTranscurridos: 25, global: 0, canales: {}, vendedoresTotales: {}, vendedorMarca: {} };
 
   filas.forEach(function (row, idx) {
     if (!row || !row.length) return;
     var col0 = String(row[0] || "").trim();
     if (col0 === "Días Hábiles del Mes:") { var v = parseFloat(String(row[1]).replace(",", ".")); if (v > 0 && v <= 31) m.diasMes = v; }
-    if (idx === 3 && row[3]) m.global = handleNum_(row[3]);                 // D4 = global
-    if (row[5]) { var cn = canalNorm_(row[5]); if (cn) m.canales[cn] = handleNum_(row[6]); }  // F/G = metas por canal
+    if (idx === 3 && row[3]) m.global = bmHandleNum_(row[3]);                 // D4 = global
+    if (row[5]) { var cn = bmCanalNorm_(row[5]); if (cn) m.canales[cn] = bmHandleNum_(row[6]); }  // F/G = metas por canal
     if (row[8] && idx >= 3 && String(row[8]).trim() !== "Vendedor") {       // I/J = metas por vendedor
-      var vClean = limpiarNombre_(row[8]);
-      var meta = handleNum_(row[9]);
+      var vClean = bmLimpiar_(row[8]);
+      var meta = bmHandleNum_(row[9]);
       if (meta > 0) m.vendedoresTotales[vClean] = meta;
     }
   });
@@ -154,8 +154,8 @@ function construirMetasDelConfig_(filas) {
             if (!filas[r]) continue;
             var marc = String(filas[r][col] || "").trim();
             if (marc && marc.indexOf("---") !== 0 && marc.indexOf("[") !== 0) {
-              var meta2 = handleNum_(filas[r][col + 1]);
-              if (meta2 > 0) m.vendedorMarca[limpiarNombre_(vend) + "|||" + limpiarNombre_(marc)] = meta2;
+              var meta2 = bmHandleNum_(filas[r][col + 1]);
+              if (meta2 > 0) m.vendedorMarca[bmLimpiar_(vend) + "|||" + bmLimpiar_(marc)] = meta2;
             }
           }
         }
@@ -171,12 +171,12 @@ function construirMetasDelConfig_(filas) {
 
 /* ============================ LECTURA / ESCRITURA DEL HISTÓRICO ============================ */
 
-function leerHistorico_(sh) {
+function bmLeerHistorico_(sh) {
   var vals = sh.getRange(1, 1, sh.getLastRow(), 2).getValues();
   var chunks = [];
   for (var r = 0; r < vals.length; r++) {
     var a = String(vals[r][0] || "").trim();
-    if (a.indexOf(PREFIJO_B64) === 0) chunks.push({ idx: parseInt(a.replace(PREFIJO_B64, ""), 10) || 0, val: String(vals[r][1] || "") });
+    if (a.indexOf(BM_PREFIJO_B64) === 0) chunks.push({ idx: parseInt(a.replace(BM_PREFIJO_B64, ""), 10) || 0, val: String(vals[r][1] || "") });
   }
   if (!chunks.length) return { obj: {}, ok: true, hadChunks: false };
   chunks.sort(function (a, b) { return a.idx - b.idx; });
@@ -189,15 +189,15 @@ function leerHistorico_(sh) {
   }
 }
 
-function escribirHistorico_(sh, obj) {
+function bmEscribirHistorico_(sh, obj) {
   var json = JSON.stringify(obj);
   var b64 = Utilities.base64Encode(Utilities.newBlob(json).getBytes());  // UTF-8
   var partes = [];
-  for (var i = 0; i < b64.length; i += CHUNK) partes.push(b64.substr(i, CHUNK));
+  for (var i = 0; i < b64.length; i += BM_CHUNK) partes.push(b64.substr(i, BM_CHUNK));
 
   var vals = sh.getRange(1, 1, sh.getLastRow(), 2).getValues();
   var filasB64 = [];
-  for (var r = 0; r < vals.length; r++) if (String(vals[r][0] || "").indexOf(PREFIJO_B64) === 0) filasB64.push(r + 1); // 1-based
+  for (var r = 0; r < vals.length; r++) if (String(vals[r][0] || "").indexOf(BM_PREFIJO_B64) === 0) filasB64.push(r + 1); // 1-based
   var inicio = filasB64.length ? filasB64[0] : (sh.getLastRow() + 2);
   var finViejo = filasB64.length ? filasB64[filasB64.length - 1] : inicio - 1;
   var totalFilas = Math.max(partes.length, finViejo - inicio + 1);
@@ -206,13 +206,13 @@ function escribirHistorico_(sh, obj) {
   for (var k = 0; k < totalFilas; k++) {
     var fila = inicio + k;
     var aActual = (fila - 1 < vals.length) ? String(vals[fila - 1][0] || "").trim() : "";
-    if (aActual && aActual.indexOf(PREFIJO_B64) !== 0)
+    if (aActual && aActual.indexOf(BM_PREFIJO_B64) !== 0)
       throw new Error("Fila " + fila + " ocupada por '" + aActual + "'; abortado para no corromper el CONFIG.");
   }
 
   var out = [];
   for (var k2 = 0; k2 < totalFilas; k2++)
-    out.push([k2 < partes.length ? (PREFIJO_B64 + k2) : "", k2 < partes.length ? partes[k2] : ""]);
+    out.push([k2 < partes.length ? (BM_PREFIJO_B64 + k2) : "", k2 < partes.length ? partes[k2] : ""]);
   sh.getRange(inicio, 1, totalFilas, 2).setValues(out);
 }
 
@@ -220,22 +220,22 @@ function escribirHistorico_(sh, obj) {
 
 function blindarMesActual_() {
   try {
-    var sh = SpreadsheetApp.getActive().getSheetByName(HOJA_CONFIG);
+    var sh = SpreadsheetApp.getActive().getSheetByName(BM_HOJA_CONFIG);
     if (!sh) throw new Error("No existe la hoja CONFIG");
     var filas = sh.getDataRange().getValues();
 
-    var mes = mesDelConfig_(filas);
+    var mes = bmMesDelConfig_(filas);
     if (!mes) throw new Error("No pude determinar el mes (Fecha Fin/Inicio vacíos o ilegibles)");
 
-    var metas = construirMetasDelConfig_(filas);
+    var metas = bmConstruirMetas_(filas);
     // CONFIG vacío / a medio cargar: no blindar (evita pisar un mes bueno con algo incompleto).
     if (metas.global <= 0 && !Object.keys(metas.vendedoresTotales).length) return;
 
-    var h = leerHistorico_(sh);
+    var h = bmLeerHistorico_(sh);
     if (h.hadChunks && !h.ok) throw new Error("El histórico existente no se pudo leer (corrupto); abortado para NO perder lo ya guardado.");
 
     h.obj[String(mes)] = metas;          // agrega/actualiza SOLO el mes actual; conserva los demás
-    escribirHistorico_(sh, h.obj);
+    bmEscribirHistorico_(sh, h.obj);
   } catch (e) {
     try {
       MailApp.sendEmail(Session.getEffectiveUser().getEmail(),
