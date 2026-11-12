@@ -3738,22 +3738,37 @@
                 if(!vData) return;
                 if(!vendedorPasaFiltro(v)) return; // al filtrar un vendedor, solo su ficha
 
-                let marcasUnicas = new Set();
-                
-                // Las marcas que vendió en el Google Sheet
-                Object.keys(vData.marcas).forEach(m => marcasUnicas.add(limpiarNombre(m)));
-                
-                // Las marcas que tiene asignadas como meta en el histórico blindado
+                // 🔑 Agrupamos marcas por "clave" (claveMarca: ignora puntos, espacios y guiones),
+                //   así una marca que Odoo factura como "B.E. ARMOR" y su meta "B.E ARMOR" son la MISMA.
+                //   Antes se emparejaba por nombre limpio y un solo punto de diferencia partía la marca en dos
+                //   (la venta quedaba sin meta y la meta figuraba en 0 → activación perdida).
+                let ventasPorClave = {}, displayPorClave = {}, prodPorClave = {}, cliPorClave = {};
+                Object.keys(vData.marcas).forEach(m => {
+                    let cKey = claveMarca(m);
+                    if (!cKey) return;
+                    ventasPorClave[cKey] = (ventasPorClave[cKey] || 0) + (vData.marcas[m] || 0);
+                    if (!displayPorClave[cKey]) displayPorClave[cKey] = m; // nombre tal cual lo factura Odoo
+                    let pm = (vData.productos && vData.productos[m]) ? vData.productos[m] : null;
+                    if (pm) { if (!prodPorClave[cKey]) prodPorClave[cKey] = {}; Object.keys(pm).forEach(p => prodPorClave[cKey][p] = (prodPorClave[cKey][p] || 0) + pm[p]); }
+                    let cm = (vData.clientes && vData.clientes[m]) ? vData.clientes[m] : null;
+                    if (cm) { if (!cliPorClave[cKey]) cliPorClave[cKey] = {}; Object.keys(cm).forEach(c => cliPorClave[cKey][c] = (cliPorClave[cKey][c] || 0) + cm[c]); }
+                });
+
+                // Metas del vendedor agrupadas por la misma clave.
+                let metaPorClave = {}, metaNombrePorClave = {};
                 if (METAS_ACTIVAS.vendedorMarca) {
                     Object.keys(METAS_ACTIVAS.vendedorMarca).forEach(k => {
                         let parts = String(k).split('|||');
-                        if (parts.length === 2 && METAS_ACTIVAS.vendedorMarca[k] > 0) {
-                            if (sonElMismoVendedor(parts[0], v)) {
-                                marcasUnicas.add(limpiarNombre(parts[1])); 
-                            }
+                        if (parts.length === 2 && METAS_ACTIVAS.vendedorMarca[k] > 0 && sonElMismoVendedor(parts[0], v)) {
+                            let cKey = claveMarca(parts[1]);
+                            if (!cKey) return;
+                            metaPorClave[cKey] = Math.max(metaPorClave[cKey] || 0, METAS_ACTIVAS.vendedorMarca[k]);
+                            if (!metaNombrePorClave[cKey]) metaNombrePorClave[cKey] = parts[1];
                         }
                     });
                 }
+
+                let marcasUnicas = new Set([...Object.keys(ventasPorClave), ...Object.keys(metaPorClave)]);
 
                 let mRows = "", aRows = "", rRows = "";
                 let subMV = 0, subAV = 0, subRV = 0;
@@ -3763,22 +3778,14 @@
                 let aymAsig = 0, aymAlc = 0;
                 let marcasActiv = [], amActiv = []; // nombres de marcas activadas (para el desplegable de bonos)
 
-                Array.from(marcasUnicas).sort().forEach(mClean => {
-                    let val = vData.marcas[mClean] || 0; // Usar el nombre limpio
-                    
-                    let mAsig = 0;
-                    for (let k in METAS_ACTIVAS.vendedorMarca) {
-                        let parts = String(k).split('|||');
-                        if (parts.length === 2 && limpiarNombre(parts[1]) === mClean && sonElMismoVendedor(parts[0], v)) {
-                            mAsig = METAS_ACTIVAS.vendedorMarca[k];
-                            break;
-                        }
-                    }
-                    
+                Array.from(marcasUnicas).sort().forEach(cKey => {
+                    let val = ventasPorClave[cKey] || 0;
+                    let mAsig = metaPorClave[cKey] || 0;
+
                     let rowClass = "";
                     let checkMark = "";
-                    let isWeapon = LISTA_ARMAS.some(la => claveMarca(la) === claveMarca(mClean));
-                    
+                    let isWeapon = LISTA_ARMAS.some(la => claveMarca(la) === cKey);
+
                     if (mAsig > 0) {
                         if (isWeapon) {
                             aymAsig++;
@@ -3791,17 +3798,17 @@
 
                     let pctM = mAsig > 0 ? ((val/mAsig)*100).toFixed(0) + "%" : "-";
                     
-                    // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
-                    let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
+                    // Nombre para mostrar: el que factura Odoo (si lo vendió); si solo tiene meta, el de la meta.
+                    let displayBrand = displayPorClave[cKey] || metaNombrePorClave[cKey] || cKey;
 
                     // 💰 Marca activada (llegó a su meta) → la guardamos para el desplegable de bonos.
                     if (mAsig > 0 && val >= mAsig) { (isWeapon ? amActiv : marcasActiv).push(displayBrand); }
 
                     // Drill-down: productos vendidos de esta marca por este vendedor
-                    let prodMap = (vData.productos && vData.productos[mClean]) ? vData.productos[mClean] : {};
+                    let prodMap = prodPorClave[cKey] || {};
                     let prodKeys = Object.keys(prodMap).filter(p => prodMap[p] > 0).sort((a,b)=>prodMap[b]-prodMap[a]);
                     // Clientes que compraron esta marca a este vendedor → ícono para abrir el modal.
-                    let cliMap = (vData.clientes && vData.clientes[mClean]) ? vData.clientes[mClean] : {};
+                    let cliMap = cliPorClave[cKey] || {};
                     let tieneClientes = Object.keys(cliMap).some(c => cliMap[c] > 0);
                     let iconoCli = "";
                     if (tieneClientes) {
@@ -3824,7 +3831,7 @@
                         row = `<tr class="ficha-marca-row ${rowClass}"><td>${escapeHtml(displayBrand)}${checkMark}${iconoCli}</td>${celVenta}${celMeta}${celPctM}</tr>`;
                     }
 
-                    let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === claveMarca(mClean));
+                    let isMainBrand = LISTA_MARCAS.some(lm => claveMarca(lm) === cKey);
 
                     if (isMainBrand) { mRows += row; subMV += val; subMObj += mAsig; }
                     else if (isWeapon) { aRows += row; subAV += val; subAObj += mAsig; }
