@@ -859,6 +859,9 @@
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">¿Alcanzó Meta?</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">Marcas (Grales)</th>
                                 <th class="text-center th-sort" onclick="ordenarTabla(this)">Armas y Municiones</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Monto Marcas (₲)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Monto A&M (₲)</th>
+                                <th class="text-right th-sort" onclick="ordenarTabla(this)">Total a Abonar (₲)</th>
                             </tr>
                         </thead>
                         <tbody id="grid-bonos-vendedores"></tbody>
@@ -2776,6 +2779,24 @@
         const LISTA_MARCAS = ["ASG", "TSS", "Crosman", "Umarex", "Doberman", "Konus", "GSM", "Truglo", "Fab Defense", "Miguel Nieto", "NTK", "Coleman", "Imalent", "Apolo", "Aitor", "Rocky Boots", "KCI", "Nitecore", "Caterpillar", "Polymer", "Snake", "Fobus", "Beretta Mod", "B.E Armor", "Vector Optics", "Osight", "Vaultek", "Descuentos"];
         const LISTA_ARMAS = ["Mendoza", "Boito", "Derya", "Armed", "Tinck", "Emtan", "Rexio", "Ruger", "Tanfoglio", "Walther", "AHSS", "KOR", "Beretta", "Rock Island", "GB", "Saga", "Sellier & Bellot", "Armscor", "IMI", "Golden Eagle", "Federal", "Mirage", "CCI"];
 
+        // 💰 ESCALAS DE BONO 2025 (col VENDEDOR). Marcas: 10/13/16 activadas. Armas y Municiones: 9.
+        //   Venta Externa, E-commerce, Directorio y Reparaciones NO tienen bono (no están en el esquema).
+        const BONO_ESCALAS = {
+            "Mayoristas": { m10: 900000, m13: 1800000, m16: 3600000, am: 1800000 },
+            "Salon":      { m10: 350000, m13: 700000,  m16: 1400000, am: 700000 },
+            "Online":     { m10: 350000, m13: 700000,  m16: 1400000, am: 700000 }
+        };
+        // Bono por marcas = la escala más alta alcanzada (≥16, ≥13, ≥10).
+        function bonoMarcaMonto(e, n) { if (!e) return 0; if (n >= 16) return e.m16; if (n >= 13) return e.m13; if (n >= 10) return e.m10; return 0; }
+        // Bono A&M (cascada): solo si ya activó ≥10 marcas generales Y ≥9 de armas/municiones.
+        function bonoAMMonto(e, nAM, nMarcas) { if (!e) return 0; return (nMarcas >= 10 && nAM >= 9) ? e.am : 0; }
+        // Desplegar/plegar el detalle de marcas activadas de un vendedor en la tabla de bonos.
+        function toggleBono(id, el) {
+            var r = document.getElementById(id); if (!r) return;
+            var s = r.style.display === 'none'; r.style.display = s ? '' : 'none';
+            var c = el.querySelector('.bono-caret'); if (c) c.textContent = s ? '▾' : '▸';
+        }
+
         // =========================================================================
         // 🏆 EVALUACIÓN 37/10 — objetivos ANUALES por vendedor (editable cada año).
         // Ventas y venta de marcas se calculan solos del DATA (YTD). Solo los objetivos
@@ -3708,6 +3729,7 @@
 
             let hFichasSalon = ""; let hFichasOnline = ""; let hFichasEcom = ""; let hFichasMayo = ""; let hFichasExt = ""; let hFichasDir = ""; let hFichasRep = "";
             let bonosDataByCanal = { "Salon": [], "Online": [], "Venta Externa": [], "Directorio": [], "E-commerce": [], "Mayoristas": [], "Reparaciones": [] };
+            let bonoSumaGeneral = 0; // 💰 total de bonos a abonar (todos los vendedores)
             let __pdSeq = 0; // secuencia para grupos de drill-down (producto por marca)
             __clientesMarcaReg = {}; // se regenera en cada render (los uid 'cm#' se reasignan)
 
@@ -3739,6 +3761,7 @@
 
                 let marcasGenAsig = 0, marcasGenAlc = 0;
                 let aymAsig = 0, aymAlc = 0;
+                let marcasActiv = [], amActiv = []; // nombres de marcas activadas (para el desplegable de bonos)
 
                 Array.from(marcasUnicas).sort().forEach(mClean => {
                     let val = vData.marcas[mClean] || 0; // Usar el nombre limpio
@@ -3770,6 +3793,9 @@
                     
                     // Buscar el nombre original para mostrarlo bonito (si lo vendió), sino capitalizar el limpio
                     let displayBrand = Object.keys(vData.marcas).find(x => limpiarNombre(x) === mClean) || mClean.charAt(0) + mClean.slice(1).toLowerCase();
+
+                    // 💰 Marca activada (llegó a su meta) → la guardamos para el desplegable de bonos.
+                    if (mAsig > 0 && val >= mAsig) { (isWeapon ? amActiv : marcasActiv).push(displayBrand); }
 
                     // Drill-down: productos vendidos de esta marca por este vendedor
                     let prodMap = (vData.productos && vData.productos[mClean]) ? vData.productos[mClean] : {};
@@ -3842,15 +3868,40 @@
                     let txtMGen = marcasGenAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${marcasGenAlc} de ${marcasGenAsig}</span>`;
                     let txtAyM = aymAsig === 0 ? `<span style="color:#a0aec0; font-size:10px;">- N/A -</span>` : `<span class="badge badge-brand">${aymAlc} de ${aymAsig}</span>`;
 
+                    // 💰 MONTOS DE BONO (esquema 2025, columna Vendedor). Solo si alcanzó la meta general.
+                    let canalBono = vData.canal || "Salon";
+                    let escB = BONO_ESCALAS[canalBono] || null;
+                    let bonoMarcas = (logroMeta && escB) ? bonoMarcaMonto(escB, marcasGenAlc) : 0;
+                    let bonoAM = (logroMeta && escB) ? bonoAMMonto(escB, aymAlc, marcasGenAlc) : 0;
+                    let bonoTotal = bonoMarcas + bonoAM;
+                    bonoSumaGeneral += bonoTotal;
+                    let gB = x => `₲ ${Math.round(x).toLocaleString('es-PY')}`;
+                    let celMM = `<td class="text-right" style="${bonoMarcas > 0 ? 'color:#2b7a78;font-weight:bold;' : 'color:#a0aec0;'}">${gB(bonoMarcas)}</td>`;
+                    let celAM = `<td class="text-right" style="${bonoAM > 0 ? 'color:#2b7a78;font-weight:bold;' : 'color:#a0aec0;'}">${gB(bonoAM)}</td>`;
+                    let celTot = `<td class="text-right" style="${bonoTotal > 0 ? 'color:#1a7a3c;font-weight:bold;background:#eafaf0;' : 'color:#a0aec0;'}">${gB(bonoTotal)}</td>`;
+
+                    let bonoId = 'bono' + (++__pdSeq);
+                    let notaB = !escB ? `<br><span style="color:#a0aec0;">(Este canal no entra en el esquema de bonos.)</span>`
+                                      : (!logroMeta ? `<br><span style="color:#b4472d;">(No alcanzó la meta general → no califica a bono.)</span>` : ``);
                     let rowHtmlBonos = `
                         <tr>
-                            <td class="text-left"><strong>${escapeHtml(v)}</strong></td>
+                            <td class="text-left" style="cursor:pointer;" onclick="toggleBono('${bonoId}', this)" title="Ver marcas activadas"><span class="bono-caret" style="color:#dd6b20;font-weight:bold;">▸</span> <strong>${escapeHtml(v)}</strong></td>
                             <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
                             <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
                             <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11.5px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
                             <td class="text-center">${badgeMeta}</td>
                             <td class="text-center">${txtMGen}</td>
                             <td class="text-center">${txtAyM}</td>
+                            ${celMM}
+                            ${celAM}
+                            ${celTot}
+                        </tr>
+                        <tr id="${bonoId}" style="display:none; background:#fffaf0;">
+                            <td colspan="10" style="font-size:11px; color:#4a5568; padding:8px 16px; text-align:left;">
+                                <b style="color:#2b7a78;">Marcas activadas (${marcasActiv.length}):</b> ${marcasActiv.length ? marcasActiv.map(escapeHtml).join(', ') : '—'}
+                                <br><b style="color:#b4472d;">Armas y Municiones activadas (${amActiv.length}):</b> ${amActiv.length ? amActiv.map(escapeHtml).join(', ') : '—'}
+                                ${notaB}
+                            </td>
                         </tr>
                     `;
                     
@@ -3971,10 +4022,12 @@
             let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "E-commerce", "Mayoristas", "Reparaciones"];
             canalesSegmentosBonos.forEach(c => {
                 if (bonosDataByCanal[c] && bonosDataByCanal[c].length > 0) {
-                    hTablaBonosFinal += `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${c.toUpperCase()} ---</td></tr>`;
+                    hTablaBonosFinal += `<tr class="header-segmento"><td colspan="10">--- EQUIPO ${c.toUpperCase()} ---</td></tr>`;
                     hTablaBonosFinal += bonosDataByCanal[c].join("");
                 }
             });
+            // 💰 Total general de bonos a abonar (suma de todos los vendedores que calificaron).
+            hTablaBonosFinal += `<tr class="total-segmento"><td colspan="9" class="text-right" style="font-weight:bold;">💰 TOTAL A ABONAR EN BONOS</td><td class="text-right" style="font-weight:bold; background:#eafaf0; color:#1a7a3c;">₲ ${bonoSumaGeneral.toLocaleString('es-PY')}</td></tr>`;
             document.getElementById('grid-bonos-vendedores').innerHTML = hTablaBonosFinal;
 
             // Item 7: E-commerce POR CLIENTE + objetivo POR CANAL (no por cliente) + total de marcas por cliente
