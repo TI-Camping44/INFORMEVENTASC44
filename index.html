@@ -3336,6 +3336,12 @@
                 hdrObj = objetivoFiltrado;
                 hdrTitulo = 'META GLOBAL DEL PERÍODO';
             }
+            // 💰 En la página de bonos, Directorio NO cuenta para la venta general (operaciones de
+            //   directores, no ventas comerciales). Así el avance refleja lo comercial de verdad.
+            if (tabActivaId === 'tab-bonos' && acumCanales['Directorio']) {
+                hdrNeta -= (acumCanales['Directorio'].bruto + acumCanales['Directorio'].nc);
+                if (METAS_ACTIVAS.canales && METAS_ACTIVAS.canales['Directorio']) hdrObj -= METAS_ACTIVAS.canales['Directorio'];
+            }
             let hdrDif = hdrNeta - hdrObj; // diferencia contra el objetivo del período (negativo = falta)
             let hdrAvance = hdrObj > 0 ? ((hdrNeta / hdrObj) * 100).toFixed(1) : 0;
             // Ritmo necesario: cuánto falta facturar por día hábil restante para llegar al objetivo del mes,
@@ -3960,7 +3966,9 @@
             
             // CONSTRUIR TABLA DE BONOS AGRUPADA POR CANAL
             let hTablaBonosFinal = "";
-            let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "Directorio", "E-commerce", "Mayoristas", "Reparaciones"];
+            // 💰 Directorio NO va en los bonos: son operaciones de directores, no ventas comerciales
+            //   que califiquen a bonos (y distorsionaban la venta general del equipo).
+            let canalesSegmentosBonos = ["Salon", "Online", "Venta Externa", "E-commerce", "Mayoristas", "Reparaciones"];
             canalesSegmentosBonos.forEach(c => {
                 if (bonosDataByCanal[c] && bonosDataByCanal[c].length > 0) {
                     hTablaBonosFinal += `<tr class="header-segmento"><td colspan="7">--- EQUIPO ${c.toUpperCase()} ---</td></tr>`;
