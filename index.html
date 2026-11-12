@@ -1304,6 +1304,66 @@
         }
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarClientesMarca(); });
 
+        // 💳 FICHA DE BONO (tarjeta por vendedor) — se abre al tocar el nombre en la pestaña Bonos.
+        let __bonoFichaReg = {};
+        function verBonoFicha(uid) {
+            let f = __bonoFichaReg[uid];
+            if (!f) return;
+            let fmt = n => '₲ ' + Math.round(n).toLocaleString('es-PY');
+            let badge = f.logro
+                ? '<span style="display:inline-block;background:#e8f8ee;color:#22543d;border:1px solid #9ae6b4;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;">✅ SÍ ALCANZÓ</span>'
+                : '<span style="display:inline-block;background:#fde8e8;color:#8a2a2a;border:1px solid #f5b5b5;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;">❌ NO</span>';
+            let gTxt = f.gAsig ? (f.gAlc + ' de ' + f.gAsig) : '—';
+            let aTxt = f.aAsig ? (f.aAlc + ' de ' + f.aAsig) : '—';
+            let filas = (f.marcas || []).map(m =>
+                `<tr${m.weapon ? ' style="background:#fdf3e8;"' : ''}>
+                    <td>${escapeHtml(m.marca)}${m.weapon ? ' <span style="color:#b4472d;font-size:10px;">(A&amp;M)</span>' : ''}</td>
+                    <td class="text-right" style="color:#2b7a78;font-weight:700;">${fmt(m.venta)}</td>
+                    <td class="text-right" style="color:#4a5568;">${fmt(m.meta)}</td>
+                    <td class="text-center">${m.pct}%</td>
+                    <td class="text-center" style="color:#2f9e5e;font-weight:700;">✅</td>
+                </tr>`).join('');
+            if (!filas) filas = '<tr><td colspan="5" style="text-align:center;color:#a0aec0;padding:14px;">No activó marcas con objetivo este mes.</td></tr>';
+            let pctObj = f.obj > 0 ? ((f.net / f.obj) * 100).toFixed(0) + '%' : '—';
+            let ov = document.getElementById('modal-bono-ficha');
+            if (!ov) {
+                ov = document.createElement('div');
+                ov.id = 'modal-bono-ficha';
+                ov.className = 'cm-overlay';
+                ov.onclick = function(e){ if (e.target === ov) cerrarBonoFicha(); };
+                document.body.appendChild(ov);
+            }
+            ov.innerHTML = `
+              <div class="cm-box" style="max-width:720px;">
+                <div class="cm-head" style="background:#1c3d5a;">
+                    <div><div class="cm-title" style="color:#fff;">${escapeHtml(f.v)}</div>
+                    <div class="cm-sub" style="color:#c6d4e3;">Canal: ${escapeHtml(f.canal)} · Ficha de bono del mes</div></div>
+                    <button class="cm-close" onclick="cerrarBonoFicha()">✕</button>
+                </div>
+                <div class="cm-body">
+                  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+                    <div style="flex:1;min-width:120px;border:1px solid #eef1f5;border-radius:8px;padding:9px 12px;"><div style="font-size:10px;color:#718096;text-transform:uppercase;">Venta neta</div><div style="font-size:15px;font-weight:800;">${fmt(f.net)}</div></div>
+                    <div style="flex:1;min-width:120px;border:1px solid #eef1f5;border-radius:8px;padding:9px 12px;"><div style="font-size:10px;color:#718096;text-transform:uppercase;">Objetivo (${pctObj})</div><div style="font-size:15px;font-weight:800;">${fmt(f.obj)}</div></div>
+                    <div style="flex:1;min-width:120px;border:1px solid #eef1f5;border-radius:8px;padding:9px 12px;"><div style="font-size:10px;color:#718096;text-transform:uppercase;">Objetivo general</div><div style="margin-top:4px;">${badge}</div></div>
+                    <div style="flex:1;min-width:120px;border:1px solid #eef1f5;border-radius:8px;padding:9px 12px;"><div style="font-size:10px;color:#718096;text-transform:uppercase;">Marcas · A&amp;M</div><div style="font-size:14px;font-weight:800;"><span style="color:#2b7a78;">${gTxt}</span> · <span style="color:#a0aec0;">${aTxt}</span></div></div>
+                  </div>
+                  <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid #dcefe8;margin-bottom:14px;">
+                    <div style="flex:1;text-align:center;padding:10px;background:#f0f8f5;border-right:1px solid #dcefe8;"><div style="font-size:10.5px;color:#4a5568;">Monto Marcas</div><div style="font-size:15px;font-weight:800;">${fmt(f.bM)}</div></div>
+                    <div style="flex:1;text-align:center;padding:10px;background:#f0f8f5;border-right:1px solid #dcefe8;"><div style="font-size:10.5px;color:#4a5568;">Monto A&amp;M</div><div style="font-size:15px;font-weight:800;color:${f.bA>0?'#1f2733':'#a0aec0'};">${fmt(f.bA)}</div></div>
+                    <div style="flex:1;text-align:center;padding:10px;background:#2b7a78;color:#fff;"><div style="font-size:10.5px;color:#cdeae3;">💰 Total a abonar</div><div style="font-size:16px;font-weight:800;">${fmt(f.bT)}</div></div>
+                  </div>
+                  <div style="font-size:12.5px;color:#1c3d5a;font-weight:700;margin-bottom:6px;">Marcas activadas (${(f.marcas||[]).length})</div>
+                  <table class="cm-table">
+                    <thead><tr><th>Marca</th><th class="text-right">Venta neta</th><th class="text-right">Objetivo</th><th class="text-center">%</th><th></th></tr></thead>
+                    <tbody>${filas}</tbody>
+                  </table>
+                </div>
+              </div>`;
+            ov.classList.add('open');
+        }
+        function cerrarBonoFicha(){ let ov=document.getElementById('modal-bono-ficha'); if(ov) ov.classList.remove('open'); }
+        document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrarBonoFicha(); });
+
         // =========================================================================
         // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
         // =========================================================================
@@ -3732,6 +3792,7 @@
             let bonoSumaGeneral = 0; // 💰 total de bonos a abonar (todos los vendedores)
             let __pdSeq = 0; // secuencia para grupos de drill-down (producto por marca)
             __clientesMarcaReg = {}; // se regenera en cada render (los uid 'cm#' se reasignan)
+            __bonoFichaReg = {}; // fichas de bono por vendedor (se regeneran en cada render)
 
             Object.keys(dataFichasVend).sort().forEach(v => {
                 let vData = dataFichasVend[v];
@@ -3777,6 +3838,7 @@
                 let marcasGenAsig = 0, marcasGenAlc = 0;
                 let aymAsig = 0, aymAlc = 0;
                 let marcasActiv = [], amActiv = []; // nombres de marcas activadas (para el desplegable de bonos)
+                let fichaActiv = []; // detalle rico {marca, venta, meta, pct, weapon} para la ficha-modal
 
                 Array.from(marcasUnicas).sort().forEach(cKey => {
                     let val = ventasPorClave[cKey] || 0;
@@ -3802,7 +3864,7 @@
                     let displayBrand = displayPorClave[cKey] || metaNombrePorClave[cKey] || cKey;
 
                     // 💰 Marca activada (llegó a su meta) → la guardamos para el desplegable de bonos.
-                    if (mAsig > 0 && val >= mAsig) { (isWeapon ? amActiv : marcasActiv).push(displayBrand); }
+                    if (mAsig > 0 && val >= mAsig) { (isWeapon ? amActiv : marcasActiv).push(displayBrand); fichaActiv.push({ marca: displayBrand, venta: val, meta: mAsig, pct: mAsig > 0 ? Math.round(val / mAsig * 100) : 0, weapon: isWeapon }); }
 
                     // Drill-down: productos vendidos de esta marca por este vendedor
                     let prodMap = prodPorClave[cKey] || {};
@@ -3888,11 +3950,18 @@
                     let celTot = `<td class="text-right" style="${bonoTotal > 0 ? 'color:#1a7a3c;font-weight:bold;background:#eafaf0;' : 'color:#a0aec0;'}">${gB(bonoTotal)}</td>`;
 
                     let bonoId = 'bono' + (++__pdSeq);
+                    // Guardamos la ficha de este vendedor para abrirla como tarjeta al tocar el nombre.
+                    __bonoFichaReg[bonoId] = {
+                        v: v, canal: canalBono, net: net, obj: obj, logro: logroMeta,
+                        gAlc: marcasGenAlc, gAsig: marcasGenAsig, aAlc: aymAlc, aAsig: aymAsig,
+                        bM: bonoMarcas, bA: bonoAM, bT: bonoTotal,
+                        marcas: fichaActiv.slice().sort((a, b) => b.venta - a.venta)
+                    };
                     let notaB = !escB ? `<br><span style="color:#a0aec0;">(Este canal no entra en el esquema de bonos.)</span>`
                                       : (!logroMeta ? `<br><span style="color:#b4472d;">(No alcanzó la meta general → no califica a bono.)</span>` : ``);
                     let rowHtmlBonos = `
                         <tr>
-                            <td class="text-left" style="cursor:pointer;" onclick="toggleBono('${bonoId}', this)" title="Ver marcas activadas"><span class="bono-caret" style="color:#dd6b20;font-weight:bold;">▸</span> <strong>${escapeHtml(v)}</strong></td>
+                            <td class="text-left"><span class="bono-caret" style="color:#dd6b20;font-weight:bold;cursor:pointer;" onclick="toggleBono('${bonoId}', this)" title="Ver resumen rápido">▸</span> <strong style="cursor:pointer;color:#1c3d5a;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px;" onclick="verBonoFicha('${bonoId}')" title="Abrir ficha de bono">${escapeHtml(v)}</strong></td>
                             <td class="text-right">₲ ${obj.toLocaleString('es-PY')}</td>
                             <td class="text-right" style="font-weight:bold;">₲ ${net.toLocaleString('es-PY')}</td>
                             <td class="text-center ${logroMeta?'num-positivo':'num-negativo'}" style="font-size:11.5px; font-weight:bold;">${pctMesBono.toFixed(1)}%</td>
