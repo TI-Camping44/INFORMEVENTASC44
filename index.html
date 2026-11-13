@@ -991,7 +991,7 @@
             if (element) { element.classList.add('active'); if (element.getAttribute('role') === 'tab') element.setAttribute('aria-selected', 'true'); }
             tabActivaId = tabId;
             // La pestaña activa queda en la URL: así se puede compartir el link y usar el botón Atrás.
-            try { if (location.hash !== '#' + tabId) history.pushState(null, '', '#' + tabId); } catch (e) {}
+            try { if (!window.__restaurando && location.hash.split('?')[0] !== '#' + tabId) history.pushState(null, '', '#' + tabId); } catch (e) {}
             // Celular: al elegir una pestaña, cierro el menú desplegable.
             let sb = document.getElementById('main-sidebar');
             if (sb) sb.classList.remove('menu-open');
@@ -1000,15 +1000,60 @@
             try { filtrarYRenderizarTodo(); } catch (e) {}
         }
 
-        // Abre la pestaña indicada en la URL (#tab-xxx) al cargar o con el botón Atrás.
-        function activarTabDesdeHash() {
-            let h = (location.hash || '').replace('#', '');
-            if (!h) return;
-            let btn = document.querySelector('.menu-item[aria-controls="' + h + '"]');
-            if (btn && document.getElementById(h)) switchTab(h, btn);
+        // 🔗 Estado en la URL: pestaña + mes + filtros, para compartir el link y usar Atrás.
+        window.__restauradoInicial = false; // la restauración inicial ocurre al terminar la 1ª carga
+        window.__restaurando = false;       // true mientras reconstruimos desde la URL
+        window.__suspenderRender = false;    // evita re-render en cada paso de la restauración
+
+        function serializarEstadoURL() {
+            if (window.__restaurando) return;
+            let fa = filtrosActivos, qs = new URLSearchParams();
+            if (fa.mes && fa.mes !== String(fa.mesActualLive)) qs.set('mes', fa.mes);
+            if (fa.vendedores && fa.vendedores.length) qs.set('vend', fa.vendedores.join('~'));
+            if (fa.canales && fa.canales.length) qs.set('canal', fa.canales.join('~'));
+            if (fa.marcas && fa.marcas.length) qs.set('marca', fa.marcas.join('~'));
+            if (fa.rotaciones && fa.rotaciones.length) qs.set('rot', fa.rotaciones.join('~'));
+            if (window.__sinIva) qs.set('iva', 'sin');
+            if (window.__soloFacturado) qs.set('cot', 'fact');
+            if (fa.fecha) qs.set('fecha', fa.fecha);
+            if (fa.desde) qs.set('desde', fa.desde);
+            if (fa.hasta) qs.set('hasta', fa.hasta);
+            let s = qs.toString();
+            let nuevo = '#' + (tabActivaId || 'tab-general') + (s ? '?' + s : '');
+            try { if (location.hash !== nuevo) history.replaceState(null, '', nuevo); } catch (e) {}
         }
-        window.addEventListener('popstate', activarTabDesdeHash);
-        window.addEventListener('load', function () { setTimeout(activarTabDesdeHash, 0); });
+
+        function restaurarEstadoDesdeHash() {
+            let raw = location.hash || '';
+            if (!raw) return;
+            let partes = raw.replace(/^#/, '').split('?');
+            let tabPart = partes[0], qs = new URLSearchParams(partes[1] || '');
+            window.__restaurando = true; window.__suspenderRender = true;
+            try {
+                if (tabPart) { let b = document.querySelector('.menu-item[aria-controls="' + tabPart + '"]'); if (b && document.getElementById(tabPart)) switchTab(tabPart, b); }
+                let selMes = document.getElementById('select-mes');
+                if (qs.has('mes') && selMes && [].some.call(selMes.options, function (o) { return o.value === qs.get('mes'); })) selMes.value = qs.get('mes');
+                ['select-fecha|fecha', 'select-desde|desde', 'select-hasta|hasta'].forEach(function (p) { let a = p.split('|'); let el = document.getElementById(a[0]); if (el) el.value = qs.get(a[1]) || ''; });
+                let iva = qs.get('iva') === 'sin' ? 'sin' : 'con'; let bIva = document.querySelector('#iva-btns .rot-btn[data-iva="' + iva + '"]'); if (bIva) setIva(iva, bIva);
+                let cot = qs.get('cot') === 'fact' ? 'facturado' : 'completa'; let bCot = document.querySelector('#cot-btns .rot-btn[data-cot="' + cot + '"]'); if (bCot) setCotizacion(cot, bCot);
+                filtrosActivos.rotaciones = [];
+                let rots = qs.get('rot') ? qs.get('rot').split('~') : [];
+                if (!rots.length) { let b0 = document.querySelector('#rot-btns .rot-btn[data-rot=""]'); if (b0) setRotacion('', b0); }
+                else rots.forEach(function (letra) { let b = document.querySelector('#rot-btns .rot-btn[data-rot="' + letra + '"]'); if (b) setRotacion(letra, b); });
+                [['vend', 'ms-vendedor'], ['canal', 'ms-canal'], ['marca', 'ms-marca']].forEach(function (par) {
+                    let valores = qs.get(par[0]) ? qs.get(par[0]).split('~') : [];
+                    let panel = document.querySelector('#' + par[1] + ' .ms-panel'); if (!panel) return;
+                    panel.querySelectorAll('input[type="checkbox"][value]').forEach(function (c) { c.checked = valores.indexOf(c.value) >= 0; });
+                    if (valores.length) msCambio(par[1]);
+                });
+                aplicarFiltrosDropdown();
+            } catch (e) { console.error('restaurar URL', e); }
+            window.__suspenderRender = false; window.__restaurando = false;
+            try { filtrarYRenderizarTodo(); } catch (e) {}
+        }
+        // Compat: el nombre viejo sigue funcionando.
+        function activarTabDesdeHash() { restaurarEstadoDesdeHash(); }
+        window.addEventListener('popstate', function () { restaurarEstadoDesdeHash(); });
 
         // ♿ Teclado para elementos clickeables que no son botones nativos (carets, nombres, etc.):
         //    los hace enfocables (tabindex) y operables con Enter/Espacio, incl. contenido dinámico.
@@ -2236,6 +2281,8 @@
 
                 try { filtrarYRenderizarTodo(); } catch(e){ console.error(e); }
                 if (!silencioso) document.getElementById('loader').style.display = 'none';
+                // Con los datos y dropdowns ya listos, restauramos el estado que venga en la URL (una vez).
+                if (!window.__restauradoInicial) { window.__restauradoInicial = true; try { restaurarEstadoDesdeHash(); } catch(e){ console.error('restaurar inicial', e); } }
 
             } catch (err) {
                 clearTimeout(slowNotice); clearTimeout(networkTimeout);
@@ -3091,6 +3138,8 @@
         }
 
         function filtrarYRenderizarTodo() {
+          if (window.__suspenderRender) return; // durante la restauración desde la URL rendereamos una sola vez al final
+          try { if (window.__restauradoInicial && !window.__restaurando) serializarEstadoURL(); } catch (e) {}
           try {
             // 📌 TI-0105: en la vista por VENDEDOR (ficha/objetivo), Diego y Héctor caen en Mayoristas si el
             //   mes mostrado es noviembre 2026 en adelante; antes, Venta Externa. (Las VENTAS ya se cortan por
