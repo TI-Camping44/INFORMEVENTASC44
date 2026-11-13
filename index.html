@@ -2774,11 +2774,14 @@
                 let thA = document.getElementById('th-mayo-activos');
                 if (thA) thA.textContent = 'Activos (últ. ' + W + ' meses)';
 
-                let card = (titulo, valor, color) =>
+                let card = (titulo, valor, color, sub) =>
                     `<div style="flex:1; min-width:150px; background:var(--bg-card,#fff); border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; padding:14px 16px;">
                         <div style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px;">${titulo}</div>
                         <div style="font-size:26px; font-weight:800; color:${color}; margin-top:4px;">${valor}</div>
+                        ${sub ? `<div style="font-size:10px; color:var(--text-muted); margin-top:4px; line-height:1.35;">${sub}</div>` : ''}
                     </div>`;
+                let _mesNom = hoy.toLocaleDateString('es-PY', { month: 'long' });
+                _mesNom = _mesNom.charAt(0).toUpperCase() + _mesNom.slice(1);
                 let rango = window.__mayoRango || {};
                 let diag = '';
                 if (rango.minT) {
@@ -2792,9 +2795,9 @@
                 setHtmlSafe('kpi-mayoristas-clientes',
                     `<div style="display:flex; gap:12px; flex-wrap:wrap;">
                         ${card('Clientes mayoristas totales', totG.toLocaleString('es-PY'), 'var(--navy-main,#1e293b)')}
-                        ${card('Activos (últ. ' + W + ' meses)', actG.toLocaleString('es-PY'), '#16a34a')}
-                        ${card('% de clientes activos', pctG + '%', colDe(pctG))}
-                        ${card('🆕 Nuevos este mes', nueG.toLocaleString('es-PY'), '#2563eb')}
+                        ${card('Activos (últ. ' + W + ' meses)', actG.toLocaleString('es-PY'), '#16a34a', 'Compraron en los últimos ' + W + ' meses · cambia con el selector')}
+                        ${card('% de clientes activos', pctG + '%', colDe(pctG), 'Activos ÷ totales (ventana de ' + W + ' meses)')}
+                        ${card('🆕 Nuevos en ' + _mesNom, nueG.toLocaleString('es-PY'), '#2563eb', '1ª compra mayorista en ' + _mesNom + ' · NO depende del selector de 3/12 meses')}
                     </div>${diag}`);
 
                 let filas = Object.values(porVend).sort((a, b) => b.tot - a.tot);
