@@ -1080,6 +1080,14 @@
 
     <script>
         // Menú hamburguesa (celular): abre/cierra la lista de pestañas.
+        // 🎨 Ajusta los colores "globales" de Chart.js (texto de ejes/leyenda y líneas de grilla)
+        //    según el tema. Se llama antes de dibujar cada gráfico y al cambiar de tema.
+        function aplicarTemaCharts() {
+            if (typeof Chart === 'undefined') return;
+            let oscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+            Chart.defaults.color = oscuro ? '#cdd9e6' : '#666';
+            Chart.defaults.borderColor = oscuro ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+        }
         // 🌙 Alterna claro/oscuro, lo recuerda y ajusta el color de la barra del navegador.
         function etiquetarBotonTema() {
             let b = document.getElementById('btn-tema');
@@ -1094,6 +1102,8 @@
             html.setAttribute('data-theme', nuevo);
             try { localStorage.setItem('bi-theme', nuevo); } catch (e) {}
             etiquetarBotonTema();
+            aplicarTemaCharts();
+            try { filtrarYRenderizarTodo(); } catch (e) {} // re-dibuja los gráficos con los colores del tema
         }
         document.addEventListener('DOMContentLoaded', etiquetarBotonTema);
 
@@ -4521,6 +4531,8 @@
 
             // === CURVA: cada contenedor .container-line según los canales de su pestaña ===
             try {
+                aplicarTemaCharts();
+                let _dkCh = document.documentElement.getAttribute('data-theme') === 'dark';
                 (window.__lineCharts || []).forEach(c => { try { c.destroy(); } catch (e) {} });
                 window.__lineCharts = [];
                 let lineOpts = { responsive: true, maintainAspectRatio: false };
@@ -4534,7 +4546,7 @@
                     let labels = pts.map(p => p.label);
                     let mesArr = pts.map(p => p.mesIdx), fechaArr = pts.map(p => p.fecha);
                     let datasets = [
-                        { type: 'bar', label: etiquetaVenta, data: pts.map(p => Math.round(p.venta)), backgroundColor: 'rgba(28, 61, 90, 0.65)', borderColor: '#1c3d5a', borderWidth: 1, order: 2 },
+                        { type: 'bar', label: etiquetaVenta, data: pts.map(p => Math.round(p.venta)), backgroundColor: _dkCh ? 'rgba(74,159,224,0.55)' : 'rgba(28, 61, 90, 0.65)', borderColor: _dkCh ? '#4a9fe0' : '#1c3d5a', borderWidth: 1, order: 2 },
                         { type: 'line', label: etiquetaObjetivo, data: pts.map(() => Math.round(objPunto)), borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.05)', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, tension: 0, order: 1 }
                     ];
                     let opts = Object.assign({}, lineOpts, { onClick: (e, elements) => {
