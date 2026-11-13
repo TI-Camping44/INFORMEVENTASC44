@@ -2357,6 +2357,67 @@
         // ========================================================================
         let __syncEnCurso = false;
         const AUTO_REFRESH_MIN = 10; // auto-actualización silenciosa cada N minutos (sin tocar F5)
+        // ====== 📦 CACHÉ LOCAL (IndexedDB) ======================================
+        // Guarda los CSV crudos de la última sincronización para pintar al instante
+        // en la próxima visita, mientras se baja la versión fresca por detrás.
+        const BI_CACHE_DB = 'bi_cache_v1', BI_CACHE_STORE = 'kv';
+        function biIdbAbrir() {
+            return new Promise(function (res, rej) {
+                try {
+                    let r = indexedDB.open(BI_CACHE_DB, 1);
+                    r.onupgradeneeded = function () { try { r.result.createObjectStore(BI_CACHE_STORE); } catch (e) {} };
+                    r.onsuccess = function () { res(r.result); };
+                    r.onerror = function () { rej(r.error); };
+                } catch (e) { rej(e); }
+            });
+        }
+        async function biCacheGuardar(cfg, data, plan) {
+            try {
+                let db = await biIdbAbrir();
+                await new Promise(function (res) {
+                    let tx = db.transaction(BI_CACHE_STORE, 'readwrite'), st = tx.objectStore(BI_CACHE_STORE);
+                    st.put(cfg, 'cfg'); st.put(data, 'data'); st.put(plan || '', 'plan'); st.put(Date.now(), 'ts');
+                    tx.oncomplete = function () { res(); }; tx.onerror = function () { res(); };
+                });
+            } catch (e) { /* sin caché (modo privado, cuota, etc.): no pasa nada */ }
+        }
+        async function biCacheLeer() {
+            try {
+                let db = await biIdbAbrir();
+                return await new Promise(function (res) {
+                    let tx = db.transaction(BI_CACHE_STORE, 'readonly'), st = tx.objectStore(BI_CACHE_STORE), out = {}, keys = ['cfg', 'data', 'plan', 'ts'], pend = keys.length;
+                    keys.forEach(function (k) { let g = st.get(k); g.onsuccess = function () { out[k] = g.result; if (--pend === 0) res(out); }; g.onerror = function () { if (--pend === 0) res(out); }; });
+                });
+            } catch (e) { return {}; }
+        }
+        // Pinta el dashboard desde la caché (si existe). Devuelve true si pintó algo.
+        async function pintarDesdeCache() {
+            try {
+                let c = await biCacheLeer();
+                if (!c || !c.cfg || !c.data) return false;
+                let filasConfig = parseCSV(c.cfg), filasData = parseCSV(c.data);
+                filasConfig.forEach(function (row) {
+                    let col0 = String(row[0] || "").trim();
+                    if (col0.includes("Fecha Actual (Corte):") && row[1]) {
+                        let mIdx = getMonthFromDate(row[1]);
+                        if (mIdx > 0 && mIdx <= 12) { filtrosActivos.mesActualLive = mIdx; filtrosActivos.mes = String(mIdx); }
+                    }
+                });
+                construirDropdownMesesDinámico(filtrosActivos.mesActualLive);
+                procesarMetasConfigActuales(filasConfig);
+                cargarHistoricoDesdeConfig(filasConfig);
+                procesarVentasData(filasData); // también puebla los dropdowns de filtros
+                if (c.plan && !/^\s*</.test(c.plan)) { try { cargarPlanDesdeSheet(parseCSV(c.plan)); } catch (e) {} }
+                try { filtrarYRenderizarTodo(); } catch (e) {}
+                let loader = document.getElementById('loader'); if (loader) loader.style.display = 'none';
+                let hace = c.ts ? Math.round((Date.now() - c.ts) / 60000) : null;
+                actualizarBannerEstado('success', '📦 Mostrando datos guardados' + (hace != null ? ' (hace ' + hace + ' min)' : '') + ' · actualizando en vivo…');
+                window.__restauradoInicial = true;
+                try { restaurarEstadoDesdeHash(); } catch (e) {}
+                return true;
+            } catch (e) { console.warn('pintarDesdeCache', e); return false; }
+        }
+
         async function iniciarSincronizacion(silencioso) {
             if (__syncEnCurso) return;              // evita que dos cargas se solapen
             __syncEnCurso = true;
@@ -2412,16 +2473,19 @@
 
                 // 📋 Plan Estratégico EN VIVO (hoja "PLAN", gid 424299). Si falla o no está publicada,
                 //   el tablero sigue con la copia interna del plan (no rompe nada).
+                let _txtPlan = '';
                 try {
                     const urlPlan = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp2zrO1KG9ReWEdh5COq97li6O19H-ff3L-rDLblngpBf-SZVGrAIWrthhWkFu9Wd8E9MUofy91vvf/pub?gid=424299&single=true&output=csv&cb=' + new Date().getTime();
                     const resPlan = await fetch(urlPlan, { signal: controller.signal });
                     if (resPlan.ok) {
-                        let txtPlan = await resPlan.text();
-                        if (txtPlan && !/^\s*</.test(txtPlan)) cargarPlanDesdeSheet(parseCSV(txtPlan));
+                        _txtPlan = await resPlan.text();
+                        if (_txtPlan && !/^\s*</.test(_txtPlan)) cargarPlanDesdeSheet(parseCSV(_txtPlan));
                     }
                 } catch (ePlan) { console.warn("Plan Estratégico: uso la copia interna", ePlan); }
 
                 clearTimeout(slowNotice); clearTimeout(networkTimeout);
+                // 📦 Guardamos los CSV de esta sincronización para la próxima visita (no bloquea el render).
+                biCacheGuardar(txtConfig, txtData, _txtPlan);
                 // Modo silencioso: restauramos los filtros que tenía el usuario (mes, canal, vendedor, marca…).
                 if (silencioso && snapFiltros) {
                     let liveMes = filtrosActivos.mesActualLive;   // mes actual recién leído del CONFIG
@@ -5217,7 +5281,13 @@
             return leyenda + out;
         }
 
-        iniciarSincronizacion();
+        // Arranque: si hay datos guardados, los mostramos al instante y refrescamos por detrás
+        // (sin loader). Si no hay caché, carga normal con la pantalla de "Cargando…".
+        (async function () {
+            let huboCache = false;
+            try { huboCache = await pintarDesdeCache(); } catch (e) {}
+            iniciarSincronizacion(huboCache);
+        })();
 
         // ⏱️ Auto-actualización: cada AUTO_REFRESH_MIN minutos re-lee el Sheet sin tocar F5 ni los filtros.
         //    Solo corre si la pestaña está visible (no gasta datos en segundo plano).
