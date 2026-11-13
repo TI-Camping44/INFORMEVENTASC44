@@ -11,7 +11,7 @@
       (function () {
         try {
           var t = localStorage.getItem('bi-theme');
-          if (t !== 'dark' && t !== 'light') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+          if (t !== 'dark' && t !== 'light') t = 'light'; // por defecto: modo claro (hasta que el usuario elija)
           document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
       })();
