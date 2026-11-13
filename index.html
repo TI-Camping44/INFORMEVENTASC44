@@ -54,6 +54,9 @@
         .skip-link:focus { left: 0; }
         /* Solo para lectores de pantalla */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+        /* Virtualización de render en tablas largas: el navegador no pinta las filas fuera de
+           pantalla (las filas siguen en el DOM → exportar/buscar/imprimir siguen funcionando). */
+        table.lv-virtual > tbody > tr { content-visibility: auto; contain-intrinsic-size: auto 34px; }
         /* Respeta "reducir movimiento" del sistema operativo */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
@@ -1066,6 +1069,24 @@
                 if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
             }
             function upgrade(root) { try { (root || document).querySelectorAll('[onclick]').forEach(marcar); } catch (e) {} }
+            // 🚀 Virtualización ligera: en tablas con muchas filas, el navegador omite pintar las que
+            //    están fuera de pantalla (content-visibility). No quita filas del DOM, así que exportar,
+            //    buscar (Ctrl+F) e imprimir siguen funcionando. Solo se activa con > 50 filas.
+            function virtualizarTablasLargas(root) {
+                try {
+                    (root || document).querySelectorAll('table:not(.lv-virtual)').forEach(function (t) {
+                        let body = t.tBodies && t.tBodies[0];
+                        let n = body ? body.rows.length : (t.rows ? t.rows.length : 0);
+                        if (n > 50) t.classList.add('lv-virtual');
+                    });
+                } catch (e) {}
+            }
+            let lvPend = false;
+            function programarVirtualizar() {
+                if (lvPend) return; lvPend = true;
+                let run = function () { lvPend = false; virtualizarTablasLargas(document); };
+                if (window.requestAnimationFrame) window.requestAnimationFrame(run); else setTimeout(run, 0);
+            }
             document.addEventListener('keydown', function (e) {
                 let t = e.target;
                 if ((e.key === 'Enter' || e.key === ' ') && t && t.hasAttribute && t.hasAttribute('data-kbd')) {
@@ -1073,12 +1094,14 @@
                 }
             });
             let obs = new MutationObserver(function (muts) {
+                let huboNodos = false;
                 for (let m of muts) for (let n of m.addedNodes) {
-                    if (n.nodeType === 1) { marcar(n); if (n.querySelectorAll) upgrade(n); }
+                    if (n.nodeType === 1) { marcar(n); if (n.querySelectorAll) upgrade(n); huboNodos = true; }
                 }
+                if (huboNodos) programarVirtualizar();
             });
             document.addEventListener('DOMContentLoaded', function () {
-                upgrade(document);
+                upgrade(document); virtualizarTablasLargas(document);
                 try { obs.observe(document.body, { childList: true, subtree: true }); } catch (e) {}
             });
         })();
