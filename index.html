@@ -975,7 +975,7 @@
 
         <div id="tab-altas" class="tab-content">
             <div class="excel-container">
-                <div class="excel-title">📈 ALTAS DE CLIENTES NUEVOS (todos los canales)</div>
+                <div class="excel-title">📈 ALTAS DE CLIENTES NUEVOS</div>
                 <div style="padding:12px 15px; background:#ebf8ff; border:1px solid #bee3f8; margin-bottom:15px; font-size:11.5px; color:#2c5282; border-radius:6px; border-left:5px solid #3182ce;">
                     <strong>ℹ️ Cómo se cuenta:</strong> "cliente nuevo" = su <strong>primera compra registrada</strong> en los datos cargados (hoy, <strong>2026</strong>). Sirve para seguir el <strong>ritmo de altas por mes y por trimestre</strong>. Para distinguir clientes <em>realmente</em> nuevos (que nunca compraron antes) habría que cargar el historial 2025. Se excluyen las ventas a "Consumidor Final" y sin cliente.
                 </div>
@@ -4765,6 +4765,11 @@
             let primeras = {};
             lineas.forEach(function (r) {
                 if (!r || r.documento === 'Nota de Crédito') return;
+                // Respeta canal/vendedor/marca/mercadería (NO el mes: esta vista es anual, con su propio período).
+                if (!canalPasaFiltro(r.canal)) return;
+                if (!vendedorPasaFiltro(r.vendedor)) return;
+                if (!marcaPasaFiltro(r.marcaFinal)) return;
+                if (!rotacionPasaFiltro(r.rotacion)) return;
                 let cli = r.cliente; if (!cli) return;
                 let cl = limpiarNombre(cli);
                 if (!cl || /CONSUMIDOR|SIN CLIENTE|SIN NOMBRE|MOSTRADOR|VARIOS|OCASIONAL|CLIENTE FINAL/.test(cl)) return;
@@ -4773,6 +4778,13 @@
                 if (!p || t < p.t) primeras[cl] = { nombre: cli, t: t, canal: r.canal || '—', vendedor: r.vendedor || '—' };
             });
             let clientes = Object.keys(primeras).map(function (k) { return primeras[k]; });
+            // Alcance actual (según los filtros activos), para mostrarlo arriba.
+            let _sc = [];
+            if (filtrosActivos.canales && filtrosActivos.canales.length) _sc.push('Canal: ' + filtrosActivos.canales.join(', '));
+            if (filtrosActivos.vendedores && filtrosActivos.vendedores.length) _sc.push('Vendedor: ' + filtrosActivos.vendedores.join(', '));
+            if (filtrosActivos.marcas && filtrosActivos.marcas.length) _sc.push('Marca: ' + filtrosActivos.marcas.join(', '));
+            if (filtrosActivos.rotaciones && filtrosActivos.rotaciones.length) _sc.push('Mercadería: ' + filtrosActivos.rotaciones.join(', '));
+            let scopeTxt = _sc.length ? _sc.join(' · ') : 'Todos los canales';
             let hoy = new Date(), anio = hoy.getFullYear();
             let MES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             let porMes = []; for (let m = 0; m < 12; m++) porMes[m] = 0;
@@ -4803,6 +4815,7 @@
             }).join('');
             if (!filas) filas = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:14px;">Sin altas en el período.</td></tr>';
             cont.innerHTML =
+                '<div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Alcance: <b style="color:var(--navy-main,#1e293b);">' + escapeHtml(scopeTxt) + '</b> <span style="color:var(--text-muted);">· cruza con los filtros de arriba (canal, vendedor, marca)</span></div>' +
                 '<div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">' +
                     kcard('Altas en el año (' + anio + ')', nAnio.toLocaleString('es-PY'), '#2563eb', 'Clientes con 1ª compra en ' + anio) +
                     kcard('Este trimestre (' + qNom + ')', nTrim.toLocaleString('es-PY'), '#16a34a', '1ª compra en el trimestre actual') +
