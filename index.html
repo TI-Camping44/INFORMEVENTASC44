@@ -37,6 +37,7 @@
             --green-banner-bg: #def7ec; --green-banner-text: #03543f; --green-banner-border: #84e1bc;
             --red-banner-bg: #fde8e8; --red-banner-text: #9b1c1c; --red-banner-border: #f8b4b4;
             --row-success-bg: #e6fffa;
+            --bg-card: #ffffff; --bg-total: #f1f5f9;
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-app); display: flex; flex-direction: row; height: 100vh; color: var(--text-dark); font-size: 12px; }
@@ -84,6 +85,7 @@
             --green-banner-bg:#102a20; --green-banner-text:#6ee7b7; --green-banner-border:#1f5140;
             --red-banner-bg:#2a1414; --red-banner-text:#fca5a5; --red-banner-border:#5a2424;
             --row-success-bg:#12302a;
+            --bg-card:#16212e; --bg-total:#1b2634;
             color-scheme: dark;
         }
         :root[data-theme="dark"] body { background: var(--bg-app); color: var(--text-dark); }
@@ -496,6 +498,7 @@
         <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-plan" onclick="switchTab('tab-plan', this)">📋 Plan Estratégico</button>
         <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-anual" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</button>
         <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-ranking" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-altas" onclick="switchTab('tab-altas', this)">📈 Altas de Clientes</button>
         <button type="button" role="tab" class="menu-item bonos-highlight" aria-selected="false" aria-controls="tab-bonos" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</button>
         </div>
     </div>
@@ -967,6 +970,16 @@
                         <tbody id="grid-ranking"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <div id="tab-altas" class="tab-content">
+            <div class="excel-container">
+                <div class="excel-title">📈 ALTAS DE CLIENTES NUEVOS (todos los canales)</div>
+                <div style="padding:12px 15px; background:#ebf8ff; border:1px solid #bee3f8; margin-bottom:15px; font-size:11.5px; color:#2c5282; border-radius:6px; border-left:5px solid #3182ce;">
+                    <strong>ℹ️ Cómo se cuenta:</strong> "cliente nuevo" = su <strong>primera compra registrada</strong> en los datos cargados (hoy, <strong>2026</strong>). Sirve para seguir el <strong>ritmo de altas por mes y por trimestre</strong>. Para distinguir clientes <em>realmente</em> nuevos (que nunca compraron antes) habría que cargar el historial 2025. Se excluyen las ventas a "Consumidor Final" y sin cliente.
+                </div>
+                <div id="altas-contenido"></div>
             </div>
         </div>
 
@@ -3635,6 +3648,7 @@
 
             renderizarEstructuraVisual(METAS_ACTIVAS, data, acumDias, acumCanales, acumVendPorCanal, dataFichasVend, brutoEco, ncEco, acumClientesNC, acumFechasNC, acumMarcas, diasTranscurridosActivos, diasTotalesActivos, acumVendedorNC, ecomPorCliente, acumDiasPorCanal);
             try { renderRanking(); } catch(e) { console.error("Error ranking", e); }
+            try { renderAltasClientes(); } catch(e) { console.error("Error altas clientes", e); }
             try { renderAnual(); } catch(e) { console.error("Error anual", e); }
             try { renderConciliacion(); } catch(e) { console.error("Error conciliacion", e); }
             try { renderPlanEstrategico(acumCanales, METAS_ACTIVAS); } catch(e) { console.error("Error plan estrategico", e); }
@@ -4737,6 +4751,74 @@
         // 🏆 RANKING 37/10 — se calcula sobre el acumulado del AÑO (YTD), independiente
         // del filtro de mes. Ventas del DATA + objetivos anuales de RANKING_ANUAL.
         // =========================================================================
+        // =========================================================================
+        // 📈 ALTAS DE CLIENTES NUEVOS — todos los canales, YTD. "Nuevo" = primera
+        // compra registrada en los datos cargados (2026). Independiente de los filtros.
+        // =========================================================================
+        window.__altasPeriodo = 'mes'; // mes | trim | anio (controla solo la LISTA)
+        function setAltasPeriodo(p) { window.__altasPeriodo = p; try { renderAltasClientes(); } catch (e) {} }
+        function renderAltasClientes() {
+            let cont = document.getElementById('altas-contenido');
+            if (!cont) return;
+            let lineas = lineasDeDatosGlobales || [];
+            // Primera compra por cliente (excluye NC, Consumidor Final y sin cliente).
+            let primeras = {};
+            lineas.forEach(function (r) {
+                if (!r || r.documento === 'Nota de Crédito') return;
+                let cli = r.cliente; if (!cli) return;
+                let cl = limpiarNombre(cli);
+                if (!cl || /CONSUMIDOR|SIN CLIENTE|SIN NOMBRE|MOSTRADOR|VARIOS|OCASIONAL|CLIENTE FINAL/.test(cl)) return;
+                let t = parseDateToTime(r.fecha); if (!t) return;
+                let p = primeras[cl];
+                if (!p || t < p.t) primeras[cl] = { nombre: cli, t: t, canal: r.canal || '—', vendedor: r.vendedor || '—' };
+            });
+            let clientes = Object.keys(primeras).map(function (k) { return primeras[k]; });
+            let hoy = new Date(), anio = hoy.getFullYear();
+            let MES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            let porMes = []; for (let m = 0; m < 12; m++) porMes[m] = 0;
+            clientes.forEach(function (c) { let d = new Date(c.t); if (d.getFullYear() === anio) porMes[d.getMonth()]++; });
+            let tIniMes = new Date(anio, hoy.getMonth(), 1).getTime();
+            let qAct = Math.floor(hoy.getMonth() / 3);
+            let tIniTrim = new Date(anio, qAct * 3, 1).getTime();
+            let tIniAnio = new Date(anio, 0, 1).getTime();
+            let nMes = clientes.filter(function (c) { return c.t >= tIniMes; }).length;
+            let nTrim = clientes.filter(function (c) { return c.t >= tIniTrim; }).length;
+            let nAnio = clientes.filter(function (c) { return c.t >= tIniAnio; }).length;
+            let per = window.__altasPeriodo || 'mes';
+            let desde = per === 'trim' ? tIniTrim : (per === 'anio' ? tIniAnio : tIniMes);
+            let lista = clientes.filter(function (c) { return c.t >= desde; }).sort(function (a, b) { return b.t - a.t; });
+            let mesNom = MES[hoy.getMonth()], qNom = 'Q' + (qAct + 1);
+            let maxMes = Math.max.apply(null, porMes.concat([1]));
+            let kcard = function (t, v, c, sub) { return '<div style="flex:1; min-width:150px; background:var(--bg-card,#fff); border:1px solid var(--gray-border,#e2e8f0); border-radius:10px; padding:14px 16px;"><div style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px;">' + t + '</div><div style="font-size:26px; font-weight:800; color:' + c + '; margin-top:4px;">' + v + '</div>' + (sub ? '<div style="font-size:10px; color:var(--text-muted); margin-top:4px; line-height:1.35;">' + sub + '</div>' : '') + '</div>'; };
+            let barras = '';
+            for (let m = 0; m <= hoy.getMonth(); m++) {
+                let w = Math.round(porMes[m] / maxMes * 100);
+                barras += '<div style="display:flex; align-items:center; gap:8px; margin:3px 0; font-size:12px;"><span style="width:34px; color:var(--text-muted);">' + MES[m] + '</span><span style="flex:1; background:var(--gray-bg,#edf2f7); border-radius:4px; height:16px; position:relative;"><span style="position:absolute; left:0; top:0; bottom:0; width:' + w + '%; background:#2563eb; border-radius:4px; min-width:2px;"></span></span><span style="width:30px; text-align:right; font-weight:bold;">' + porMes[m] + '</span></div>';
+            }
+            let btn = function (id, txt) { let on = per === id; return '<button type="button" onclick="setAltasPeriodo(\'' + id + '\')" style="border:1px solid var(--gray-border,#e2e8f0); background:' + (on ? '#2563eb' : 'var(--bg-card,#fff)') + '; color:' + (on ? '#fff' : 'var(--text-dark,#1e293b)') + '; font-size:12px; font-weight:bold; padding:6px 12px; cursor:pointer; border-radius:6px;">' + txt + '</button>'; };
+            let filas = lista.map(function (c) {
+                let d = new Date(c.t);
+                let f = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+                return '<tr><td>' + escapeHtml(c.nombre) + '</td><td class="text-center">' + f + '</td><td>' + escapeHtml(c.canal) + '</td><td>' + escapeHtml(c.vendedor) + '</td></tr>';
+            }).join('');
+            if (!filas) filas = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:14px;">Sin altas en el período.</td></tr>';
+            cont.innerHTML =
+                '<div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">' +
+                    kcard('Altas en el año (' + anio + ')', nAnio.toLocaleString('es-PY'), '#2563eb', 'Clientes con 1ª compra en ' + anio) +
+                    kcard('Este trimestre (' + qNom + ')', nTrim.toLocaleString('es-PY'), '#16a34a', '1ª compra en el trimestre actual') +
+                    kcard('Este mes (' + mesNom + ')', nMes.toLocaleString('es-PY'), '#7c3aed', '1ª compra en ' + mesNom) +
+                '</div>' +
+                '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; align-items:start;">' +
+                    '<div><div style="font-size:12px; font-weight:bold; color:var(--navy-main,#1e293b); margin-bottom:6px;">Altas por mes — ' + anio + '</div>' + barras + '</div>' +
+                    '<div>' +
+                        '<div style="font-size:12px; font-weight:bold; color:var(--navy-main,#1e293b); margin-bottom:6px;">Lista de clientes nuevos</div>' +
+                        '<div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">' + btn('mes', 'Este mes') + btn('trim', 'Este trimestre') + btn('anio', 'Año') + '</div>' +
+                        '<div class="table-responsive-wrapper" style="max-height:360px; overflow:auto;"><table class="excel-table"><thead><tr><th>Cliente</th><th class="text-center">1ª compra</th><th>Canal</th><th>Vendedor</th></tr></thead><tbody>' + filas + '</tbody></table></div>' +
+                        '<div style="font-size:11px; color:var(--text-muted); margin-top:6px;">' + lista.length.toLocaleString('es-PY') + ' clientes nuevos en el período seleccionado.</div>' +
+                    '</div>' +
+                '</div>';
+        }
+
         function renderRanking() {
             let el = document.getElementById('grid-ranking');
             if (!el) return;
