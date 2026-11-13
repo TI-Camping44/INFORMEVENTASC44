@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1c3d5a">
+    <meta name="color-scheme" content="light">
     <title>Dashboard Comercial BI YTD - CAMPING 44</title>
     <!-- Favicon: logo de Camping 44 (versión liviana generada desde LOGOC44.png) -->
     <link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png">
@@ -33,16 +35,41 @@
         ::-webkit-scrollbar-track { background: #edf2f7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 
+        /* ===== Accesibilidad / Web Interface Guidelines ===== */
+        /* Anillo de foco visible (teclado) con los colores de la marca */
+        :focus-visible { outline: 3px solid var(--teal-accent); outline-offset: 2px; border-radius: 4px; }
+        .sidebar :focus-visible { outline-color: #ffffff; } /* sobre fondo oscuro */
+        .filter-group select:focus-visible, .filter-group input:focus-visible,
+        .select-simulador:focus-visible { outline: 3px solid var(--teal-accent); outline-offset: 1px; }
+        /* menu-item pasa de <div> a <button>: reset para que se vea igual */
+        button.menu-item { width: 100%; text-align: left; border: none; font-family: inherit; color: inherit; appearance: none; }
+        /* Números tabulares en columnas de montos (alinean los dígitos) */
+        td, th, .text-right, .num-positivo, .num-negativo, .num-cero { font-variant-numeric: tabular-nums; }
+        /* Interacción táctil sin retardo */
+        button, a, .menu-item, [data-clickable], select, input, label { touch-action: manipulation; }
+        /* El scroll dentro de modales no arrastra la página de atrás */
+        .cm-overlay, .vsit-overlay, .ms-dropdown, .modal, [class*="overlay"] { overscroll-behavior: contain; }
+        /* Enlace para saltar al contenido */
+        .skip-link { position: absolute; left: -9999px; top: 0; z-index: 9999; background: var(--navy-main); color: #fff; padding: 8px 14px; border-radius: 0 0 6px 0; font-weight: bold; }
+        .skip-link:focus { left: 0; }
+        /* Solo para lectores de pantalla */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+        /* Respeta "reducir movimiento" del sistema operativo */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+        }
+
         /* --- MENÚ LATERAL --- */
         .sidebar { width: 220px; background-color: var(--navy-main); color: white; padding: 15px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; }
         .sidebar-logo { width: 90%; max-width: 120px; margin: 0 auto 15px auto; display: block; background-color: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
         .sidebar h2 { text-align: center; border-bottom: 2px solid #2d3748; padding-bottom: 8px; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
-        .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; user-select: none; }
+        .menu-item { padding: 10px 12px; margin-bottom: 5px; background-color: transparent; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s ease, color 0.2s ease; user-select: none; }
         .menu-item:hover { background-color: rgba(255,255,255,0.1); }
         .menu-item.active { background-color: var(--teal-accent); color: white; }
         .menu-item.bonos-highlight { background-color: #dd6b20; color: white; margin-top: auto; border-left: 3px solid white; }
         .menu-item.bonos-highlight:hover { background-color: #c05621; }
         .nav-toggle { display: none; }  /* Botón hamburguesa: solo en celular */
+        .menu-tabs { display: flex; flex-direction: column; flex: 1 1 auto; }
 
         /* --- CONTENIDO PRINCIPAL --- */
         .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; z-index: 1; width: calc(100% - 220px); }
@@ -51,7 +78,7 @@
         .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1 1 160px; min-width: 140px; }
         .filter-group label { font-size: 10px; font-weight: bold; color: var(--navy-main); text-transform: uppercase; letter-spacing: 0.5px; }
         .filter-group select, .filter-group input[type="date"] { width: 100%; padding: 8px 10px; font-size: 11.5px; border-radius: 6px; border: 1px solid var(--gray-border); background-color: #f8fafc; color: var(--text-dark); font-weight: bold; outline: none; cursor: pointer; transition: border-color 0.2s; }
-        .btn-clear-filters { flex: 0 1 auto; background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+        .btn-clear-filters { flex: 0 1 auto; background-color: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--gray-border); padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 11.5px; cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease; white-space: nowrap; }
 
         .sheet-header-box { background: white; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
         .sheet-title-main { flex: 1 1 300px; }
@@ -282,7 +309,7 @@
         /* Fila de vendedor clickable (cartera mayorista) */
         .mayo-vrow { cursor:pointer; transition:background .12s; }
         .mayo-vrow:hover { background:#eff6ff; }
-        .mayo-vchev { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:#e0f2fe; color:#0369a1; font-size:9px; flex:none; transition:all .12s; }
+        .mayo-vchev { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:#e0f2fe; color:#0369a1; font-size:9px; flex:none; transition:background-color .12s, transform .12s; }
         .mayo-vrow:hover .mayo-vchev { background:#0369a1; color:#fff; }
         .mayo-vhint { font-size:10px; font-weight:700; color:#0369a1; text-transform:uppercase; letter-spacing:.3px; opacity:0; transition:opacity .12s; }
         .mayo-vrow:hover .mayo-vhint { opacity:1; }
@@ -328,14 +355,15 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <div id="loader" class="loading-screen">
-        <div class="spinner"></div>
-        <div id="loader-text">Cargando Base Operativa Blindada...</div>
+    <div id="loader" class="loading-screen" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <div id="loader-text">Cargando Base Operativa Blindada…</div>
     </div>
 
     <div class="sidebar" id="main-sidebar">
-        <img src="LOGOC44.png" alt="Camping 44 Logo" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
+        <img src="LOGOC44.png" alt="Camping 44" width="120" height="120" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
         <h2>CAMPING 44 - BI YTD</h2>
         <!-- Selector de empresa: se ve cuál está abierta y se cambia de un clic (mismo componente que Vitálica). -->
         <style>
@@ -352,32 +380,35 @@
           @media (max-width: 820px) { .sw-empresa { max-width: 230px; margin: 0 8px 0 0; } }
         </style>
         <div class="sw-empresa">
-          <a class="on" href="#" onclick="return false" title="Estás en el informe de Camping 44">Camping 44</a>
+          <a class="on" aria-current="page" title="Estás en el informe de Camping 44">Camping 44</a>
           <a href="https://ti-camping44.github.io/INFORMEVENTASVITALICA/" title="Ir al informe de Vitálica">Vitálica</a>
         </div>
-        <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-label="Abrir menú">☰ Menú</button>
-        <div class="menu-item active" onclick="switchTab('tab-general', this)">📊 Resumen General</div>
-        <div class="menu-item" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</div>
-        <div class="menu-item" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</div>
-        <div class="menu-item" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</div>
-        <div class="menu-item" onclick="switchTab('tab-concil', this)">🔎 Conciliación Odoo</div>
-        <div class="menu-item" onclick="switchTab('tab-plan', this)">📋 Plan Estratégico</div>
-        <div class="menu-item" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</div>
-        <div class="menu-item" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</div>
-        <div class="menu-item bonos-highlight" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</div>
+        <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-tabs">☰ Menú</button>
+        <div class="menu-tabs" id="menu-tabs" role="tablist" aria-label="Secciones del informe">
+        <button type="button" role="tab" class="menu-item active" aria-selected="true" aria-controls="tab-general" onclick="switchTab('tab-general', this)">📊 Resumen General</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-consumidor" onclick="switchTab('tab-consumidor', this)">👥 Consumidor Final</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-mayoristas" onclick="switchTab('tab-mayoristas', this)">🏢 Mayoristas</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-nc" onclick="switchTab('tab-nc', this)">📉 Notas de Crédito</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-concil" onclick="switchTab('tab-concil', this)">🔎 Conciliación Odoo</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-plan" onclick="switchTab('tab-plan', this)">📋 Plan Estratégico</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-anual" onclick="switchTab('tab-anual', this)">📈 Objetivo Anual (Marcas/A&M)</button>
+        <button type="button" role="tab" class="menu-item" aria-selected="false" aria-controls="tab-ranking" onclick="switchTab('tab-ranking', this)">🏆 Ranking 37/10</button>
+        <button type="button" role="tab" class="menu-item bonos-highlight" aria-selected="false" aria-controls="tab-bonos" onclick="switchTab('tab-bonos', this)">💰 KPIs de Bonos</button>
+        </div>
     </div>
 
-    <div class="main-content">
-        
+    <div class="main-content" id="contenido" role="main" tabindex="-1" aria-label="Informe de ventas">
+        <h1 class="sr-only">Dashboard Comercial BI YTD — Camping 44</h1>
+
         <div class="filter-panel" id="main-filters">
             <div class="filter-group">
-                <label>📆 Mes / Período de Análisis</label>
+                <label for="select-mes">📆 Mes / Período de Análisis</label>
                 <select id="select-mes" onchange="aplicarFiltrosDropdown()"></select>
             </div>
             <div class="filter-group" id="fg-vendedor" style="display:none;">
                 <label>👤 Vendedor (multi)</label>
                 <div class="multi-select" id="ms-vendedor">
-                    <button type="button" class="ms-btn" onclick="toggleMs('ms-vendedor')">-- Todos los Vendedores --</button>
+                    <button type="button" class="ms-btn" aria-label="Filtrar por vendedor" aria-haspopup="true" onclick="toggleMs('ms-vendedor')">-- Todos los Vendedores --</button>
                     <div class="ms-panel"></div>
                 </div>
             </div>
@@ -387,20 +418,20 @@
             <div class="filter-group" id="fg-canal" style="display:none;">
                 <label>🏷️ Canal / Equipo (multi)</label>
                 <div class="multi-select" id="ms-canal">
-                    <button type="button" class="ms-btn" onclick="toggleMs('ms-canal')">-- Todos los Canales --</button>
+                    <button type="button" class="ms-btn" aria-label="Filtrar por canal o equipo" aria-haspopup="true" onclick="toggleMs('ms-canal')">-- Todos los Canales --</button>
                     <div class="ms-panel"></div>
                 </div>
             </div>
             <div class="filter-group">
                 <label>🎯 Marca (multi)</label>
                 <div class="multi-select" id="ms-marca">
-                    <button type="button" class="ms-btn" onclick="toggleMs('ms-marca')">-- Todas las Marcas --</button>
+                    <button type="button" class="ms-btn" aria-label="Filtrar por marca" aria-haspopup="true" onclick="toggleMs('ms-marca')">-- Todas las Marcas --</button>
                     <div class="ms-panel"></div>
                 </div>
             </div>
             <div class="filter-group">
-                <label>📦 Mercadería (Rotación)</label>
-                <div id="rot-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                <label id="lbl-rot">📦 Mercadería (Rotación)</label>
+                <div id="rot-btns" role="group" aria-labelledby="lbl-rot" style="display:flex; gap:5px; flex-wrap:wrap;">
                     <button type="button" class="rot-btn on" data-rot="" onclick="setRotacion('', this)">Todas</button>
                     <button type="button" class="rot-btn" data-rot="A" onclick="setRotacion('A', this)">A</button>
                     <button type="button" class="rot-btn" data-rot="B" onclick="setRotacion('B', this)">B</button>
@@ -409,35 +440,35 @@
                 </div>
             </div>
             <div class="filter-group">
-                <label>🧾 Valores (IVA)</label>
-                <div id="iva-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                <label id="lbl-iva">🧾 Valores (IVA)</label>
+                <div id="iva-btns" role="group" aria-labelledby="lbl-iva" style="display:flex; gap:5px; flex-wrap:wrap;">
                     <button type="button" class="rot-btn on" data-iva="con" onclick="setIva('con', this)">Con IVA</button>
                     <button type="button" class="rot-btn" data-iva="sin" onclick="setIva('sin', this)">Sin IVA</button>
                 </div>
             </div>
             <div class="filter-group">
-                <label>📋 Anticipos</label>
-                <div id="cot-btns" style="display:flex; gap:5px; flex-wrap:wrap;">
+                <label id="lbl-cot">📋 Anticipos</label>
+                <div id="cot-btns" role="group" aria-labelledby="lbl-cot" style="display:flex; gap:5px; flex-wrap:wrap;">
                     <button type="button" class="rot-btn on" data-cot="completa" onclick="setCotizacion('completa', this)" title="Cuenta la cotización completa, incluido el saldo de anticipos todavía no facturado">Venta completa</button>
                     <button type="button" class="rot-btn" data-cot="facturado" onclick="setCotizacion('facturado', this)" title="Cuenta solo lo facturado en Odoo (sin el saldo pendiente de los anticipos)">Solo facturado</button>
                 </div>
             </div>
             <div class="filter-group">
-                <label>📅 Día Exacto</label>
-                <input type="date" id="select-fecha" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
+                <label for="select-fecha">📅 Día Exacto</label>
+                <input type="date" id="select-fecha" autocomplete="off" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <div class="filter-group">
-                <label>📆 Desde (rango)</label>
-                <input type="date" id="select-desde" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
+                <label for="select-desde">📆 Desde (rango)</label>
+                <input type="date" id="select-desde" autocomplete="off" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <div class="filter-group">
-                <label>📆 Hasta (rango)</label>
-                <input type="date" id="select-hasta" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
+                <label for="select-hasta">📆 Hasta (rango)</label>
+                <input type="date" id="select-hasta" autocomplete="off" onchange="aplicarFiltrosDropdown()" oninput="aplicarFiltrosDropdown()">
             </div>
             <button class="btn-clear-filters" onclick="limpiarTodosLosFiltros()" id="btn-reset">❌ Limpiar</button>
         </div>
 
-        <div id="status-banner" class="banner-success">Sincronizando canal de datos en vivo...</div>
+        <div id="status-banner" class="banner-success" role="status" aria-live="polite">Sincronizando canal de datos en vivo…</div>
 
         <div id="chips-filtros" style="display:none; flex-wrap:wrap; gap:6px; margin:0 0 10px 0; align-items:center;"></div>
 
@@ -948,15 +979,19 @@
         // Menú hamburguesa (celular): abre/cierra la lista de pestañas.
         function toggleNav() {
             let sb = document.getElementById('main-sidebar');
-            if (sb) sb.classList.toggle('menu-open');
+            let abierto = sb ? sb.classList.toggle('menu-open') : false;
+            let t = document.getElementById('nav-toggle');
+            if (t) t.setAttribute('aria-expanded', abierto ? 'true' : 'false');
         }
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => { item.classList.remove('active'); if (item.getAttribute('role') === 'tab') item.setAttribute('aria-selected', 'false'); });
             const targetTab = document.getElementById(tabId);
             if (targetTab) targetTab.classList.add('active');
-            if (element) element.classList.add('active');
+            if (element) { element.classList.add('active'); if (element.getAttribute('role') === 'tab') element.setAttribute('aria-selected', 'true'); }
             tabActivaId = tabId;
+            // La pestaña activa queda en la URL: así se puede compartir el link y usar el botón Atrás.
+            try { if (location.hash !== '#' + tabId) history.pushState(null, '', '#' + tabId); } catch (e) {}
             // Celular: al elegir una pestaña, cierro el menú desplegable.
             let sb = document.getElementById('main-sidebar');
             if (sb) sb.classList.remove('menu-open');
@@ -964,6 +999,44 @@
             // Re-render para que la META del encabezado se agrupe según la pestaña activa.
             try { filtrarYRenderizarTodo(); } catch (e) {}
         }
+
+        // Abre la pestaña indicada en la URL (#tab-xxx) al cargar o con el botón Atrás.
+        function activarTabDesdeHash() {
+            let h = (location.hash || '').replace('#', '');
+            if (!h) return;
+            let btn = document.querySelector('.menu-item[aria-controls="' + h + '"]');
+            if (btn && document.getElementById(h)) switchTab(h, btn);
+        }
+        window.addEventListener('popstate', activarTabDesdeHash);
+        window.addEventListener('load', function () { setTimeout(activarTabDesdeHash, 0); });
+
+        // ♿ Teclado para elementos clickeables que no son botones nativos (carets, nombres, etc.):
+        //    los hace enfocables (tabindex) y operables con Enter/Espacio, incl. contenido dinámico.
+        (function () {
+            function esNativo(el) { return el.matches && el.matches('button,a,input,select,textarea,[contenteditable="true"]'); }
+            function marcar(el) {
+                if (el.nodeType !== 1 || !el.hasAttribute('onclick') || el.hasAttribute('data-kbd') || esNativo(el)) return;
+                el.setAttribute('data-kbd', '1');
+                if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+                if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+            }
+            function upgrade(root) { try { (root || document).querySelectorAll('[onclick]').forEach(marcar); } catch (e) {} }
+            document.addEventListener('keydown', function (e) {
+                let t = e.target;
+                if ((e.key === 'Enter' || e.key === ' ') && t && t.hasAttribute && t.hasAttribute('data-kbd')) {
+                    e.preventDefault(); t.click();
+                }
+            });
+            let obs = new MutationObserver(function (muts) {
+                for (let m of muts) for (let n of m.addedNodes) {
+                    if (n.nodeType === 1) { marcar(n); if (n.querySelectorAll) upgrade(n); }
+                }
+            });
+            document.addEventListener('DOMContentLoaded', function () {
+                upgrade(document);
+                try { obs.observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+            });
+        })();
 
         // Filtro contextual según la pestaña:
         //  - Resumen General: sin filtro de Vendedor ni Canal (se ve todo consolidado).
@@ -1287,7 +1360,7 @@
                             <div class="cm-title">👥 Clientes que compraron <strong>${escapeHtml(info.marca)}</strong></div>
                             <div class="cm-sub">Vendedor: ${escapeHtml(info.vendedor)} · ${claves.length} cliente${claves.length === 1 ? '' : 's'} · Total ₲ ${total.toLocaleString('es-PY')}</div>
                         </div>
-                        <button class="cm-close" onclick="cerrarClientesMarca()">✕</button>
+                        <button class="cm-close" onclick="cerrarClientesMarca()" aria-label="Cerrar" title="Cerrar">✕</button>
                     </div>
                     <div class="cm-body">
                         <table class="cm-table">
@@ -1338,7 +1411,7 @@
                 <div class="cm-head" style="background:#1c3d5a;">
                     <div><div class="cm-title" style="color:#fff;">${escapeHtml(f.v)}</div>
                     <div class="cm-sub" style="color:#c6d4e3;">Canal: ${escapeHtml(f.canal)} · Ficha de bono del mes</div></div>
-                    <button class="cm-close" onclick="cerrarBonoFicha()">✕</button>
+                    <button class="cm-close" onclick="cerrarBonoFicha()" aria-label="Cerrar" title="Cerrar">✕</button>
                 </div>
                 <div class="cm-body">
                   <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
@@ -1364,11 +1437,30 @@
         function cerrarBonoFicha(){ let ov=document.getElementById('modal-bono-ficha'); if(ov) ov.classList.remove('open'); }
         document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrarBonoFicha(); });
 
+        // 🔔 Aviso inline (reemplaza a alert()): no bloquea y se anuncia en una región viva.
+        function mostrarAviso(msg, tipo) {
+            let c = document.getElementById('avisos');
+            if (!c) {
+                c = document.createElement('div');
+                c.id = 'avisos'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite');
+                c.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:10050;display:flex;flex-direction:column;gap:8px;max-width:min(360px,92vw);';
+                document.body.appendChild(c);
+            }
+            let t = document.createElement('div');
+            let estilo = (tipo === 'error')
+                ? 'background:var(--red-banner-bg);color:var(--red-banner-text);border:1px solid var(--red-banner-border);'
+                : 'background:var(--green-banner-bg);color:var(--green-banner-text);border:1px solid var(--green-banner-border);';
+            t.style.cssText = 'padding:12px 14px;border-radius:8px;font-size:12.5px;font-weight:bold;box-shadow:0 6px 20px rgba(0,0,0,.15);' + estilo;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(function () { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 320); }, 5000);
+        }
+
         // =========================================================================
         // 🔥 EXPORTACIÓN EXCEL REAL (XLSX) - LIMPIA Y AGRUPADA
         // =========================================================================
         function exportarBonosExcel() {
-            if (typeof XLSX === 'undefined') { alert("⚠️ No se pudo cargar la librería de Excel (XLSX). Verificá tu conexión a Internet e intentá de nuevo."); return; }
+            if (typeof XLSX === 'undefined') { mostrarAviso("No se pudo cargar la librería de Excel (XLSX). Verificá tu conexión a Internet e intentá de nuevo.", "error"); return; }
             let currentMonthTxt = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
             let table = document.getElementById("tabla-exportar-bonos");
             let rows = table.querySelectorAll("tbody tr");
@@ -1404,7 +1496,7 @@
         // 🔥 GENERADOR PROFESIONAL DE PDF (JSPDF + AUTOTABLE)
         // =========================================================================
         function exportarBonosPDF() {
-            if (!(window.jspdf && window.jspdf.jsPDF)) { alert("⚠️ No se pudo cargar la librería de PDF (jsPDF). Verificá tu conexión a Internet e intentá de nuevo."); return; }
+            if (!(window.jspdf && window.jspdf.jsPDF)) { mostrarAviso("No se pudo cargar la librería de PDF (jsPDF). Verificá tu conexión a Internet e intentá de nuevo.", "error"); return; }
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4'); // A4 Vertical
@@ -1490,7 +1582,7 @@
                 doc.save(`Control_KPIs_${currentMonthTxt.replace(/\s+/g, '_')}.pdf`);
 
             } catch(e) {
-                alert("Error generando el PDF. Asegúrate de estar conectado a Internet.");
+                mostrarAviso("Error generando el PDF. Asegurate de estar conectado a Internet.", "error");
                 console.error(e);
             }
         }
@@ -1498,7 +1590,7 @@
         function copiarLinkVendedor() {
             let v = (filtrosActivos.vendedores && filtrosActivos.vendedores.length === 1) ? filtrosActivos.vendedores[0] : "";
             if (!v) {
-                alert("⚠️ Primero seleccioná UN solo vendedor en el filtro para compartir su panel.");
+                mostrarAviso("Primero seleccioná UN solo vendedor en el filtro para compartir su panel.", "error");
                 return;
             }
             let urlObj = new URL(window.location.href);
@@ -4930,7 +5022,7 @@
         <div class="vsit-box">
             <div class="vsit-head">
                 <div><h3 id="vsit-nombre">Vendedor</h3><div class="vsit-canal" id="vsit-canal"></div></div>
-                <button class="vsit-close" onclick="cerrarVendModal()" title="Cerrar">×</button>
+                <button class="vsit-close" onclick="cerrarVendModal()" title="Cerrar" aria-label="Cerrar">×</button>
             </div>
             <div class="vsit-body" id="vsit-body"></div>
         </div>
@@ -4940,7 +5032,7 @@
         <div class="vsit-box" style="max-width:720px;">
             <div class="vsit-head">
                 <div><h3 id="mayo-nombre">Vendedor</h3><div class="vsit-canal" id="mayo-sub"></div></div>
-                <button class="vsit-close" onclick="cerrarMayoVend()" title="Cerrar">×</button>
+                <button class="vsit-close" onclick="cerrarMayoVend()" title="Cerrar" aria-label="Cerrar">×</button>
             </div>
             <div class="vsit-body" id="mayo-body"></div>
         </div>
