@@ -465,8 +465,8 @@
     </div>
 
     <div class="sidebar" id="main-sidebar">
-        <img src="LOGOC44.png" alt="Camping 44" width="120" height="120" class="sidebar-logo" id="logo-empresa" onerror="this.style.display='none'">
-        <h2>CAMPING 44 - BI YTD</h2>
+        <img src="LOGOC44.png" alt="Camping 44 — volver al inicio" width="120" height="120" class="sidebar-logo" id="logo-empresa" style="cursor:pointer;" title="Volver al inicio (Resumen General)" onclick="irAlInicio()" onerror="this.style.display='none'">
+        <h2 style="cursor:pointer;" title="Volver al inicio (Resumen General)" onclick="irAlInicio()">CAMPING 44 - BI YTD</h2>
         <!-- Selector de empresa: se ve cuál está abierta y se cambia de un clic (mismo componente que Vitálica). -->
         <style>
           .sw-empresa { display: flex; background: #262a31; border-radius: 8px; padding: 3px; gap: 3px;
@@ -1107,6 +1107,14 @@
         }
         document.addEventListener('DOMContentLoaded', etiquetarBotonTema);
 
+        // 🏠 Volver al inicio: pestaña Resumen General + scroll arriba (no toca los filtros).
+        function irAlInicio() {
+            let b = document.querySelector('.menu-item[aria-controls="tab-general"]');
+            if (b) switchTab('tab-general', b);
+            let mc = document.querySelector('.main-content'); if (mc) mc.scrollTop = 0;
+            try { window.scrollTo(0, 0); } catch (e) {}
+            let sb = document.getElementById('main-sidebar'); if (sb) sb.classList.remove('menu-open');
+        }
         function toggleNav() {
             let sb = document.getElementById('main-sidebar');
             let abierto = sb ? sb.classList.toggle('menu-open') : false;
